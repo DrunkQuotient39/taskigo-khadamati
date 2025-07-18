@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import ServiceGrid from '@/components/services/ServiceGrid';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Star, MapPin, Clock, Search, Filter, ArrowRight, Users, Grid, List } from 'lucide-react';
 
 interface ServicesProps {
   messages: any;
@@ -11,167 +16,69 @@ interface ServicesProps {
 
 export default function Services({ messages }: ServicesProps) {
   const [location] = useLocation();
-  
-  // Mock data - in real app, this would come from API
-  const mockServices = [
-    {
-      id: 1,
-      title: 'Premium House Cleaning',
-      description: 'Deep cleaning service for your home with eco-friendly products',
-      price: '35',
-      priceType: 'hourly',
-      rating: '4.9',
-      reviewCount: 127,
-      provider: {
-        name: 'Sarah Johnson',
-        image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Downtown',
-      duration: 120,
-      category: 'cleaning',
-      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop',
-      createdAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: 2,
-      title: 'Emergency Plumbing',
-      description: '24/7 emergency plumbing services for urgent repairs',
-      price: '45',
-      priceType: 'hourly',
-      rating: '4.8',
-      reviewCount: 89,
-      provider: {
-        name: 'Ahmed Hassan',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Citywide',
-      duration: 60,
-      category: 'plumbing',
-      image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800&h=400&fit=crop',
-      createdAt: '2024-01-10T14:30:00Z'
-    },
-    {
-      id: 3,
-      title: 'Electrical Installation',
-      description: 'Licensed electrical installations and safety inspections',
-      price: '55',
-      priceType: 'hourly',
-      rating: '4.9',
-      reviewCount: 156,
-      provider: {
-        name: 'Maria Rodriguez',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Residential Areas',
-      duration: 90,
-      category: 'electrical',
-      image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=400&fit=crop',
-      createdAt: '2024-01-08T09:15:00Z'
-    },
-    {
-      id: 4,
-      title: 'Express Delivery',
-      description: 'Same-day delivery service for packages and documents',
-      price: '15',
-      priceType: 'fixed',
-      rating: '4.7',
-      reviewCount: 203,
-      provider: {
-        name: 'David Wilson',
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Metro Area',
-      duration: 30,
-      category: 'delivery',
-      image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&h=400&fit=crop',
-      createdAt: '2024-01-12T16:45:00Z'
-    },
-    {
-      id: 5,
-      title: 'Home Maintenance',
-      description: 'General repairs and maintenance for residential properties',
-      price: '30',
-      priceType: 'hourly',
-      rating: '4.6',
-      reviewCount: 94,
-      provider: {
-        name: 'James Thompson',
-        image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Suburban Areas',
-      duration: 180,
-      category: 'maintenance',
-      image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=400&fit=crop',
-      createdAt: '2024-01-05T11:20:00Z'
-    },
-    {
-      id: 6,
-      title: 'Interior Painting',
-      description: 'Professional interior painting with premium quality paints',
-      price: '35',
-      priceType: 'hourly',
-      rating: '4.8',
-      reviewCount: 112,
-      provider: {
-        name: 'Lisa Anderson',
-        image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
-      },
-      location: 'Residential',
-      duration: 240,
-      category: 'painting',
-      image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=800&h=400&fit=crop',
-      createdAt: '2024-01-03T13:30:00Z'
-    }
-  ];
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priceRange, setPriceRange] = useState('all');
+  const [sortBy, setSortBy] = useState('rating');
+  const [viewMode, setViewMode] = useState<'category' | 'list'>('category');
 
-  const mockCategories = [
-    { id: 1, name: 'cleaning', displayName: 'Cleaning' },
-    { id: 2, name: 'plumbing', displayName: 'Plumbing' },
-    { id: 3, name: 'electrical', displayName: 'Electrical' },
-    { id: 4, name: 'delivery', displayName: 'Delivery' },
-    { id: 5, name: 'maintenance', displayName: 'Maintenance' },
-    { id: 6, name: 'painting', displayName: 'Painting' },
-  ];
-
-  const { data: services, isLoading: servicesLoading } = useQuery({
-    queryKey: ['/api/services'],
-    queryFn: () => Promise.resolve(mockServices),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
+  // Fetch service categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['/api/categories'],
-    queryFn: () => Promise.resolve(mockCategories),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    queryKey: ['/api/service-categories'],
   });
 
-  const handleServiceBook = (serviceId: number) => {
-    // In real app, this would navigate to booking page with service ID
-    console.log(`Booking service ${serviceId}`);
-    // useLocation()[1](`/booking?service=${serviceId}`);
+  // Fetch services with filters
+  const { data: services, isLoading: servicesLoading } = useQuery({
+    queryKey: ['/api/services', selectedCategory, searchTerm, priceRange, sortBy],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedCategory !== 'all') params.append('category', selectedCategory);
+      if (searchTerm) params.append('search', searchTerm);
+      if (priceRange !== 'all') params.append('priceRange', priceRange);
+      if (sortBy) params.append('sortBy', sortBy);
+      
+      const response = await fetch(`/api/services?${params}`);
+      return response.json();
+    },
+  });
+
+  // Group services by category for hierarchical display
+  const servicesByCategory = services?.reduce((acc: any, service: any) => {
+    const category = categories?.find((cat: any) => cat.id === service.categoryId);
+    if (!category) return acc;
+    
+    if (!acc[category.name]) {
+      acc[category.name] = {
+        category,
+        services: []
+      };
+    }
+    acc[category.name].services.push(service);
+    return acc;
+  }, {}) || {};
+
+  const handleBookService = (serviceId: number) => {
+    console.log('Booking service', serviceId);
+    // Handle booking logic here
   };
 
   if (servicesLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen pt-20 pb-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <Skeleton className="h-12 w-64 mx-auto mb-4" />
-            <Skeleton className="h-6 w-96 mx-auto" />
-          </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-full mb-4" />
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-8 w-16" />
-                  </div>
-                </div>
-              </div>
+              <Card key={i} className="h-96">
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-32 w-full mb-4" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -180,27 +87,244 @@ export default function Services({ messages }: ServicesProps) {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ScrollReveal>
-            <h1 className="text-4xl font-bold text-khadamati-dark mb-4">
-              {messages.services_page?.title || 'All Services'}
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {messages.services?.title || 'Our Services'}
             </h1>
-            <p className="text-xl text-khadamati-gray max-w-2xl mx-auto">
-              {messages.services_page?.description || 'Find the perfect service provider for your needs.'}
+            <p className="text-gray-600 mb-6">
+              {messages.services?.subtitle || 'Find professional services from trusted providers'}
             </p>
           </ScrollReveal>
-        </div>
 
-        <ScrollReveal delay={200}>
-          <ServiceGrid
-            services={services || []}
-            categories={categories || []}
-            onServiceBook={handleServiceBook}
-            messages={messages}
-          />
-        </ScrollReveal>
+          {/* Filters */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder={messages.services?.search || 'Search services...'}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories?.map((category: any) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={priceRange} onValueChange={setPriceRange}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Price Range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Prices</SelectItem>
+                <SelectItem value="0-25">$0 - $25</SelectItem>
+                <SelectItem value="25-50">$25 - $50</SelectItem>
+                <SelectItem value="50-100">$50 - $100</SelectItem>
+                <SelectItem value="100+">$100+</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rating">Rating</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="newest">Newest First</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'category' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('category')}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Services Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {viewMode === 'category' ? (
+          // Category View - Hierarchical Structure
+          <div className="space-y-12">
+            {Object.entries(servicesByCategory).map(([categoryName, categoryData]: [string, any]) => (
+              <ScrollReveal key={categoryName}>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  {/* Category Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                        style={{ backgroundColor: categoryData.category.color + '20' }}
+                      >
+                        {categoryData.category.icon}
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">
+                          {categoryData.category.name}
+                        </h2>
+                        <p className="text-gray-600">
+                          {categoryData.category.description}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {categoryData.services.length} Providers
+                    </Badge>
+                  </div>
+
+                  {/* Services Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {categoryData.services.map((service: any) => (
+                      <Card key={service.id} className="hover:shadow-md transition-shadow duration-200">
+                        <div className="aspect-w-16 aspect-h-9 mb-4">
+                          <img
+                            src={service.images?.[0] || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop'}
+                            alt={service.title}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                          />
+                        </div>
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-lg">{service.title}</CardTitle>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                              <span className="text-sm font-medium">{service.rating}</span>
+                            </div>
+                          </div>
+                          <CardDescription className="text-sm">
+                            {service.description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                {service.location}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {service.duration} min
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="text-lg font-bold text-khadamati-blue">
+                              ${service.price}
+                              <span className="text-sm font-normal text-gray-600">
+                                /{service.priceType}
+                              </span>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="bg-khadamati-yellow text-khadamati-dark hover:bg-yellow-500"
+                              onClick={() => handleBookService(service.id)}
+                            >
+                              Book Now
+                              <ArrowRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        ) : (
+          // List View - Traditional Grid
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services?.map((service: any) => (
+              <ScrollReveal key={service.id}>
+                <Card className="hover:shadow-md transition-shadow duration-200">
+                  <div className="aspect-w-16 aspect-h-9 mb-4">
+                    <img
+                      src={service.images?.[0] || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop'}
+                      alt={service.title}
+                      className="w-full h-48 object-cover rounded-t-lg"
+                    />
+                  </div>
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{service.title}</CardTitle>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="text-sm font-medium">{service.rating}</span>
+                      </div>
+                    </div>
+                    <CardDescription className="text-sm">
+                      {service.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {service.location}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {service.duration} min
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-lg font-bold text-khadamati-blue">
+                        ${service.price}
+                        <span className="text-sm font-normal text-gray-600">
+                          /{service.priceType}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-khadamati-yellow text-khadamati-dark hover:bg-yellow-500"
+                        onClick={() => handleBookService(service.id)}
+                      >
+                        Book Now
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
