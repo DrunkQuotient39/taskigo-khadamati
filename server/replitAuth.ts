@@ -8,15 +8,16 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+// Check for required environment variables
+const REPLIT_DOMAINS = process.env.REPLIT_DOMAINS || "localhost:5000";
+const REPL_ID = process.env.REPL_ID || "dev-app";
+const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-key-change-in-production";
 
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      REPL_ID
     );
   },
   { maxAge: 3600 * 1000 }
@@ -32,13 +33,13 @@ export function getSession() {
     tableName: "sessions",
   });
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: sessionTtl,
     },
   });
