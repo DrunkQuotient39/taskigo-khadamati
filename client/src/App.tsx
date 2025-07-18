@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { loadMessages, defaultLanguage, getDirection, type Language } from './lib/i18n';
 import type { Messages } from './lib/i18n';
+import { useAuth } from '@/hooks/useAuth';
 
 // Components
 import Header from '@/components/navigation/Header';
@@ -13,6 +14,7 @@ import Footer from '@/components/navigation/Footer';
 import FloatingChat from '@/components/common/FloatingChat';
 
 // Pages
+import Landing from '@/pages/Landing';
 import Home from '@/pages/Home';
 import Services from '@/pages/Services';
 import Booking from '@/pages/Booking';
@@ -27,6 +29,24 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
 }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show landing page for unauthenticated users
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Landing messages={messages} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header 

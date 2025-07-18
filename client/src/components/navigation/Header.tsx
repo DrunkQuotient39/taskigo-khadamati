@@ -19,10 +19,10 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   
-  // Mock user data - in real app, this would come from auth context
+  // Get user data from auth hook
   const { data: user } = useQuery<UserType | null>({
-    queryKey: ['/api/auth/me'],
-    enabled: false, // Disable for now since we don't have auth
+    queryKey: ['/api/auth/user'],
+    retry: false,
   });
 
   const navItems = [
@@ -107,22 +107,25 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     <Link href="/bookings">My Bookings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <button onClick={() => {/* Handle logout */}}>Logout</button>
+                    <button onClick={() => window.location.href = '/api/logout'}>Logout</button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="hidden md:flex items-center space-x-3">
-                <Link href="/login">
-                  <Button variant="outline" className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white">
-                    {messages.nav?.login || 'Login'}
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="bg-khadamati-blue hover:bg-blue-700">
-                    {messages.nav?.signup || 'Sign Up'}
-                  </Button>
-                </Link>
+                <Button 
+                  variant="outline" 
+                  className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white"
+                  onClick={() => window.location.href = '/api/login'}
+                >
+                  {messages.nav?.login || 'Login'}
+                </Button>
+                <Button 
+                  className="bg-khadamati-blue hover:bg-blue-700"
+                  onClick={() => window.location.href = '/api/login'}
+                >
+                  {messages.nav?.signup || 'Sign Up'}
+                </Button>
               </div>
             )}
 

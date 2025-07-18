@@ -694,7 +694,7 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values({
-        ...insertUser,
+        id: insertUser.id || crypto.randomUUID(),
         email: insertUser.email || null,
         firstName: insertUser.firstName || null,
         lastName: insertUser.lastName || null,
@@ -942,4 +942,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

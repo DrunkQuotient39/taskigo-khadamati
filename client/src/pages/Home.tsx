@@ -153,11 +153,13 @@ export default function Home({ messages }: HomeProps) {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/provider-signup">
-                  <Button size="lg" className="px-8 py-4 bg-white text-khadamati-blue border-2 border-white hover:bg-gray-100 hover:text-khadamati-dark font-semibold transition-all duration-300">
-                    {messages.hero?.cta?.provider || 'Become a Provider'}
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  className="px-8 py-4 bg-white text-khadamati-blue border-2 border-white hover:bg-gray-100 hover:text-khadamati-dark font-semibold transition-all duration-300"
+                  onClick={() => window.location.href = '/api/login'}
+                >
+                  {messages.hero?.cta?.provider || 'Become a Provider'}
+                </Button>
               </div>
             </ScrollReveal>
           </div>
