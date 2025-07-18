@@ -13,6 +13,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/service-categories", async (req, res) => {
+    try {
+      const categories = await storage.getServiceCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch service categories" });
+    }
+  });
+
   app.post("/api/categories", async (req, res) => {
     try {
       const category = await storage.createServiceCategory(req.body);

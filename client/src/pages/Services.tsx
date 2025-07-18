@@ -25,6 +25,10 @@ export default function Services({ messages }: ServicesProps) {
   // Fetch service categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/service-categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/service-categories');
+      return response.json();
+    },
   });
 
   // Fetch services with filters
