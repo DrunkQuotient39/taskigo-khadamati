@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, ArrowRight, Shield, Users } from 'lucide-react';
@@ -10,14 +10,6 @@ interface LoginProps {
 }
 
 export default function Login({ messages }: LoginProps) {
-  useEffect(() => {
-    // Auto-redirect to Replit Auth
-    const timer = setTimeout(() => {
-      window.location.href = '/api/login';
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
