@@ -1,0 +1,247 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "booking": "Booking",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Professional Services",
+    "subtitle": "At Your Fingertips",
+    "description": "Connect with trusted local service providers for all your home and business needs. From cleaning to repairs, we've got you covered.",
+    "cta": {
+      "book": "Book a Service",
+      "provider": "Become a Provider"
+    }
+  },
+  "stats": {
+    "providers": "Service Providers",
+    "bookings": "Completed Bookings",
+    "rating": "Average Rating",
+    "cities": "Cities Covered"
+  },
+  "services": {
+    "title": "Our Services",
+    "description": "Explore our wide range of professional services designed to make your life easier.",
+    "view_all": "View All Services",
+    "cleaning": {
+      "title": "Cleaning",
+      "description": "Professional house and office cleaning services"
+    },
+    "plumbing": {
+      "title": "Plumbing",
+      "description": "Expert plumbing repairs and installations"
+    },
+    "electrical": {
+      "title": "Electrical",
+      "description": "Licensed electrical services and repairs"
+    },
+    "delivery": {
+      "title": "Delivery",
+      "description": "Fast and reliable delivery services"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "description": "General maintenance and handyman services"
+    },
+    "painting": {
+      "title": "Painting",
+      "description": "Professional interior and exterior painting"
+    },
+    "gardening": {
+      "title": "Gardening",
+      "description": "Garden maintenance and landscaping services"
+    },
+    "tutoring": {
+      "title": "Tutoring",
+      "description": "Expert tutoring and educational support"
+    }
+  },
+  "how_it_works": {
+    "title": "How It Works",
+    "description": "Get your service in just a few simple steps.",
+    "step1": {
+      "title": "Choose Service",
+      "description": "Browse our categories and select the service you need"
+    },
+    "step2": {
+      "title": "Book & Pay",
+      "description": "Select your preferred time and complete the booking"
+    },
+    "step3": {
+      "title": "Get Service",
+      "description": "Professional service provider arrives at your location"
+    }
+  },
+  "featured_providers": {
+    "title": "Top Rated Providers",
+    "description": "Meet our highly-rated service providers who deliver excellence every time.",
+    "book_now": "Book Now"
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "description": "Join thousands of satisfied customers who trust Taskego for their service needs.",
+    "download_app": "Download App",
+    "learn_more": "Learn More"
+  },
+  "services_page": {
+    "title": "All Services",
+    "description": "Find the perfect service provider for your needs.",
+    "filter": {
+      "category": "Category",
+      "price": "Price Range",
+      "search": "Search"
+    },
+    "book": "Book"
+  },
+  "booking_page": {
+    "title": "Book a Service",
+    "description": "Schedule your service in just a few clicks.",
+    "service_type": "Service Type",
+    "select_service": "Select a service...",
+    "date": "Date",
+    "time": "Time",
+    "select_time": "Select time...",
+    "location": "Location",
+    "details": "Additional Details",
+    "phone": "Phone Number",
+    "email": "Email Address",
+    "submit": "Book Service"
+  },
+  "provider_dashboard": {
+    "title": "Provider Dashboard",
+    "description": "Manage your services and bookings.",
+    "stats": {
+      "total_bookings": "Total Bookings",
+      "earnings": "Total Earnings",
+      "rating": "Average Rating",
+      "active_services": "Active Services"
+    },
+    "recent_bookings": "Recent Bookings",
+    "view_all": "View All",
+    "table": {
+      "client": "Client",
+      "service": "Service",
+      "date": "Date",
+      "status": "Status",
+      "amount": "Amount"
+    },
+    "services": "My Services",
+    "add_service": "Add Service"
+  },
+  "admin_panel": {
+    "title": "Admin Panel",
+    "description": "Platform management and analytics.",
+    "stats": {
+      "total_users": "Total Users",
+      "active_providers": "Active Providers",
+      "monthly_bookings": "Monthly Bookings",
+      "revenue": "Monthly Revenue"
+    },
+    "pending_approvals": "Pending Approvals",
+    "approve": "Approve",
+    "reject": "Reject",
+    "user_management": "User Management",
+    "search": "Search",
+    "table": {
+      "user": "User",
+      "type": "Type",
+      "joined": "Joined",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "contact_page": {
+    "title": "Contact Us",
+    "description": "We're here to help. Get in touch with us for any questions or support.",
+    "address": {
+      "title": "Address"
+    },
+    "phone": {
+      "title": "Phone"
+    },
+    "email": {
+      "title": "Email"
+    },
+    "hours": {
+      "title": "Business Hours"
+    },
+    "form": {
+      "title": "Send us a message",
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "submit": "Send Message"
+    }
+  },
+  "about_page": {
+    "title": "About Taskego",
+    "description": "Learn more about our mission to connect people with trusted service providers.",
+    "mission": {
+      "title": "Our Mission",
+      "description": "To make professional services accessible, reliable, and convenient for everyone."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To become the leading platform for local service providers and customers."
+    },
+    "values": {
+      "title": "Our Values",
+      "quality": "Quality",
+      "trust": "Trust",
+      "innovation": "Innovation",
+      "customer": "Customer Focus"
+    }
+  },
+  "chat": {
+    "title": "Taskego Assistant",
+    "status": "Online",
+    "welcome": "Hello! I'm here to help you find the perfect service. What can I help you with today?",
+    "response": "I found several available providers for your request. What's your location and preferred time?",
+    "placeholder": "Type your message..."
+  },
+  "footer": {
+    "description": "Your trusted platform for professional local services. Connect with skilled providers and get the job done right.",
+    "quick_links": "Quick Links",
+    "home": "Home",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "services_title": "Services",
+    "support": "Support",
+    "help_center": "Help Center",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "faq": "FAQ",
+    "cookies": "Cookies",
+    "copyright": "© 2023 Taskego. All rights reserved."
+  }
+}
