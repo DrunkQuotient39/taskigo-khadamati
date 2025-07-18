@@ -1,0 +1,164 @@
+You are a world-class full-stack developer and designer.
+Build a fully dynamic, bilingual, AI-powered local service platform called Taskego (Khadamati).
+It connects clients with service providers (cleaning, plumbing, delivery, maintenance, etc.).
+The app must be visually stunning, modular, multi-page, mobile-first, and future-ready.
+
+🧱 Stack Overview
+Frontend:
+Next.js 15.3.2 (App Router) + React 19 + TypeScript
+Tailwind CSS 4.1.7, Framer Motion, next-intl, Axios
+
+Backend:
+Node.js, Express.js, MongoDB + Mongoose, JWT Auth
+Helmet, express-validator, rate-limiter, bcrypt
+
+AI (Planned):
+Gemini AI + fallback local NLP
+AI chat widget (floating on every page, always visible)
+
+Hosting:
+Firebase, Render, or local development
+
+Payments (Future):
+Stripe, Apple Pay (button component prepped), internal wallet logic with refund/partial refund support
+
+🎯 Core Requirements (High Detail)
+🧠 UX/UI Design — Must Look Billion-Dollar Level
+NO single-page design.
+Create clean, isolated pages for everything: Home, About, Services, Booking, Providers, Admin, Contact, Terms, Support, etc.
+
+Animated hover cards, Framer Motion transitions, scroll reveals, page load animations
+
+Interactive parallax sections, animated counters, glowing buttons
+
+Tailwind + custom Khadamati blue/yellow theme
+
+Floating chat icon (bottom-right): always visible, animated, AI-ready
+
+Mobile-first, responsive from ground up (with collapsible nav, language switcher, and touch interactions)
+
+🌍 Language & RTL
+Full i18n via next-intl
+
+Support English + Arabic, RTL when Arabic is selected
+
+All text pulled from /messages/en.json and /messages/ar.json
+
+Language selection stored in profile and respected across sessions
+
+👥 Authentication System
+JWT-based auth: Client, Provider, Admin
+
+Email verification, forgot password, reset flow
+
+Role-based access control
+
+Profile: photo, location, language, phone, bio
+
+🛠️ Service Listings (Dynamic & Structured)
+Providers can create/manage listings (CRUD)
+
+Admin approves/rejects listings
+
+Listings: name, price, description, photo, location, availability
+
+Hierarchical categories: icons, colors, bilingual labels
+
+Listings are searchable by filters: price, category, distance, rating, provider
+
+📅 Booking Flow
+Clients can schedule bookings
+
+Booking lifecycle: pending → accepted → in_progress → completed → cancelled
+
+Cancellation reasons and timestamp logs
+
+Real-time status tracking per booking
+
+Stored booking history for both users and providers
+
+📊 Admin Dashboard
+Pages for:
+
+User management (block, verify)
+
+Booking review (manual override)
+
+Service moderation (approve/reject)
+
+Logs: ratings, cancellations, payments
+
+Analytics: signups, bookings, views, success rates
+
+🤖 AI Integration (Planned)
+Floating chat widget (bottom-right, animated)
+
+Gemini AI + fallback engine (custom)
+
+Natural-language processing of questions like:
+
+"What's the best maid service in Tripoli today under $30?"
+
+"Compare handyman A and B based on rating and time slot"
+
+"Schedule a plumber near me tomorrow 3PM"
+
+AI logic must factor in:
+
+User location, budget, time, category, language, behavior
+
+WebSocket or long-polling for real-time chat upgrade (future)
+
+💰 Payment & Wallet System (Structure Now, Logic Later)
+Service fees can be tracked: unpaid → paid → refunded
+
+Wallet balances per user
+
+Stripe / Apple Pay buttons (UI component now, logic later)
+
+Refund system with optional admin review
+
+💬 Pages Required (All Real Pages, Not Modals or Sections)
+Page	Description
+Home	Hero + dynamic services + intro + animations
+About	Company info, trust signals
+Services	Grid view with filters, animated categories
+Booking	Live booking form + user’s booking history
+Provider Dashboard	Provider-only CRUD, analytics, earnings
+Admin Panel	Admin-only booking/service moderation
+Contact	Support form
+Terms / Privacy	Legal pages
+Chat (floating)	Mini window always visible, collapsible
+
+🔧 Dev Tools & Standards
+TypeScript everywhere
+
+ESLint + Prettier
+
+Nodemon, PostCSS
+
+TurboPack for dev speed
+
+Modular Express routes
+
+Mongoose models: User, Booking, Service, Review, Wallet
+
+Unit tests via Jest + Supertest
+
+MongoDB Atlas connection
+
+Swagger/Postman collection for API docs
+
+Deployment ready for Firebase/Render
+
+🚀 Phased Execution Plan (Realistic Delivery)
+Phase	Focus	Milestones
+Phase 1	Layout & UX	Setup Next.js + Tailwind, routing, i18n, RTL, homepage animations
+Phase 2	Auth & Roles	JWT auth, login/signup, roles, profile editing
+Phase 3	Provider & Service System	Service CRUD, category hierarchy, image upload, admin moderation
+Phase 4	Booking Logic	Booking schema, provider/client flow, status changes, calendar UI
+Phase 5	Admin System	User management, provider verification, service control, logs
+Phase 6	Wallet & Payment UI	Add UI for payments, wallet balances, refund states
+Phase 7	AI Integration	Floating AI chat widget, Gemini backend, smart NLP
+Phase 8	Polish & Deployment	Animations, PWA tweaks, hosting to Firebase/Render
+
