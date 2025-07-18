@@ -154,7 +154,7 @@ export default function Home({ messages }: HomeProps) {
                   </Button>
                 </Link>
                 <Link href="/provider-signup">
-                  <Button size="lg" variant="outline" className="px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-khadamati-dark font-semibold transition-all duration-300">
+                  <Button size="lg" className="px-8 py-4 bg-white text-khadamati-blue border-2 border-white hover:bg-gray-100 hover:text-khadamati-dark font-semibold transition-all duration-300">
                     {messages.hero?.cta?.provider || 'Become a Provider'}
                   </Button>
                 </Link>
