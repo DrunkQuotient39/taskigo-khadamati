@@ -117,6 +117,9 @@ export class MemStorage implements IStorage {
       const cat: ServiceCategory = {
         id: this.currentCategoryId++,
         ...category,
+        description: category.description || null,
+        descriptionAr: category.descriptionAr || null,
+        isActive: category.isActive ?? true,
         createdAt: new Date(),
       };
       this.serviceCategories.set(cat.id, cat);
@@ -133,6 +136,8 @@ export class MemStorage implements IStorage {
       const u: User = {
         id: this.currentUserId++,
         ...user,
+        role: user.role || 'client',
+        language: user.language || 'en',
         password: 'hashedpassword',
         phone: null,
         profileImage: null,
