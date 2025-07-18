@@ -15,6 +15,8 @@ import FloatingChat from '@/components/common/FloatingChat';
 
 // Pages
 import Landing from '@/pages/Landing';
+import Login from '@/pages/Login';
+import SignUp from '@/pages/SignUp';
 import Home from '@/pages/Home';
 import Services from '@/pages/Services';
 import Booking from '@/pages/Booking';
@@ -40,6 +42,8 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={() => <Home messages={messages} />} />
+          <Route path="/login" component={() => <Login messages={messages} />} />
+          <Route path="/signup" component={() => <SignUp messages={messages} />} />
           <Route path="/services" component={() => <Services messages={messages} />} />
           <Route path="/booking" component={() => <Booking messages={messages} />} />
           <Route path="/about" component={() => <About messages={messages} />} />
