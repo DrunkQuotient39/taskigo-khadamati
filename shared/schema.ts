@@ -1,15 +1,25 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, varchar, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table for Replit Auth
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  phone: text("phone"),
-  profileImage: text("profile_image"),
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
   role: text("role").notNull().default("client"), // client, provider, admin
   language: text("language").notNull().default("en"), // en, ar
   isVerified: boolean("is_verified").default(false),
@@ -32,7 +42,7 @@ export const serviceCategories = pgTable("service_categories", {
 
 export const services = pgTable("services", {
   id: serial("id").primaryKey(),
-  providerId: integer("provider_id").references(() => users.id).notNull(),
+  providerId: varchar("provider_id").references(() => users.id).notNull(),
   categoryId: integer("category_id").references(() => serviceCategories.id).notNull(),
   title: text("title").notNull(),
   titleAr: text("title_ar"),
@@ -54,9 +64,9 @@ export const services = pgTable("services", {
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").references(() => users.id).notNull(),
+  clientId: varchar("client_id").references(() => users.id).notNull(),
   serviceId: integer("service_id").references(() => services.id).notNull(),
-  providerId: integer("provider_id").references(() => users.id).notNull(),
+  providerId: varchar("provider_id").references(() => users.id).notNull(),
   scheduledDate: timestamp("scheduled_date").notNull(),
   scheduledTime: text("scheduled_time").notNull(),
   duration: integer("duration").notNull(),
@@ -75,8 +85,8 @@ export const bookings = pgTable("bookings", {
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
   bookingId: integer("booking_id").references(() => bookings.id).notNull(),
-  clientId: integer("client_id").references(() => users.id).notNull(),
-  providerId: integer("provider_id").references(() => users.id).notNull(),
+  clientId: varchar("client_id").references(() => users.id).notNull(),
+  providerId: varchar("provider_id").references(() => users.id).notNull(),
   serviceId: integer("service_id").references(() => services.id).notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment"),
@@ -85,7 +95,7 @@ export const reviews = pgTable("reviews", {
 
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
   title: text("title").notNull(),
   message: text("message").notNull(),
   type: text("type").notNull(), // booking, payment, system, etc.
@@ -131,6 +141,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type ServiceCategory = typeof serviceCategories.$inferSelect;
 export type InsertServiceCategory = z.infer<typeof insertServiceCategorySchema>;
 export type Service = typeof services.$inferSelect;

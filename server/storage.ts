@@ -7,6 +7,7 @@ import {
   notifications,
   type User, 
   type InsertUser,
+  type UpsertUser,
   type Service,
   type InsertService,
   type ServiceCategory,
@@ -18,13 +19,16 @@ import {
   type Notification,
   type InsertNotification
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, asc, like, ilike } from "drizzle-orm";
 
 export interface IStorage {
-  // User management
-  getUser(id: number): Promise<User | undefined>;
+  // User management - Updated for Replit Auth
+  getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
   getUsers(search?: string): Promise<User[]>;
 
   // Service categories
@@ -385,8 +389,8 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.id === id);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -394,7 +398,7 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
+    const id = (this.currentUserId++).toString();
     const user: User = {
       ...insertUser,
       id,
@@ -403,16 +407,28 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    this.users.set(id, user);
+    this.users.set(this.currentUserId - 1, user);
     return user;
   }
 
-  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
-    const user = this.users.get(id);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existingUser = await this.getUser(userData.id);
+    if (existingUser) {
+      return await this.updateUser(userData.id, userData) || existingUser;
+    } else {
+      return await this.createUser(userData);
+    }
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User | undefined> {
+    const user = await this.getUser(id);
     if (!user) return undefined;
 
     const updatedUser = { ...user, ...userData, updatedAt: new Date() };
-    this.users.set(id, updatedUser);
+    const numericId = Array.from(this.users.entries()).find(([_, u]) => u.id === id)?.[0];
+    if (numericId) {
+      this.users.set(numericId, updatedUser);
+    }
     return updatedUser;
   }
 
@@ -422,9 +438,9 @@ export class MemStorage implements IStorage {
     if (search) {
       const searchLower = search.toLowerCase();
       users = users.filter(user => 
-        user.firstName.toLowerCase().includes(searchLower) ||
-        user.lastName.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower)
+        (user.firstName?.toLowerCase() || '').includes(searchLower) ||
+        (user.lastName?.toLowerCase() || '').includes(searchLower) ||
+        (user.email?.toLowerCase() || '').includes(searchLower)
       );
     }
 
@@ -661,4 +677,269 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  // User management - Updated for Replit Auth
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        email: insertUser.email || null,
+        firstName: insertUser.firstName || null,
+        lastName: insertUser.lastName || null,
+        profileImageUrl: insertUser.profileImageUrl || null,
+        role: insertUser.role || 'client',
+        language: insertUser.language || 'en',
+        isVerified: insertUser.isVerified || false,
+        isActive: insertUser.isActive || true,
+      })
+      .returning();
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getUsers(search?: string): Promise<User[]> {
+    if (search) {
+      return await db.select().from(users).where(
+        and(
+          ilike(users.firstName, `%${search}%`),
+          ilike(users.lastName, `%${search}%`),
+          ilike(users.email, `%${search}%`)
+        )
+      );
+    }
+    
+    return await db.select().from(users);
+  }
+
+  // Service categories
+  async getServiceCategories(): Promise<ServiceCategory[]> {
+    return await db.select().from(serviceCategories).where(eq(serviceCategories.isActive, true));
+  }
+
+  async getServiceCategory(id: number): Promise<ServiceCategory | undefined> {
+    const [category] = await db.select().from(serviceCategories).where(eq(serviceCategories.id, id));
+    return category || undefined;
+  }
+
+  async createServiceCategory(insertCategory: InsertServiceCategory): Promise<ServiceCategory> {
+    const [category] = await db
+      .insert(serviceCategories)
+      .values(insertCategory)
+      .returning();
+    return category;
+  }
+
+  // Services
+  async getServices(filters?: {
+    category?: string;
+    search?: string;
+    priceRange?: string;
+    sortBy?: string;
+  }): Promise<Service[]> {
+    let baseQuery = db.select().from(services).where(eq(services.isActive, true));
+    
+    if (filters?.category) {
+      baseQuery = baseQuery.where(eq(services.categoryId, parseInt(filters.category)));
+    }
+    
+    if (filters?.search) {
+      baseQuery = baseQuery.where(
+        and(
+          ilike(services.title, `%${filters.search}%`),
+          ilike(services.description, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    if (filters?.sortBy === 'price-low') {
+      return await baseQuery.orderBy(asc(services.price));
+    } else if (filters?.sortBy === 'price-high') {
+      return await baseQuery.orderBy(desc(services.price));
+    } else if (filters?.sortBy === 'rating') {
+      return await baseQuery.orderBy(desc(services.rating));
+    } else {
+      return await baseQuery.orderBy(desc(services.createdAt));
+    }
+  }
+
+  async getService(id: number): Promise<Service | undefined> {
+    const [service] = await db.select().from(services).where(eq(services.id, id));
+    return service || undefined;
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const [service] = await db
+      .insert(services)
+      .values(insertService)
+      .returning();
+    return service;
+  }
+
+  async updateService(id: number, serviceData: Partial<Service>): Promise<Service | undefined> {
+    const [service] = await db
+      .update(services)
+      .set({ ...serviceData, updatedAt: new Date() })
+      .where(eq(services.id, id))
+      .returning();
+    return service || undefined;
+  }
+
+  async getProviderServices(): Promise<Service[]> {
+    return await db.select().from(services).orderBy(desc(services.createdAt));
+  }
+
+  // Bookings
+  async getBookings(): Promise<Booking[]> {
+    return await db.select().from(bookings).orderBy(desc(bookings.createdAt));
+  }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking || undefined;
+  }
+
+  async createBooking(insertBooking: InsertBooking): Promise<Booking> {
+    const [booking] = await db
+      .insert(bookings)
+      .values(insertBooking)
+      .returning();
+    return booking;
+  }
+
+  async updateBooking(id: number, bookingData: Partial<Booking>): Promise<Booking | undefined> {
+    const [booking] = await db
+      .update(bookings)
+      .set({ ...bookingData, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return booking || undefined;
+  }
+
+  async getProviderBookings(): Promise<any[]> {
+    return await db.select().from(bookings).orderBy(desc(bookings.createdAt));
+  }
+
+  // Reviews
+  async getReviews(): Promise<Review[]> {
+    return await db.select().from(reviews).orderBy(desc(reviews.createdAt));
+  }
+
+  async getReview(id: number): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, id));
+    return review || undefined;
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values(insertReview)
+      .returning();
+    return review;
+  }
+
+  async getServiceReviews(serviceId: number): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.serviceId, serviceId)).orderBy(desc(reviews.createdAt));
+  }
+
+  // Notifications
+  async getNotifications(): Promise<Notification[]> {
+    return await db.select().from(notifications).orderBy(desc(notifications.createdAt));
+  }
+
+  async getNotification(id: number): Promise<Notification | undefined> {
+    const [notification] = await db.select().from(notifications).where(eq(notifications.id, id));
+    return notification || undefined;
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(insertNotification)
+      .returning();
+    return notification;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
+  }
+
+  // Admin methods
+  async getPendingApprovals(): Promise<any[]> {
+    return await db.select().from(services).where(eq(services.status, 'pending'));
+  }
+
+  async approveService(serviceId: number): Promise<void> {
+    await db.update(services).set({ status: 'approved' }).where(eq(services.id, serviceId));
+  }
+
+  async rejectService(serviceId: number): Promise<void> {
+    await db.update(services).set({ status: 'rejected' }).where(eq(services.id, serviceId));
+  }
+
+  async getDashboardStats(): Promise<any> {
+    // This would return aggregate statistics for the dashboard
+    return {
+      totalUsers: 0,
+      totalServices: 0,
+      totalBookings: 0,
+      totalRevenue: 0,
+      pendingApprovals: 0,
+      activeProviders: 0,
+    };
+  }
+
+  async getAdminStats(): Promise<any> {
+    return this.getDashboardStats();
+  }
+
+  async approveItem(id: number): Promise<{ success: boolean; message: string }> {
+    await this.approveService(id);
+    return { success: true, message: 'Item approved successfully' };
+  }
+
+  async rejectItem(id: number): Promise<{ success: boolean; message: string }> {
+    await this.rejectService(id);
+    return { success: true, message: 'Item rejected successfully' };
+  }
+}
+
+export const storage = new DatabaseStorage();
