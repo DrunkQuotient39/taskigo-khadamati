@@ -1,43 +1,73 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useAnimation, useInView } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
-  className?: string;
+  direction?: 'up' | 'down' | 'left' | 'right';
   delay?: number;
+  duration?: number;
+  distance?: number;
+  threshold?: number;
+  className?: string;
+  once?: boolean;
 }
 
-export default function ScrollReveal({ children, className = '', delay = 0 }: ScrollRevealProps) {
-  const [isRevealed, setIsRevealed] = useState(false);
-  const elementRef = useRef<HTMLDivElement>(null);
+export default function ScrollReveal({
+  children,
+  direction = 'up',
+  delay = 0,
+  duration = 0.6,
+  distance = 50,
+  threshold = 0.1,
+  className = '',
+  once = true
+}: ScrollRevealProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { amount: threshold, once });
+  const controls = useAnimation();
+
+  const getInitialPosition = () => {
+    switch (direction) {
+      case 'up':
+        return { y: distance, opacity: 0 };
+      case 'down':
+        return { y: -distance, opacity: 0 };
+      case 'left':
+        return { x: distance, opacity: 0 };
+      case 'right':
+        return { x: -distance, opacity: 0 };
+      default:
+        return { y: distance, opacity: 0 };
+    }
+  };
+
+  const getFinalPosition = () => {
+    return { x: 0, y: 0, opacity: 1 };
+  };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            setIsRevealed(true);
-          }, delay);
+    if (isInView) {
+      controls.start({
+        ...getFinalPosition(),
+        transition: {
+          duration,
+          delay,
+          ease: [0.25, 0.46, 0.45, 0.94]
         }
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      }
-    );
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
+      });
+    } else if (!once) {
+      controls.start(getInitialPosition());
     }
-
-    return () => observer.disconnect();
-  }, [delay]);
+  }, [isInView, controls, delay, duration, once]);
 
   return (
-    <div
-      ref={elementRef}
-      className={`scroll-reveal ${isRevealed ? 'revealed' : ''} ${className}`}
+    <motion.div
+      ref={ref}
+      initial={getInitialPosition()}
+      animate={controls}
+      className={className}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
