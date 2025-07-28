@@ -1,62 +1,62 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion, useAnimation, useInView } from 'framer-motion';
 
 interface AnimatedCounterProps {
   end: number;
   duration?: number;
   suffix?: string;
+  prefix?: string;
   className?: string;
 }
 
-export default function AnimatedCounter({ end, duration = 2000, suffix = '', className = '' }: AnimatedCounterProps) {
+export default function AnimatedCounter({ 
+  end, 
+  duration = 2, 
+  suffix = '', 
+  prefix = '', 
+  className = '' 
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const elementRef = useRef<HTMLSpanElement>(null);
+  const controls = useAnimation();
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isVisible) {
-          setIsVisible(true);
+    if (isInView) {
+      let startTime: number;
+      let animationFrame: number;
+
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = (timestamp - startTime) / (duration * 1000);
+
+        if (progress < 1) {
+          setCount(Math.floor(end * progress));
+          animationFrame = requestAnimationFrame(animate);
+        } else {
+          setCount(end);
         }
-      },
-      { threshold: 0.1 }
-    );
+      };
 
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
+      animationFrame = requestAnimationFrame(animate);
+
+      return () => {
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+        }
+      };
     }
-
-    return () => observer.disconnect();
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const startTime = Date.now();
-    const startValue = 0;
-    const endValue = end;
-
-    const updateCount = () => {
-      const now = Date.now();
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentValue = Math.round(startValue + (endValue - startValue) * easeOutQuart);
-
-      setCount(currentValue);
-
-      if (progress < 1) {
-        requestAnimationFrame(updateCount);
-      }
-    };
-
-    requestAnimationFrame(updateCount);
-  }, [isVisible, end, duration]);
+  }, [isInView, end, duration]);
 
   return (
-    <span ref={elementRef} className={className}>
-      {count.toLocaleString()}{suffix}
-    </span>
+    <motion.span
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={className}
+    >
+      {prefix}{count.toLocaleString()}{suffix}
+    </motion.span>
   );
 }
