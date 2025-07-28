@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import AnimatedCounter from '@/components/common/AnimatedCounter';
+import ParallaxHero from '@/components/common/ParallaxHero';
 
 interface HomeProps {
   messages: any;
@@ -122,49 +123,12 @@ export default function Home({ messages }: HomeProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="hero-gradient text-white py-20 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black bg-opacity-20"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <ScrollReveal>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                <span>{messages.hero?.title || 'Professional Services'}</span>
-                <br />
-                <span className="text-khadamati-yellow">
-                  {messages.hero?.subtitle || 'At Your Fingertips'}
-                </span>
-              </h1>
-            </ScrollReveal>
-            
-            <ScrollReveal delay={200}>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto leading-relaxed">
-                {messages.hero?.description || 'Connect with trusted local service providers for all your home and business needs. From cleaning to repairs, we\'ve got you covered.'}
-              </p>
-            </ScrollReveal>
-            
-            <ScrollReveal delay={400}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/services">
-                  <Button size="lg" className="px-8 py-4 bg-khadamati-yellow text-khadamati-dark font-semibold hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
-                    {messages.hero?.cta?.book || 'Book a Service'}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Button 
-                  size="lg" 
-                  className="px-8 py-4 bg-white text-khadamati-blue border-2 border-white hover:bg-gray-100 hover:text-khadamati-dark font-semibold transition-all duration-300"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  {messages.hero?.cta?.provider || 'Become a Provider'}
-                </Button>
-              </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
+      {/* Enhanced Parallax Hero Section */}
+      <ParallaxHero 
+        messages={messages}
+        onGetStarted={() => window.location.href = '/services'}
+        onWatchDemo={() => window.location.href = '/chat'}
+      />
 
       {/* Stats Section */}
       <section className="py-16 bg-white">

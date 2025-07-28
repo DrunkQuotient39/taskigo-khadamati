@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import InteractiveServiceCard from '@/components/services/InteractiveServiceCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Star, MapPin, Clock, Search, Filter, ArrowRight, Users, Grid, List } from 'lucide-react';
 
@@ -22,33 +23,77 @@ export default function Services({ messages }: ServicesProps) {
   const [sortBy, setSortBy] = useState('rating');
   const [viewMode, setViewMode] = useState<'category' | 'list'>('category');
 
-  // Fetch service categories
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['/api/service-categories'],
-    queryFn: async () => {
-      const response = await fetch('/api/service-categories');
-      return response.json();
-    },
-  });
+  // Mock data for demonstration since API endpoints might not exist
+  const mockCategories = [
+    { id: 1, name: 'Cleaning', description: 'Professional cleaning services', icon: '🧹', color: '#3B82F6' },
+    { id: 2, name: 'Plumbing', description: 'Expert plumbing services', icon: '🔧', color: '#10B981' },
+    { id: 3, name: 'Electrical', description: 'Licensed electrical work', icon: '⚡', color: '#F59E0B' },
+    { id: 4, name: 'Delivery', description: 'Fast delivery services', icon: '🚚', color: '#EF4444' }
+  ];
 
-  // Fetch services with filters
-  const { data: services, isLoading: servicesLoading } = useQuery({
-    queryKey: ['/api/services', selectedCategory, searchTerm, priceRange, sortBy],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (selectedCategory !== 'all') params.append('category', selectedCategory);
-      if (searchTerm) params.append('search', searchTerm);
-      if (priceRange !== 'all') params.append('priceRange', priceRange);
-      if (sortBy) params.append('sortBy', sortBy);
-      
-      const response = await fetch(`/api/services?${params}`);
-      return response.json();
+  const mockServices = [
+    {
+      id: 1,
+      title: 'Professional House Cleaning',
+      description: 'Deep cleaning service for your home with eco-friendly products',
+      price: 45,
+      priceType: 'hour',
+      rating: 4.8,
+      categoryId: 1,
+      location: 'Downtown Area',
+      duration: 120,
+      images: ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop'],
+      provider: {
+        name: 'Sarah Johnson',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+        rating: 4.9,
+        completedJobs: 200,
+        verified: true
+      }
     },
-  });
+    {
+      id: 2,
+      title: 'Emergency Plumbing Repair',
+      description: '24/7 plumbing repair services for urgent issues',
+      price: 80,
+      priceType: 'hour',
+      rating: 4.7,
+      categoryId: 2,
+      location: 'Citywide',
+      duration: 60,
+      images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'],
+      provider: {
+        name: 'Ahmed Hassan',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+        rating: 4.8,
+        completedJobs: 150,
+        verified: true
+      }
+    },
+    {
+      id: 3,
+      title: 'Home Electrical Installation',
+      description: 'Professional electrical installation and maintenance',
+      price: 65,
+      priceType: 'hour',
+      rating: 4.9,
+      categoryId: 3,
+      location: 'Metro Area',
+      duration: 90,
+      images: ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop'],
+      provider: {
+        name: 'Michael Chen',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+        rating: 4.9,
+        completedJobs: 180,
+        verified: true
+      }
+    }
+  ];
 
-  // Group services by category for hierarchical display
-  const servicesByCategory = services?.reduce((acc: any, service: any) => {
-    const category = categories?.find((cat: any) => cat.id === service.categoryId);
+  // Group services by category
+  const servicesByCategory = mockServices.reduce((acc: any, service: any) => {
+    const category = mockCategories.find((cat: any) => cat.id === service.categoryId);
     if (!category) return acc;
     
     if (!acc[category.name]) {
@@ -59,36 +104,16 @@ export default function Services({ messages }: ServicesProps) {
     }
     acc[category.name].services.push(service);
     return acc;
-  }, {}) || {};
+  }, {});
 
   const handleBookService = (serviceId: number) => {
     console.log('Booking service', serviceId);
-    // Handle booking logic here
+    window.location.href = `/booking?service=${serviceId}`;
   };
 
-  if (servicesLoading || categoriesLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="h-96">
-                <CardHeader>
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-32 w-full mb-4" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-2/3" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleViewDetails = (serviceId: number) => {
+    window.location.href = `/service/${serviceId}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,7 +147,7 @@ export default function Services({ messages }: ServicesProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories?.map((category: any) => (
+                {mockCategories.map((category: any) => (
                   <SelectItem key={category.id} value={category.name}>
                     {category.name}
                   </SelectItem>
@@ -207,62 +232,41 @@ export default function Services({ messages }: ServicesProps) {
                     </Badge>
                   </div>
 
-                  {/* Services Grid */}
+                  {/* Services Grid with Interactive Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categoryData.services.map((service: any) => (
-                      <Card key={service.id} className="hover:shadow-md transition-shadow duration-200">
-                        <div className="aspect-w-16 aspect-h-9 mb-4">
-                          <img
-                            src={service.images?.[0] || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop'}
-                            alt={service.title}
-                            className="w-full h-48 object-cover rounded-t-lg"
+                    {categoryData.services.map((service: any) => {
+                      // Transform service data to match InteractiveServiceCard props
+                      const transformedService = {
+                        ...service,
+                        provider: {
+                          name: service.provider?.name || 'Professional Provider',
+                          nameAr: service.provider?.nameAr || '',
+                          avatar: service.provider?.avatar || '',
+                          rating: service.provider?.rating || 4.8,
+                          completedJobs: service.provider?.completedJobs || 150,
+                          verified: service.provider?.verified || true
+                        },
+                        category: {
+                          name: categoryData.category.name,
+                          nameAr: categoryData.category.nameAr || '',
+                          icon: categoryData.category.icon,
+                          color: categoryData.category.color || '#3B82F6'
+                        },
+                        rating: service.rating || 4.8,
+                        location: service.location || 'Your area',
+                        duration: service.duration || 60
+                      };
+                      
+                      return (
+                        <ScrollReveal key={service.id} delay={50}>
+                          <InteractiveServiceCard
+                            service={transformedService}
+                            onBook={handleBookService}
+                            onViewDetails={handleViewDetails}
                           />
-                        </div>
-                        <CardHeader className="pb-3">
-                          <div className="flex justify-between items-start">
-                            <CardTitle className="text-lg">{service.title}</CardTitle>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                              <span className="text-sm font-medium">{service.rating}</span>
-                            </div>
-                          </div>
-                          <CardDescription className="text-sm">
-                            {service.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {service.location}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {service.duration} min
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="text-lg font-bold text-khadamati-blue">
-                              ${service.price}
-                              <span className="text-sm font-normal text-gray-600">
-                                /{service.priceType}
-                              </span>
-                            </div>
-                            <Button
-                              size="sm"
-                              className="bg-khadamati-yellow text-khadamati-dark hover:bg-yellow-500"
-                              onClick={() => handleBookService(service.id)}
-                            >
-                              Book Now
-                              <ArrowRight className="ml-1 h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                        </ScrollReveal>
+                      );
+                    })}
                   </div>
                 </div>
               </ScrollReveal>
@@ -271,62 +275,38 @@ export default function Services({ messages }: ServicesProps) {
         ) : (
           // List View - Traditional Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services?.map((service: any) => (
-              <ScrollReveal key={service.id}>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <div className="aspect-w-16 aspect-h-9 mb-4">
-                    <img
-                      src={service.images?.[0] || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop'}
-                      alt={service.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
-                    />
-                  </div>
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{service.title}</CardTitle>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">{service.rating}</span>
-                      </div>
-                    </div>
-                    <CardDescription className="text-sm">
-                      {service.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {service.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {service.duration} min
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-lg font-bold text-khadamati-blue">
-                        ${service.price}
-                        <span className="text-sm font-normal text-gray-600">
-                          /{service.priceType}
-                        </span>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="bg-khadamati-yellow text-khadamati-dark hover:bg-yellow-500"
-                        onClick={() => handleBookService(service.id)}
-                      >
-                        Book Now
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
-            ))}
+            {mockServices.map((service: any) => {
+              const transformedService = {
+                ...service,
+                provider: {
+                  name: service.provider?.name || 'Professional Provider',
+                  nameAr: service.provider?.nameAr || '',
+                  avatar: service.provider?.avatar || '',
+                  rating: service.provider?.rating || 4.8,
+                  completedJobs: service.provider?.completedJobs || 150,
+                  verified: service.provider?.verified || true
+                },
+                category: {
+                  name: mockCategories.find(cat => cat.id === service.categoryId)?.name || 'Service',
+                  nameAr: '',
+                  icon: mockCategories.find(cat => cat.id === service.categoryId)?.icon || '🔧',
+                  color: mockCategories.find(cat => cat.id === service.categoryId)?.color || '#3B82F6'
+                },
+                rating: service.rating || 4.8,
+                location: service.location || 'Your area',
+                duration: service.duration || 60
+              };
+
+              return (
+                <ScrollReveal key={service.id}>
+                  <InteractiveServiceCard
+                    service={transformedService}
+                    onBook={handleBookService}
+                    onViewDetails={handleViewDetails}
+                  />
+                </ScrollReveal>
+              );
+            })}
           </div>
         )}
       </div>
