@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import InteractiveServiceCard from '@/components/services/InteractiveServiceCard';
+import SimpleServiceCard from '@/components/services/SimpleServiceCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Star, MapPin, Clock, Search, Filter, ArrowRight, Users, Grid, List } from 'lucide-react';
 
@@ -259,7 +260,7 @@ export default function Services({ messages }: ServicesProps) {
                       
                       return (
                         <ScrollReveal key={service.id} delay={50}>
-                          <InteractiveServiceCard
+                          <SimpleServiceCard
                             service={transformedService}
                             onBook={handleBookService}
                             onViewDetails={handleViewDetails}
@@ -299,7 +300,7 @@ export default function Services({ messages }: ServicesProps) {
 
               return (
                 <ScrollReveal key={service.id}>
-                  <InteractiveServiceCard
+                  <SimpleServiceCard
                     service={transformedService}
                     onBook={handleBookService}
                     onViewDetails={handleViewDetails}
