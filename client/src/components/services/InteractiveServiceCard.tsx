@@ -5,10 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Service } from '@shared/schema';
-
 interface InteractiveServiceCardProps {
-  service: Service & {
+  service: {
+    id: number;
+    title: string;
+    description: string;
+    price: number;
+    priceType: string;
+    rating: number;
+    location: string;
+    duration: number;
+    images?: string[];
     provider: {
       name: string;
       nameAr?: string;
