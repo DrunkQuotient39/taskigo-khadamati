@@ -1,0 +1,97 @@
+Prompt Title:
+“Build a dynamic, multilingual AI-powered service marketplace frontend (Taskego / Khadamati)”
+
+Prompt Body:
+
+You are a world-class full-stack developer and frontend motion designer. I want you to create the frontend of a premium service-booking marketplace called Taskego (in Arabic: Khadamati). It must feel alive, breathtaking, high-end, and extremely dynamic. This is not just a simple one-page website — each feature must have its own dedicated page and be modular, cleanly structured, responsive, and mobile-first.
+
+🖥️ Stack:
+Framework: Next.js 15.3.2 (App Router)
+
+Language: TypeScript
+
+Animations: Framer Motion, Scroll Effects, Card Transitions, Hover Reveals
+
+Styling: Tailwind CSS 4.1.7 with a bold Khadamati Blue + Yellow theme and Inter font
+
+i18n: next-intl (English and Arabic support with RTL switching)
+
+🔥 Visual Expectations:
+Full animations (Framer Motion + scroll-triggered effects)
+
+Interactive service cards (flip on hover, glow border, animated icons)
+
+Parallax hero sections with depth
+
+Floating AI chat widget (bottom-right corner, always visible and animated)
+
+Professional layout — this must feel like a billion-dollar startup
+
+Multiple pages: each of the following MUST have their own route:
+
+bash
+Copy
+Edit
+/home
+/about
+/services
+/service/[slug] (for service details)
+/book
+/providers/dashboard
+/admin
+/contact
+/chat (AI support placeholder)
+/terms
+🌍 Multilingual & RTL:
+Full bilingual interface (English + Arabic)
+
+RTL switching when Arabic is selected
+
+Dynamic translations loaded from messages/en.json and messages/ar.json
+
+Language preference saved to user profile and cookie/session
+
+🤖 Placeholder Chat AI Button:
+Floating chat widget on all pages (bottom right)
+
+Animated appearance (open/minimize)
+
+This is for AI assistant integration later using Gemini or local NLP
+
+Chat should eventually respond based on:
+
+Price range
+
+Location
+
+Age group
+
+Needs (e.g., "Cheapest AC repair in Beirut under $30 today")
+
+Smart recommendations & comparisons (e.g., hourly maid vs deep clean)
+
+📱 Mobile + Performance:
+100% mobile-first with smooth UX
+
+Fast image loading and optimization
+
+Progressive Web App ready (Tailwind PWA plugin)
+
+CDN, prefetching, caching, etc.
+
+✨ Additional UI Details:
+Provider pages must have profile sections, stats, and rating displays
+
+Client dashboard should show bookings, favorite providers, wallet, and feedback
+
+Admin dashboard placeholders must be ready
+
+How to feed this into Cursor AI:
+Paste this entire prompt in a .prompt file or into Cursor’s “New AI Command” interface.
+
+Trigger it from the root of your frontend project.
+
+Make sure the AI knows it's working in Next.js with App Router + Tailwind + Framer Motion + next-intl.
+
+Use the /app folder structure.
+

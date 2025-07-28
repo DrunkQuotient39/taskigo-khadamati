@@ -157,43 +157,177 @@
     background-clip: text;
   }
   
-  /* Hero Gradient */
-  .hero-gradient {
-    background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(207, 90%, 64%) 50%, hsl(37, 91%, 55%) 100%);
+  /* Floating Animation */
+  .floating {
+    animation: floating 3s ease-in-out infinite;
   }
   
-  /* Glassmorphism */
-  .glassmorphism {
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Glow Effect */
+  .glow-blue {
+    box-shadow: 0 0 20px hsla(207, 90%, 54%, 0.3);
+  }
+  
+  .glow-yellow {
+    box-shadow: 0 0 20px hsla(37, 91%, 55%, 0.3);
+  }
+  
+  /* Pulse Animation */
+  .pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Scroll Reveal Animation */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  .scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Service Card Hover Effects */
+  .service-card {
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  .service-card-flip {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+  
+  .service-card-flip:hover {
+    transform: rotateY(180deg);
+  }
+  
+  .service-card-front,
+  .service-card-back {
+    backface-visibility: hidden;
+  }
+  
+  .service-card-back {
+    transform: rotateY(180deg);
+  }
+  
+  /* Parallax Container */
+  .parallax {
+    transform-style: preserve-3d;
+  }
+  
+  /* Glass Morphism */
+  .glass {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  /* Card Hover Effects */
-  .card-hover {
-    @apply transition-all duration-300 ease-in-out;
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .card-hover:hover {
-    @apply transform -translate-y-2 shadow-xl;
+  /* Interactive Buttons */
+  .btn-animated {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
   }
   
-  /* Floating Animation */
-  .floating {
-    animation: float 3s ease-in-out infinite;
+  .btn-animated::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
   }
   
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+  .btn-animated:hover::before {
+    left: 100%;
+  }
+  
+  /* Hero Section Animations */
+  .hero-bg {
+    background: linear-gradient(135deg, 
+      hsla(207, 90%, 54%, 0.1) 0%, 
+      hsla(37, 91%, 55%, 0.1) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+  
+  /* Chat Widget Animations */
+  .chat-bubble {
+    animation: chat-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  @keyframes chat-bounce {
+    0% { transform: scale(0) rotate(45deg); }
+    50% { transform: scale(1.1) rotate(22.5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  
+  /* Loading Animations */
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .bounce-dots > div {
+    animation: bounce-dots 1.4s ease-in-out infinite both;
+  }
+  
+  .bounce-dots > div:nth-child(1) { animation-delay: -0.32s; }
+  .bounce-dots > div:nth-child(2) { animation-delay: -0.16s; }
+  
+  @keyframes bounce-dots {
+    0%, 80%, 100% { 
+      transform: scale(0);
+    } 40% { 
+      transform: scale(1);
+    }
   }
   
   /* Scroll Reveal */
   .scroll-reveal {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.6s ease-out;
+    transform: translateY(50px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
   .scroll-reveal.revealed {
@@ -296,9 +430,5 @@
   
   .text-responsive-3xl {
     @apply text-3xl md:text-4xl;
-  }
-  
-  .text-responsive-4xl {
-    @apply text-4xl md:text-5xl lg:text-6xl;
   }
 }

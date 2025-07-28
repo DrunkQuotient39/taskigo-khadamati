@@ -19,9 +19,12 @@ import Login from '@/pages/Login';
 import SignUp from '@/pages/SignUp';
 import Home from '@/pages/Home';
 import Services from '@/pages/Services';
+import ServiceDetail from '@/pages/ServiceDetail';
 import Booking from '@/pages/Booking';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Chat from '@/pages/Chat';
+import Terms from '@/pages/Terms';
 import ProviderDashboard from '@/pages/ProviderDashboard';
 import AdminPanel from '@/pages/AdminPanel';
 import NotFound from '@/pages/not-found';
@@ -42,13 +45,19 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={() => <Home messages={messages} />} />
+          <Route path="/home" component={() => <Home messages={messages} />} />
           <Route path="/login" component={() => <Login messages={messages} />} />
           <Route path="/signup" component={() => <SignUp messages={messages} />} />
           <Route path="/services" component={() => <Services messages={messages} />} />
+          <Route path="/service/:slug" component={() => <ServiceDetail messages={messages} />} />
           <Route path="/booking" component={() => <Booking messages={messages} />} />
           <Route path="/about" component={() => <About messages={messages} />} />
           <Route path="/contact" component={() => <Contact messages={messages} />} />
+          <Route path="/chat" component={() => <Chat messages={messages} />} />
+          <Route path="/terms" component={() => <Terms messages={messages} />} />
+          <Route path="/providers/dashboard" component={() => <ProviderDashboard messages={messages} />} />
           <Route path="/provider-dashboard" component={() => <ProviderDashboard messages={messages} />} />
+          <Route path="/admin" component={() => <AdminPanel messages={messages} />} />
           <Route path="/admin-panel" component={() => <AdminPanel messages={messages} />} />
           <Route component={NotFound} />
         </Switch>
