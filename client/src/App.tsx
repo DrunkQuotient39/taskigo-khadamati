@@ -64,6 +64,7 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
       </main>
       
       <Footer messages={messages} />
+      <div className="pb-32 md:pb-0"></div>
       <FloatingChat messages={messages} />
     </div>
   );

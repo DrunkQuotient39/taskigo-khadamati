@@ -126,8 +126,8 @@ export default function Home({ messages }: HomeProps) {
       {/* Enhanced Parallax Hero Section */}
       <ParallaxHero 
         messages={messages}
-        onGetStarted={() => window.location.href = '/services'}
-        onWatchDemo={() => window.location.href = '/chat'}
+        onGetStarted={() => window.location.assign('/services')}
+        onWatchDemo={() => window.location.assign('/chat')}
       />
 
       {/* Stats Section */}
@@ -340,7 +340,7 @@ export default function Home({ messages }: HomeProps) {
               {messages.cta?.description || 'Join thousands of satisfied customers who trust Taskego for their service needs.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
+              <Link href="/services">
                 <Button size="lg" className="px-8 py-4 bg-white text-khadamati-blue hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
                   {messages.cta?.download_app || 'Get Started Now'}
                   <ArrowRight className="ml-2 h-5 w-5" />
