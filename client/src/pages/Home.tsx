@@ -207,7 +207,7 @@ export default function Home({ messages }: HomeProps) {
           <div className="text-center mt-12">
             <ScrollReveal>
               <Link href="/services">
-                <Button size="lg" className="px-8 py-4 bg-khadamati-blue text-white hover:bg-blue-700 transition-all duration-300 transform hover:scale-105">
+                <Button size="lg" className="px-8 py-4 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white hover:from-blue-700 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
                   {messages.services?.view_all || 'View All Services'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -341,7 +341,7 @@ export default function Home({ messages }: HomeProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/services">
-                <Button size="lg" className="px-8 py-4 bg-white text-khadamati-blue hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
+                <Button size="lg" className="px-8 py-4 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white hover:from-blue-700 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 shadow-xl">
                   {messages.cta?.download_app || 'Get Started Now'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

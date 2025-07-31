@@ -75,7 +75,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
   };
 
   return (
-    <div ref={ref} className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-800 dark:to-gray-900">
+    <div ref={ref} className="relative min-h-screen overflow-hidden bg-gradient-to-br from-white via-blue-50 to-purple-50">
       {/* Background Elements */}
       <div className="absolute inset-0">
         {/* Animated Gradient Orbs */}
@@ -142,18 +142,18 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
             </motion.div>
 
             {/* Main Heading */}
-            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-bold mb-6">
-              <span className="text-gradient">Taskego</span>
+            <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow bg-clip-text text-transparent">Taskego</span>
               <br />
               <span className="text-gray-900 dark:text-white">
-                Your Service
+                Your Trusted Service
               </span>
               <br />
               <span className="text-khadamati-blue">Marketplace</span>
             </motion.h1>
 
             {/* Subheading */}
-            <motion.p variants={itemVariants} className="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl">
               Connect with verified professionals for 
               <span className="text-khadamati-blue font-semibold"> cleaning</span>,
               <span className="text-khadamati-yellow font-semibold"> repairs</span>, and
