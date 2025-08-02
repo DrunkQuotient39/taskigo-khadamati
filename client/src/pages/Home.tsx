@@ -149,8 +149,8 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
             
             <ScrollReveal className="text-center" delay={200}>
-              <div className="text-4xl font-bold text-khadamati-blue mb-2">
-                <AnimatedCounter end={4.9} suffix="" />
+              <div className="text-4xl font-bold text-yellow-bright mb-2">
+                <AnimatedCounter end={4.9} suffix="" />⭐
               </div>
               <div className="text-khadamati-gray">{messages.stats?.rating || 'Average Rating'}</div>
             </ScrollReveal>
@@ -194,7 +194,7 @@ export default function Home({ messages }: HomeProps) {
                       <p className="text-khadamati-gray mb-4 text-sm">
                         {category.description}
                       </p>
-                      <div className="text-khadamati-blue font-semibold text-sm">
+                      <div className="text-yellow-bright font-bold text-base bg-yellow-bright/10 px-3 py-1 rounded-full">
                         {category.price}
                       </div>
                     </CardContent>
@@ -290,7 +290,7 @@ export default function Home({ messages }: HomeProps) {
               <CardContent className="p-8 text-center">
                 <div className="flex justify-center mb-6">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-6 w-6 text-khadamati-yellow fill-current" />
+                    <Star key={i} className="h-6 w-6 text-yellow-bright fill-current" />
                   ))}
                 </div>
                 <blockquote className="text-xl text-khadamati-dark mb-8 italic">
@@ -321,7 +321,7 @@ export default function Home({ messages }: HomeProps) {
                 key={index}
                 onClick={() => setCurrentTestimonial(index)}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentTestimonial ? 'bg-khadamati-blue' : 'bg-gray-300'
+                  index === currentTestimonial ? 'bg-yellow-bright' : 'bg-gray-300'
                 }`}
               />
             ))}
