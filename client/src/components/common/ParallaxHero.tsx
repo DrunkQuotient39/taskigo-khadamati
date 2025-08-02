@@ -143,21 +143,21 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
 
             {/* Main Heading */}
             <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-yellow-bright to-khadamati-blue bg-clip-text text-transparent">Taskego</span>
+              <span className="text-khadamati-blue font-black text-shadow-lg">Taskego</span>
               <br />
-              <span className="text-gray-900 dark:text-white">
+              <span className="text-dark-readable font-bold">
                 Your Trusted Service
               </span>
               <br />
-              <span className="text-khadamati-blue">Marketplace</span>
+              <span className="text-khadamati-blue font-bold">Marketplace</span>
             </motion.h1>
 
             {/* Subheading */}
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-dark-readable mb-8 leading-relaxed max-w-2xl font-medium">
               Connect with verified professionals for 
-              <span className="text-khadamati-blue font-semibold"> cleaning</span>,
+              <span className="text-khadamati-blue font-bold"> cleaning</span>,
               <span className="text-yellow-bright font-bold"> repairs</span>, and
-              <span className="text-khadamati-blue font-semibold"> maintenance</span> services. 
+              <span className="text-khadamati-blue font-bold"> maintenance</span> services. 
               Available in English and Arabic.
             </motion.p>
 

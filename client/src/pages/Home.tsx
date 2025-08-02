@@ -188,10 +188,10 @@ export default function Home({ messages }: HomeProps) {
                       <div className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
                         <span className="text-2xl">{category.icon}</span>
                       </div>
-                      <h3 className="text-xl font-semibold text-khadamati-dark mb-3">
+                      <h3 className="text-xl font-bold text-dark-readable mb-3">
                         {category.name}
                       </h3>
-                      <p className="text-khadamati-gray mb-4 text-sm">
+                      <p className="text-khadamati-gray mb-4 text-base font-medium">
                         {category.description}
                       </p>
                       <div className="text-yellow-bright font-bold text-base bg-yellow-bright/10 px-3 py-1 rounded-full">
@@ -222,10 +222,10 @@ export default function Home({ messages }: HomeProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <h2 className="text-4xl font-bold text-khadamati-dark mb-4">
+              <h2 className="text-4xl font-bold text-dark-readable mb-4">
                 {messages.how_it_works?.title || 'How It Works'}
               </h2>
-              <p className="text-xl text-khadamati-gray max-w-2xl mx-auto">
+              <p className="text-xl text-khadamati-gray max-w-2xl mx-auto font-medium">
                 {messages.how_it_works?.description || 'Get your service in just a few simple steps.'}
               </p>
             </ScrollReveal>
@@ -236,10 +236,10 @@ export default function Home({ messages }: HomeProps) {
               <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-khadamati-dark mb-3">
+              <h3 className="text-xl font-bold text-dark-readable mb-3">
                 {messages.how_it_works?.step1?.title || 'Choose Service'}
               </h3>
-              <p className="text-khadamati-gray">
+              <p className="text-khadamati-gray font-medium">
                 {messages.how_it_works?.step1?.description || 'Browse our categories and select the service you need'}
               </p>
             </ScrollReveal>
@@ -248,10 +248,10 @@ export default function Home({ messages }: HomeProps) {
               <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">2</span>
               </div>
-              <h3 className="text-xl font-semibold text-khadamati-dark mb-3">
+              <h3 className="text-xl font-bold text-dark-readable mb-3">
                 {messages.how_it_works?.step2?.title || 'Book & Pay'}
               </h3>
-              <p className="text-khadamati-gray">
+              <p className="text-khadamati-gray font-medium">
                 {messages.how_it_works?.step2?.description || 'Select your preferred time and complete the booking'}
               </p>
             </ScrollReveal>
@@ -260,10 +260,10 @@ export default function Home({ messages }: HomeProps) {
               <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-khadamati-dark mb-3">
+              <h3 className="text-xl font-bold text-dark-readable mb-3">
                 {messages.how_it_works?.step3?.title || 'Get Service'}
               </h3>
-              <p className="text-khadamati-gray">
+              <p className="text-khadamati-gray font-medium">
                 {messages.how_it_works?.step3?.description || 'Professional service provider arrives at your location'}
               </p>
             </ScrollReveal>
@@ -276,10 +276,10 @@ export default function Home({ messages }: HomeProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <h2 className="text-4xl font-bold text-khadamati-dark mb-4">
+              <h2 className="text-4xl font-bold text-dark-readable mb-4">
                 What Our Customers Say
               </h2>
-              <p className="text-xl text-khadamati-gray">
+              <p className="text-xl text-khadamati-gray font-medium">
                 Real feedback from our satisfied customers
               </p>
             </ScrollReveal>
@@ -293,7 +293,7 @@ export default function Home({ messages }: HomeProps) {
                     <Star key={i} className="h-6 w-6 text-yellow-bright fill-current" />
                   ))}
                 </div>
-                <blockquote className="text-xl text-khadamati-dark mb-8 italic">
+                <blockquote className="text-xl text-dark-readable mb-8 italic font-medium">
                   "{testimonials[currentTestimonial].content}"
                 </blockquote>
                 <div className="flex items-center justify-center space-x-4">
@@ -303,10 +303,10 @@ export default function Home({ messages }: HomeProps) {
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   <div>
-                    <div className="font-semibold text-khadamati-dark">
+                    <div className="font-bold text-dark-readable">
                       {testimonials[currentTestimonial].name}
                     </div>
-                    <div className="text-khadamati-gray text-sm">
+                    <div className="text-khadamati-gray text-base font-medium">
                       {testimonials[currentTestimonial].role}
                     </div>
                   </div>
