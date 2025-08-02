@@ -319,23 +319,26 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {serviceCategories.map((category, index) => (
-              <ScrollReveal key={category.id} delay={index * 100}>
+              <ScrollReveal key={category.id} delay={index * 50}>
                 <Link href={category.href}>
-                  <Card className="card-hover bg-white rounded-2xl shadow-lg border-0 h-full cursor-pointer">
-                    <CardContent className="p-8 text-center">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                        <span className="text-2xl">{category.icon}</span>
+                  <Card className="bg-white rounded-xl shadow-lg border-0 h-full cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                    <CardContent className="p-6 text-center">
+                      <div className={`w-14 h-14 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center mx-auto mb-4`}>
+                        <span className="text-xl">{category.icon}</span>
                       </div>
-                      <h3 className="text-xl font-black text-gray-900 mb-3">
+                      <h3 className="text-lg font-black text-gray-900 mb-2">
                         {category.name}
                       </h3>
-                      <p className="text-gray-700 mb-4 text-base font-bold">
+                      <p className="text-gray-700 text-sm font-medium mb-3 leading-tight">
                         {category.description}
                       </p>
-                      <div className="text-white font-black text-base bg-orange-500 px-4 py-2 rounded-full shadow-lg">
+                      <div className="text-white font-black text-sm bg-gradient-to-r from-orange-500 to-blue-600 px-3 py-2 rounded-full shadow-lg mb-2">
                         {category.price}
+                      </div>
+                      <div className="text-xs text-gray-500 font-bold">
+                        {category.id <= 3 ? '500+' : category.id <= 6 ? '300+' : category.id <= 9 ? '200+' : '150+'} PROVIDERS
                       </div>
                     </CardContent>
                   </Card>
@@ -403,6 +406,23 @@ export default function Home({ messages }: HomeProps) {
               </div>
 
               <div className="text-center">
+                <div className="mb-8">
+                  <h4 className="text-2xl font-black text-white mb-4">ALL 12 SERVICE CATEGORIES AVAILABLE 24/7</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm font-bold">
+                    <div>🧹 CLEANING SERVICES</div>
+                    <div>🔧 PLUMBING REPAIRS</div>
+                    <div>⚡ ELECTRICAL WORK</div>
+                    <div>🚚 DELIVERY SERVICES</div>
+                    <div>🔨 MAINTENANCE</div>
+                    <div>🎨 PAINTING SERVICES</div>
+                    <div>🌱 GARDENING</div>
+                    <div>🎓 TUTORING</div>
+                    <div>🚗 AUTO SERVICES</div>
+                    <div>🐕 PET CARE</div>
+                    <div>💪 PERSONAL TRAINING</div>
+                    <div>💻 TECH SUPPORT</div>
+                  </div>
+                </div>
                 <Link href="/services">
                   <Button size="lg" className="px-12 py-6 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-black text-xl shadow-2xl border-0 transition-all duration-300 transform hover:scale-105 mr-4">
                     VIEW ALL 12+ SERVICE CATEGORIES
@@ -1493,6 +1513,191 @@ export default function Home({ messages }: HomeProps) {
                   <div className="font-bold">Active Providers</div>
                 </CardContent>
               </Card>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* MOBILE APP SHOWCASE */}
+      <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">TASKEGO MOBILE EXPERIENCE</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                DOWNLOAD THE #1 RATED SERVICE APP WITH 15M+ DOWNLOADS AND 4.9★ RATING
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <ScrollReveal>
+              <div>
+                <h3 className="text-4xl font-black mb-8">APP FEATURES & BENEFITS</h3>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">📱</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black mb-2">INSTANT BOOKING</h4>
+                      <p className="font-bold">Book any service in under 45 seconds with our streamlined mobile interface and one-touch payments</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-green-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">📍</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black mb-2">LIVE GPS TRACKING</h4>
+                      <p className="font-bold">Track your service provider in real-time with precise GPS location and estimated arrival times</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">💬</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black mb-2">DIRECT MESSAGING</h4>
+                      <p className="font-bold">Communicate directly with providers through secure in-app messaging with photo sharing</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">🔔</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black mb-2">SMART NOTIFICATIONS</h4>
+                      <p className="font-bold">Get real-time updates on booking confirmations, provider arrivals, and service completions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <div className="text-center">
+                <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
+                  <h3 className="text-3xl font-black mb-6">DOWNLOAD STATS</h3>
+                  <div className="grid grid-cols-2 gap-6 mb-8">
+                    <div>
+                      <div className="text-4xl font-black mb-2">15M+</div>
+                      <div className="font-bold">TOTAL DOWNLOADS</div>
+                    </div>
+                    <div>
+                      <div className="text-4xl font-black mb-2">4.9★</div>
+                      <div className="font-bold">APP STORE RATING</div>
+                    </div>
+                    <div>
+                      <div className="text-4xl font-black mb-2">500K+</div>
+                      <div className="font-bold">MONTHLY ACTIVE USERS</div>
+                    </div>
+                    <div>
+                      <div className="text-4xl font-black mb-2">98%</div>
+                      <div className="font-bold">USER RETENTION RATE</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <Button className="w-full bg-black text-white hover:bg-gray-800 font-black text-lg py-4">
+                      📱 DOWNLOAD FOR iOS
+                    </Button>
+                    <Button className="w-full bg-green-600 text-white hover:bg-green-700 font-black text-lg py-4">
+                      🤖 DOWNLOAD FOR ANDROID
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* AWARDS & RECOGNITION */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black text-gray-900 mb-4">AWARDS & RECOGNITION</h2>
+              <p className="text-2xl text-gray-700 max-w-4xl mx-auto font-bold">
+                RECOGNIZED BY INDUSTRY LEADERS AND TRUSTED BY MILLIONS ACROSS THE MIDDLE EAST
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-gradient-to-br from-yellow-50 to-orange-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🏆</div>
+                  <h3 className="text-xl font-black text-gray-900 mb-3">MENA STARTUP OF THE YEAR</h3>
+                  <p className="text-gray-700 font-medium">2024 MIDDLE EAST BUSINESS AWARDS</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🥇</div>
+                  <h3 className="text-xl font-black text-gray-900 mb-3">BEST MOBILE APP</h3>
+                  <p className="text-gray-700 font-medium">2024 GULF TECHNOLOGY AWARDS</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">⭐</div>
+                  <h3 className="text-xl font-black text-gray-900 mb-3">CUSTOMER CHOICE AWARD</h3>
+                  <p className="text-gray-700 font-medium">2024 DUBAI BUSINESS EXCELLENCE</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-gradient-to-br from-purple-50 to-violet-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🚀</div>
+                  <h3 className="text-xl font-black text-gray-900 mb-3">FASTEST GROWING PLATFORM</h3>
+                  <p className="text-gray-700 font-medium">2024 ARABIA BUSINESS AWARDS</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-900 to-indigo-900 p-12 rounded-3xl text-white text-center">
+            <ScrollReveal>
+              <h3 className="text-4xl font-black mb-8">MEDIA COVERAGE & PRESS</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h4 className="text-2xl font-black mb-4">📰 MAJOR PUBLICATIONS</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>FEATURED IN FORBES MIDDLE EAST</li>
+                    <li>GULF NEWS TECH SPOTLIGHT</li>
+                    <li>ARAB NEWS BUSINESS SECTION</li>
+                    <li>KHALEEJ TIMES STARTUP FEATURE</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">📺 TV APPEARANCES</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>CNBC ARABIA TECH TALK</li>
+                    <li>BLOOMBERG MIDDLE EAST</li>
+                    <li>AL ARABIYA BUSINESS</li>
+                    <li>DUBAI ONE MORNING SHOW</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">🎙️ PODCAST FEATURES</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>MENA TECH PODCAST #1</li>
+                    <li>STARTUP GRIND DUBAI</li>
+                    <li>GULF ENTREPRENEURS SHOW</li>
+                    <li>ARAB INNOVATION TALKS</li>
+                  </ul>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
