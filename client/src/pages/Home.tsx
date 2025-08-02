@@ -88,6 +88,42 @@ export default function Home({ messages }: HomeProps) {
       price: 'Starting from $20',
       href: '/services?category=tutoring'
     },
+    {
+      id: 9,
+      name: messages.services?.automotive?.title || 'Auto Services',
+      description: messages.services?.automotive?.description || 'Car wash, oil change, and basic maintenance',
+      icon: '🚗',
+      color: 'from-slate-500 to-gray-600',
+      price: 'Starting from $45',
+      href: '/services?category=automotive'
+    },
+    {
+      id: 10,
+      name: messages.services?.petcare?.title || 'Pet Care',
+      description: messages.services?.petcare?.description || 'Pet sitting, walking, grooming services',
+      icon: '🐕',
+      color: 'from-amber-500 to-yellow-600',
+      price: 'Starting from $22',
+      href: '/services?category=petcare'
+    },
+    {
+      id: 11,
+      name: messages.services?.fitness?.title || 'Personal Training',
+      description: messages.services?.fitness?.description || 'Fitness coaching and personal training sessions',
+      icon: '💪',
+      color: 'from-red-500 to-orange-600',
+      price: 'Starting from $55',
+      href: '/services?category=fitness'
+    },
+    {
+      id: 12,
+      name: messages.services?.tech?.title || 'Tech Support',
+      description: messages.services?.tech?.description || 'Computer repair, setup, and tech consultation',
+      icon: '💻',
+      color: 'from-violet-500 to-purple-600',
+      price: 'Starting from $60',
+      href: '/services?category=tech'
+    },
   ];
 
   const testimonials = [
@@ -179,7 +215,7 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {serviceCategories.map((category, index) => (
               <ScrollReveal key={category.id} delay={index * 100}>
                 <Link href={category.href}>
@@ -233,38 +269,38 @@ export default function Home({ messages }: HomeProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <ScrollReveal className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-white text-2xl font-bold">1</span>
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <span className="text-white text-3xl font-black">1</span>
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-3">
-                {messages.how_it_works?.step1?.title || 'Choose Service'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">
+                {messages.how_it_works?.step1?.title || 'Choose Your Service'}
               </h3>
-              <p className="text-gray-700 font-bold">
-                {messages.how_it_works?.step1?.description || 'Browse our categories and select the service you need'}
+              <p className="text-gray-800 font-bold text-lg">
+                {messages.how_it_works?.step1?.description || 'Browse through 12+ service categories and find exactly what you need for your home or business'}
               </p>
             </ScrollReveal>
 
             <ScrollReveal className="text-center" delay={200}>
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <span className="text-white text-2xl font-black">2</span>
+              <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <span className="text-white text-3xl font-black">2</span>
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-3">
-                {messages.how_it_works?.step2?.title || 'Book & Pay'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">
+                {messages.how_it_works?.step2?.title || 'Book & Schedule'}
               </h3>
-              <p className="text-gray-700 font-bold">
-                {messages.how_it_works?.step2?.description || 'Select your preferred time and complete the booking'}
+              <p className="text-gray-800 font-bold text-lg">
+                {messages.how_it_works?.step2?.description || 'Choose your preferred date and time, get matched with verified professionals instantly'}
               </p>
             </ScrollReveal>
 
             <ScrollReveal className="text-center" delay={400}>
-              <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-white text-2xl font-bold">3</span>
+              <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <span className="text-white text-3xl font-black">3</span>
               </div>
-              <h3 className="text-xl font-bold text-dark-readable mb-3">
-                {messages.how_it_works?.step3?.title || 'Get Service'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">
+                {messages.how_it_works?.step3?.title || 'Enjoy Quality Service'}
               </h3>
-              <p className="text-khadamati-gray font-medium">
-                {messages.how_it_works?.step3?.description || 'Professional service provider arrives at your location'}
+              <p className="text-gray-800 font-bold text-lg">
+                {messages.how_it_works?.step3?.description || 'Experienced professionals arrive on time and deliver exceptional results with satisfaction guaranteed'}
               </p>
             </ScrollReveal>
           </div>
