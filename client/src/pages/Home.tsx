@@ -123,12 +123,61 @@ export default function Home({ messages }: HomeProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Enhanced Parallax Hero Section */}
-      <ParallaxHero 
-        messages={messages}
-        onGetStarted={() => window.location.assign('/services')}
-        onWatchDemo={() => window.location.assign('/chat')}
-      />
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-blue-50 to-purple-50">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto">
+            {/* Badge */}
+            <div className="mb-6">
+              <Badge className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white px-4 py-2 text-sm font-medium">
+                🚀 #1 Service Platform in the Region
+              </Badge>
+            </div>
+
+            {/* Main Heading */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow bg-clip-text text-transparent">Taskego</span>
+              <br />
+              <span className="text-gray-900">
+                Your Trusted Service
+              </span>
+              <br />
+              <span className="text-khadamati-blue">Marketplace</span>
+            </h1>
+
+            {/* Subheading */}
+            <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl mx-auto">
+              Connect with verified professionals for 
+              <span className="text-khadamati-blue font-semibold"> cleaning</span>,
+              <span className="text-khadamati-yellow font-semibold"> repairs</span>, and
+              <span className="text-khadamati-blue font-semibold"> maintenance</span> services. 
+              Available in English and Arabic.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button
+                onClick={() => window.location.href = '/services'}
+                size="lg"
+                className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white px-8 py-4 text-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                Get Started Free
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              
+              <Button
+                onClick={() => window.location.href = '/chat'}
+                variant="outline"
+                size="lg"
+                className="border-2 border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white px-8 py-4 text-lg font-semibold transition-all duration-300"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch Demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Stats Section */}
       <section className="py-16 bg-white">
