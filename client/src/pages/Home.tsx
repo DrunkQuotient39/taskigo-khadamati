@@ -657,6 +657,395 @@ export default function Home({ messages }: HomeProps) {
         </div>
       </section>
 
+      {/* Detailed Service Showcase */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">Service Spotlight</h2>
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto font-bold">
+                Discover our most popular services with detailed information, pricing, and customer reviews
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="space-y-16">
+            <ScrollReveal>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <h3 className="text-3xl font-black text-gray-900 mb-6">🏠 Home Cleaning Services</h3>
+                  <p className="text-lg text-gray-700 font-medium mb-6">
+                    Professional home cleaning services that transform your living space. From regular maintenance to deep cleaning, our trained professionals use eco-friendly products and modern equipment.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-blue-600 mb-2">500+</div>
+                      <div className="text-gray-700 font-bold">Cleaners Available</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-green-600 mb-2">4.8★</div>
+                      <div className="text-gray-700 font-bold">Average Rating</div>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Regular weekly/bi-weekly cleaning
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Deep cleaning and sanitization
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Move-in/move-out cleaning
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Post-construction cleanup
+                    </li>
+                  </ul>
+                  <div className="text-2xl font-black text-blue-600 mb-4">Starting at $25/hour</div>
+                </div>
+                <div>
+                  <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=400&fit=crop" 
+                       alt="Home Cleaning" className="rounded-2xl shadow-xl" />
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="order-2 lg:order-1">
+                  <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&h=400&fit=crop" 
+                       alt="Plumbing Services" className="rounded-2xl shadow-xl" />
+                </div>
+                <div className="order-1 lg:order-2">
+                  <h3 className="text-3xl font-black text-gray-900 mb-6">🔧 Expert Plumbing Services</h3>
+                  <p className="text-lg text-gray-700 font-medium mb-6">
+                    24/7 emergency plumbing services with licensed professionals. From simple repairs to complete installations, we handle all your plumbing needs with expertise and reliability.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-orange-600 mb-2">200+</div>
+                      <div className="text-gray-700 font-bold">Licensed Plumbers</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-green-600 mb-2">4.9★</div>
+                      <div className="text-gray-700 font-bold">Customer Rating</div>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Emergency leak repairs
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Pipe installation and replacement
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Drain cleaning and unclogging
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Water heater installation
+                    </li>
+                  </ul>
+                  <div className="text-2xl font-black text-orange-600 mb-4">Starting at $45/hour</div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <h3 className="text-3xl font-black text-gray-900 mb-6">📚 Professional Tutoring</h3>
+                  <p className="text-lg text-gray-700 font-medium mb-6">
+                    Personalized tutoring services for all ages and subjects. Our certified tutors help students achieve academic excellence through tailored learning approaches and flexible scheduling.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-purple-600 mb-2">250+</div>
+                      <div className="text-gray-700 font-bold">Qualified Tutors</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-black text-green-600 mb-2">95%</div>
+                      <div className="text-gray-700 font-bold">Success Rate</div>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Math, Science, and English
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Test preparation (SAT, IELTS)
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Language learning (Arabic/English)
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Online and in-person sessions
+                    </li>
+                  </ul>
+                  <div className="text-2xl font-black text-purple-600 mb-4">Starting at $30/hour</div>
+                </div>
+                <div>
+                  <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop" 
+                       alt="Tutoring Services" className="rounded-2xl shadow-xl" />
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Partnership & Trust Section */}
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">Trusted by Leading Companies</h2>
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto font-bold">
+                Major businesses across the Middle East trust Taskego for their service needs
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-16">
+            <ScrollReveal>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">Emaar</div>
+                <div className="text-sm text-gray-600 font-medium">Real Estate</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">ADNOC</div>
+                <div className="text-sm text-gray-600 font-medium">Energy</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">Emirates</div>
+                <div className="text-sm text-gray-600 font-medium">Airlines</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={300}>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">SABIC</div>
+                <div className="text-sm text-gray-600 font-medium">Chemicals</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={400}>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">Almarai</div>
+                <div className="text-sm text-gray-600 font-medium">Food & Beverage</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={500}>
+              <div className="bg-white rounded-xl p-6 shadow-lg text-center">
+                <div className="text-2xl font-black text-blue-600 mb-2">Careem</div>
+                <div className="text-sm text-gray-600 font-medium">Technology</div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <ScrollReveal>
+              <Card className="bg-white shadow-xl border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Enterprise Security</h3>
+                  <p className="text-gray-700 font-medium">Advanced security protocols, data encryption, and compliance with international standards for enterprise clients.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white shadow-xl border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Dedicated Support</h3>
+                  <p className="text-gray-700 font-medium">Dedicated account managers and priority support for business clients with custom service agreements.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white shadow-xl border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Premium Quality</h3>
+                  <p className="text-gray-700 font-medium">Specially selected top-tier service providers with additional training and certification for enterprise needs.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Comprehensive FAQ Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">Everything You Need to Know</h2>
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto font-bold">
+                Comprehensive answers to help you understand our services, pricing, and processes
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <ScrollReveal>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">How quickly can I book a service?</h3>
+                    <p className="text-gray-700 font-medium">Most services can be booked instantly with availability within 2-4 hours. Emergency services are available 24/7 with priority response times.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={100}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">Are service providers insured?</h3>
+                    <p className="text-gray-700 font-medium">Yes, all our service providers carry comprehensive insurance coverage and undergo thorough background checks before joining our platform.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={200}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">What payment methods do you accept?</h3>
+                    <p className="text-gray-700 font-medium">We accept all major credit cards, digital wallets, bank transfers, and cash payments. All transactions are secure and encrypted.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={300}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">Do you offer business accounts?</h3>
+                    <p className="text-gray-700 font-medium">Yes, we offer dedicated business accounts with bulk pricing, priority scheduling, and dedicated account management for corporate clients.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+            </div>
+
+            <div className="space-y-6">
+              <ScrollReveal>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">Can I cancel or reschedule bookings?</h3>
+                    <p className="text-gray-700 font-medium">Yes, you can cancel or reschedule up to 2 hours before your appointment through our app or by calling customer support.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={100}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">What if I'm not satisfied with the service?</h3>
+                    <p className="text-gray-700 font-medium">We offer a 100% satisfaction guarantee. If you're not happy, we'll send another provider or provide a full refund within 24 hours.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={200}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">Do you serve all areas in the UAE?</h3>
+                    <p className="text-gray-700 font-medium">We currently serve all major cities in UAE, Saudi Arabia, and Qatar with plans to expand to more regions across the Middle East.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+
+              <ScrollReveal delay={300}>
+                <Card className="bg-gray-50 shadow-lg border-0">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-black text-gray-900 mb-3">How do I become a service provider?</h3>
+                    <p className="text-gray-700 font-medium">Apply through our Provider Portal, complete the verification process, and start earning. We provide training, support, and marketing tools.</p>
+                  </CardContent>
+                </Card>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Location Coverage */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black mb-4">Serving Across the Middle East</h2>
+              <p className="text-xl font-bold max-w-3xl mx-auto">
+                Professional services available in major cities with local expertise and cultural understanding
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">🇦🇪 United Arab Emirates</h3>
+                  <div className="space-y-3 mb-6">
+                    <div className="text-lg font-bold">Dubai • Abu Dhabi • Sharjah</div>
+                    <div className="text-lg font-bold">Ajman • Fujairah • RAK</div>
+                  </div>
+                  <div className="text-3xl font-black mb-2">800+</div>
+                  <div className="font-bold">Active Providers</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">🇸🇦 Saudi Arabia</h3>
+                  <div className="space-y-3 mb-6">
+                    <div className="text-lg font-bold">Riyadh • Jeddah • Dammam</div>
+                    <div className="text-lg font-bold">Mecca • Medina • Khobar</div>
+                  </div>
+                  <div className="text-3xl font-black mb-2">300+</div>
+                  <div className="font-bold">Active Providers</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">🇶🇦 Qatar</h3>
+                  <div className="space-y-3 mb-6">
+                    <div className="text-lg font-bold">Doha • Al Rayyan</div>
+                    <div className="text-lg font-bold">Al Wakrah • Lusail</div>
+                  </div>
+                  <div className="text-3xl font-black mb-2">100+</div>
+                  <div className="font-bold">Active Providers</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-orange-500 to-blue-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
