@@ -136,28 +136,28 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
           >
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-6">
-              <Badge className="bg-gradient-to-r from-yellow-bright to-khadamati-blue text-white px-6 py-3 text-base font-bold shadow-lg">
+              <Badge className="bg-orange-500 text-white px-6 py-3 text-lg font-bold shadow-xl border-2 border-orange-600">
                 🚀 #1 Service Platform in the Region
               </Badge>
             </motion.div>
 
             {/* Main Heading */}
-            <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="text-khadamati-blue font-black text-shadow-lg">Taskego</span>
+            <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight">
+              <span className="text-blue-800 drop-shadow-lg">Taskego</span>
               <br />
-              <span className="text-dark-readable font-bold">
+              <span className="text-gray-900 font-black">
                 Your Trusted Service
               </span>
               <br />
-              <span className="text-khadamati-blue font-bold">Marketplace</span>
+              <span className="text-blue-800 font-black">Marketplace</span>
             </motion.h1>
 
             {/* Subheading */}
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-dark-readable mb-8 leading-relaxed max-w-2xl font-medium">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-800 mb-8 leading-relaxed max-w-2xl font-bold">
               Connect with verified professionals for 
-              <span className="text-khadamati-blue font-bold"> cleaning</span>,
-              <span className="text-yellow-bright font-bold"> repairs</span>, and
-              <span className="text-khadamati-blue font-bold"> maintenance</span> services. 
+              <span className="text-blue-700 font-black"> cleaning</span>,
+              <span className="text-orange-600 font-black"> repairs</span>, and
+              <span className="text-blue-700 font-black"> maintenance</span> services. 
               Available in English and Arabic.
             </motion.p>
 
@@ -166,7 +166,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               <Button
                 onClick={onGetStarted}
                 size="lg"
-                className="bg-gradient-to-r from-yellow-bright to-khadamati-blue text-white px-8 py-4 text-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 btn-animated shadow-lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold shadow-xl border-2 border-orange-600 hover:scale-105 transition-all duration-300"
               >
                 Get Started Free
                 <ArrowDown className="w-5 h-5 ml-2" />
@@ -176,7 +176,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
                 onClick={onWatchDemo}
                 variant="outline"
                 size="lg"
-                className="border-2 border-yellow-bright text-yellow-bright hover:bg-yellow-bright hover:text-white px-8 py-4 text-lg font-semibold transition-all duration-300 shadow-md"
+                className="border-3 border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white px-8 py-4 text-xl font-bold shadow-lg transition-all duration-300"
               >
                 <Play className="w-5 h-5 mr-2" />
                 Watch Demo

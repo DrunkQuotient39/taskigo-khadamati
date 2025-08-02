@@ -105,21 +105,21 @@
 }
 
 @layer components {
-  /* Khadamati Theme Classes */
+  /* Bold High-Contrast Khadamati Theme */
   .khadamati-blue {
-    @apply text-[hsl(220,85%,45%)];
+    @apply text-[#1e40af];
   }
   
   .bg-khadamati-blue {
-    @apply bg-[hsl(220,85%,45%)];
+    @apply bg-[#1e40af];
   }
   
   .khadamati-yellow {
-    @apply text-[hsl(42,100%,45%)];
+    @apply text-[#f59e0b];
   }
   
   .bg-khadamati-yellow {
-    @apply bg-[hsl(42,100%,45%)];
+    @apply bg-[#f59e0b];
   }
   
   .khadamati-success {
@@ -171,22 +171,27 @@
     font-weight: 700;
   }
   
-  /* High Contrast Text Classes */
+  /* Ultra High Contrast Text Classes */
   .text-yellow-bright {
-    @apply text-[hsl(42,100%,35%)];
+    @apply text-[#d97706] font-bold;
   }
   
   .bg-yellow-bright {
-    @apply bg-[hsl(42,100%,50%)];
+    @apply bg-[#f59e0b];
   }
   
   .border-yellow-bright {
-    @apply border-[hsl(42,100%,45%)];
+    @apply border-[#f59e0b];
   }
   
-  /* Dark text for better readability */
+  /* Super Dark text for maximum readability */
   .text-dark-readable {
-    @apply text-[hsl(220,30%,25%)];
+    @apply text-[#111827] font-semibold;
+  }
+  
+  /* White text for dark backgrounds */
+  .text-white-clean {
+    @apply text-white font-semibold;
   }
   
   /* Floating Animation */
