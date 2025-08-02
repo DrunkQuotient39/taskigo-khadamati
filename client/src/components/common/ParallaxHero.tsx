@@ -136,14 +136,14 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
           >
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-6">
-              <Badge className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white px-4 py-2 text-sm font-medium">
+              <Badge className="bg-gradient-to-r from-yellow-bright to-khadamati-blue text-white px-6 py-3 text-base font-bold shadow-lg">
                 🚀 #1 Service Platform in the Region
               </Badge>
             </motion.div>
 
             {/* Main Heading */}
             <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow bg-clip-text text-transparent">Taskego</span>
+              <span className="bg-gradient-to-r from-yellow-bright to-khadamati-blue bg-clip-text text-transparent">Taskego</span>
               <br />
               <span className="text-gray-900 dark:text-white">
                 Your Trusted Service
@@ -156,7 +156,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
             <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl">
               Connect with verified professionals for 
               <span className="text-khadamati-blue font-semibold"> cleaning</span>,
-              <span className="text-khadamati-yellow font-semibold"> repairs</span>, and
+              <span className="text-yellow-bright font-bold"> repairs</span>, and
               <span className="text-khadamati-blue font-semibold"> maintenance</span> services. 
               Available in English and Arabic.
             </motion.p>
@@ -166,7 +166,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               <Button
                 onClick={onGetStarted}
                 size="lg"
-                className="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white px-8 py-4 text-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 btn-animated"
+                className="bg-gradient-to-r from-yellow-bright to-khadamati-blue text-white px-8 py-4 text-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 btn-animated shadow-lg"
               >
                 Get Started Free
                 <ArrowDown className="w-5 h-5 ml-2" />
@@ -176,7 +176,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
                 onClick={onWatchDemo}
                 variant="outline"
                 size="lg"
-                className="border-2 border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white px-8 py-4 text-lg font-semibold transition-all duration-300"
+                className="border-2 border-yellow-bright text-yellow-bright hover:bg-yellow-bright hover:text-white px-8 py-4 text-lg font-semibold transition-all duration-300 shadow-md"
               >
                 <Play className="w-5 h-5 mr-2" />
                 Watch Demo
