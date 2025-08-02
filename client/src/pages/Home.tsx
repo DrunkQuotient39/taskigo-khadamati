@@ -188,13 +188,13 @@ export default function Home({ messages }: HomeProps) {
                       <div className={`w-16 h-16 bg-gradient-to-br ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
                         <span className="text-2xl">{category.icon}</span>
                       </div>
-                      <h3 className="text-xl font-bold text-dark-readable mb-3">
+                      <h3 className="text-xl font-black text-gray-900 mb-3">
                         {category.name}
                       </h3>
-                      <p className="text-khadamati-gray mb-4 text-base font-medium">
+                      <p className="text-gray-700 mb-4 text-base font-bold">
                         {category.description}
                       </p>
-                      <div className="text-yellow-bright font-bold text-base bg-yellow-bright/10 px-3 py-1 rounded-full">
+                      <div className="text-white font-black text-base bg-orange-500 px-4 py-2 rounded-full shadow-lg">
                         {category.price}
                       </div>
                     </CardContent>
@@ -207,7 +207,7 @@ export default function Home({ messages }: HomeProps) {
           <div className="text-center mt-12">
             <ScrollReveal>
               <Link href="/services">
-                <Button size="lg" className="px-8 py-4 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white hover:from-blue-700 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <Button size="lg" className="px-8 py-4 bg-blue-700 hover:bg-blue-800 text-white font-black text-lg shadow-xl border-2 border-blue-800 transition-all duration-300 transform hover:scale-105">
                   {messages.services?.view_all || 'View All Services'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -222,10 +222,10 @@ export default function Home({ messages }: HomeProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <h2 className="text-4xl font-bold text-dark-readable mb-4">
+              <h2 className="text-4xl font-black text-gray-900 mb-4">
                 {messages.how_it_works?.title || 'How It Works'}
               </h2>
-              <p className="text-xl text-khadamati-gray max-w-2xl mx-auto font-medium">
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto font-bold">
                 {messages.how_it_works?.description || 'Get your service in just a few simple steps.'}
               </p>
             </ScrollReveal>
@@ -236,22 +236,22 @@ export default function Home({ messages }: HomeProps) {
               <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">1</span>
               </div>
-              <h3 className="text-xl font-bold text-dark-readable mb-3">
+              <h3 className="text-xl font-black text-gray-900 mb-3">
                 {messages.how_it_works?.step1?.title || 'Choose Service'}
               </h3>
-              <p className="text-khadamati-gray font-medium">
+              <p className="text-gray-700 font-bold">
                 {messages.how_it_works?.step1?.description || 'Browse our categories and select the service you need'}
               </p>
             </ScrollReveal>
 
             <ScrollReveal className="text-center" delay={200}>
-              <div className="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-white text-2xl font-bold">2</span>
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <span className="text-white text-2xl font-black">2</span>
               </div>
-              <h3 className="text-xl font-bold text-dark-readable mb-3">
+              <h3 className="text-xl font-black text-gray-900 mb-3">
                 {messages.how_it_works?.step2?.title || 'Book & Pay'}
               </h3>
-              <p className="text-khadamati-gray font-medium">
+              <p className="text-gray-700 font-bold">
                 {messages.how_it_works?.step2?.description || 'Select your preferred time and complete the booking'}
               </p>
             </ScrollReveal>
