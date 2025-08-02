@@ -166,36 +166,140 @@ export default function Home({ messages }: HomeProps) {
         onWatchDemo={() => window.location.assign('/chat')}
       />
 
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
+      {/* MASSIVE Stats Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <ScrollReveal className="text-center">
-              <div className="text-4xl font-bold text-khadamati-blue mb-2">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">TASKEGO BY THE NUMBERS</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                THE LARGEST SERVICE PLATFORM IN THE MIDDLE EAST WITH UNMATCHED REACH AND QUALITY
+              </p>
+            </ScrollReveal>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 mb-16">
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+              <div className="text-4xl font-black text-orange-400 mb-2">
                 <AnimatedCounter end={1200} suffix="+" />
               </div>
-              <div className="text-khadamati-gray">{messages.stats?.providers || 'Service Providers'}</div>
+              <div className="text-white font-bold text-sm">SERVICE PROVIDERS</div>
             </ScrollReveal>
             
-            <ScrollReveal className="text-center" delay={100}>
-              <div className="text-4xl font-bold text-khadamati-blue mb-2">
-                <AnimatedCounter end={15000} suffix="+" />
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={100}>
+              <div className="text-4xl font-black text-blue-400 mb-2">
+                <AnimatedCounter end={50000} suffix="+" />
               </div>
-              <div className="text-khadamati-gray">{messages.stats?.bookings || 'Completed Bookings'}</div>
+              <div className="text-white font-bold text-sm">HAPPY CUSTOMERS</div>
             </ScrollReveal>
             
-            <ScrollReveal className="text-center" delay={200}>
-              <div className="text-4xl font-bold text-yellow-bright mb-2">
-                <AnimatedCounter end={4.9} suffix="" />⭐
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={200}>
+              <div className="text-4xl font-black text-green-400 mb-2">
+                <AnimatedCounter end={125000} suffix="+" />
               </div>
-              <div className="text-khadamati-gray">{messages.stats?.rating || 'Average Rating'}</div>
+              <div className="text-white font-bold text-sm">SERVICES COMPLETED</div>
             </ScrollReveal>
             
-            <ScrollReveal className="text-center" delay={300}>
-              <div className="text-4xl font-bold text-khadamati-blue mb-2">
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={300}>
+              <div className="text-4xl font-black text-yellow-400 mb-2">4.9⭐</div>
+              <div className="text-white font-bold text-sm">AVERAGE RATING</div>
+            </ScrollReveal>
+
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={400}>
+              <div className="text-4xl font-black text-purple-400 mb-2">
                 <AnimatedCounter end={25} suffix="+" />
               </div>
-              <div className="text-khadamati-gray">{messages.stats?.cities || 'Cities Covered'}</div>
+              <div className="text-white font-bold text-sm">CITIES COVERED</div>
+            </ScrollReveal>
+
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={500}>
+              <div className="text-4xl font-black text-pink-400 mb-2">98%</div>
+              <div className="text-white font-bold text-sm">SATISFACTION RATE</div>
+            </ScrollReveal>
+
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={600}>
+              <div className="text-4xl font-black text-indigo-400 mb-2">24/7</div>
+              <div className="text-white font-bold text-sm">SUPPORT AVAILABLE</div>
+            </ScrollReveal>
+
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={700}>
+              <div className="text-4xl font-black text-teal-400 mb-2">2HR</div>
+              <div className="text-white font-bold text-sm">AVG RESPONSE</div>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">MARKET LEADER</h3>
+                  <p className="text-lg font-bold mb-4">#1 SERVICE PLATFORM IN THE MIDDLE EAST</p>
+                  <div className="space-y-2">
+                    <div className="text-sm font-bold">🏆 FASTEST GROWING PLATFORM 2024</div>
+                    <div className="text-sm font-bold">🏆 BEST CUSTOMER SERVICE AWARD</div>
+                    <div className="text-sm font-bold">🏆 MOST TRUSTED BRAND AWARD</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">GLOBAL EXPANSION</h3>
+                  <p className="text-lg font-bold mb-4">EXPANDING TO 15 NEW COUNTRIES IN 2025</p>
+                  <div className="space-y-2">
+                    <div className="text-sm font-bold">🌍 EUROPE LAUNCH Q2 2025</div>
+                    <div className="text-sm font-bold">🌍 ASIA EXPANSION Q3 2025</div>
+                    <div className="text-sm font-bold">🌍 AFRICA ENTRY Q4 2025</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-gradient-to-br from-green-600 to-teal-600 text-white shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">TECHNOLOGY LEADER</h3>
+                  <p className="text-lg font-bold mb-4">AI-POWERED MATCHING & AUTOMATION</p>
+                  <div className="space-y-2">
+                    <div className="text-sm font-bold">🤖 SMART PROVIDER MATCHING</div>
+                    <div className="text-sm font-bold">🤖 PREDICTIVE SCHEDULING</div>
+                    <div className="text-sm font-bold">🤖 AUTOMATED QUALITY CONTROL</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="text-center">
+            <ScrollReveal>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">$50M+</div>
+                  <div className="text-xs text-white font-bold">REVENUE 2024</div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">500+</div>
+                  <div className="text-xs text-white font-bold">EMPLOYEES</div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">15M+</div>
+                  <div className="text-xs text-white font-bold">APP DOWNLOADS</div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">99.9%</div>
+                  <div className="text-xs text-white font-bold">UPTIME</div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">45SEC</div>
+                  <div className="text-xs text-white font-bold">AVG BOOKING TIME</div>
+                </div>
+                <div className="bg-white/20 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-white mb-1">95%</div>
+                  <div className="text-xs text-white font-bold">RETENTION RATE</div>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
@@ -240,68 +344,416 @@ export default function Home({ messages }: HomeProps) {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="mt-16">
             <ScrollReveal>
-              <Link href="/services">
-                <Button size="lg" className="px-8 py-4 bg-blue-700 hover:bg-blue-800 text-white font-black text-lg shadow-xl border-2 border-blue-800 transition-all duration-300 transform hover:scale-105">
-                  {messages.services?.view_all || 'View All Services'}
-                  <ArrowRight className="ml-2 h-5 w-5" />
+              <div className="bg-gradient-to-br from-orange-500 to-blue-600 p-8 rounded-3xl text-white text-center mb-8">
+                <h3 className="text-3xl font-black mb-4">EXCLUSIVE SERVICE PACKAGES</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">BASIC BUNDLE</h4>
+                    <div className="text-2xl font-black mb-2">$199/month</div>
+                    <ul className="space-y-2 text-sm font-bold">
+                      <li>✓ 10 HOURS OF CLEANING</li>
+                      <li>✓ 5 HOURS OF MAINTENANCE</li>
+                      <li>✓ PRIORITY BOOKING</li>
+                      <li>✓ 24/7 SUPPORT</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/30 backdrop-blur-lg p-6 rounded-xl border-2 border-yellow-400">
+                    <div className="bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-black mb-3 inline-block">MOST POPULAR</div>
+                    <h4 className="text-xl font-black mb-3">PREMIUM BUNDLE</h4>
+                    <div className="text-2xl font-black mb-2">$399/month</div>
+                    <ul className="space-y-2 text-sm font-bold">
+                      <li>✓ 20 HOURS OF ANY SERVICE</li>
+                      <li>✓ UNLIMITED DELIVERY</li>
+                      <li>✓ VIP SUPPORT</li>
+                      <li>✓ SAME-DAY BOOKING</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">ENTERPRISE</h4>
+                    <div className="text-2xl font-black mb-2">CUSTOM</div>
+                    <ul className="space-y-2 text-sm font-bold">
+                      <li>✓ UNLIMITED SERVICES</li>
+                      <li>✓ DEDICATED MANAGER</li>
+                      <li>✓ CUSTOM INTEGRATIONS</li>
+                      <li>✓ SLA GUARANTEES</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="text-center bg-blue-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-blue-600 mb-1">INSTANT</div>
+                  <div className="text-sm font-bold text-gray-700">BOOKING CONFIRMATION</div>
+                </div>
+                <div className="text-center bg-green-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-green-600 mb-1">SECURE</div>
+                  <div className="text-sm font-bold text-gray-700">PAYMENT PROCESSING</div>
+                </div>
+                <div className="text-center bg-orange-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-orange-600 mb-1">LIVE</div>
+                  <div className="text-sm font-bold text-gray-700">TRACKING & UPDATES</div>
+                </div>
+                <div className="text-center bg-purple-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-purple-600 mb-1">GUARANTEED</div>
+                  <div className="text-sm font-bold text-gray-700">SATISFACTION</div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Link href="/services">
+                  <Button size="lg" className="px-12 py-6 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-black text-xl shadow-2xl border-0 transition-all duration-300 transform hover:scale-105 mr-4">
+                    VIEW ALL 12+ SERVICE CATEGORIES
+                    <ArrowRight className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+                <Button size="lg" className="px-12 py-6 bg-white text-blue-600 hover:bg-gray-100 font-black text-xl shadow-2xl border-2 border-blue-600 transition-all duration-300 transform hover:scale-105">
+                  DOWNLOAD MOBILE APP
                 </Button>
-              </Link>
+              </div>
             </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 bg-white">
+      {/* COMPREHENSIVE How It Works */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <h2 className="text-4xl font-black text-gray-900 mb-4">
-                {messages.how_it_works?.title || 'How It Works'}
+              <h2 className="text-5xl font-black text-gray-900 mb-4">
+                THE COMPLETE TASKEGO EXPERIENCE
               </h2>
-              <p className="text-xl text-gray-700 max-w-2xl mx-auto font-bold">
-                {messages.how_it_works?.description || 'Get your service in just a few simple steps.'}
+              <p className="text-2xl text-gray-700 max-w-4xl mx-auto font-bold">
+                FROM BROWSING TO COMPLETION - EVERY STEP IS DESIGNED FOR MAXIMUM CONVENIENCE AND QUALITY
               </p>
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             <ScrollReveal className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <span className="text-white text-3xl font-black">1</span>
+              <div className="relative">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                  <span className="text-white text-4xl font-black">1</span>
+                </div>
+                <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
               </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-4">
-                {messages.how_it_works?.step1?.title || 'Choose Your Service'}
-              </h3>
-              <p className="text-gray-800 font-bold text-lg">
-                {messages.how_it_works?.step1?.description || 'Browse through 12+ service categories and find exactly what you need for your home or business'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">BROWSE & DISCOVER</h3>
+              <p className="text-gray-800 font-bold text-base mb-4">
+                EXPLORE 12+ SERVICE CATEGORIES WITH DETAILED PROVIDER PROFILES, RATINGS, AND REAL-TIME AVAILABILITY
               </p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-blue-600 space-y-1">
+                  <div>🔍 ADVANCED SEARCH FILTERS</div>
+                  <div>⭐ VERIFIED REVIEWS & RATINGS</div>
+                  <div>💰 TRANSPARENT PRICING</div>
+                  <div>📍 LOCATION-BASED MATCHING</div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal className="text-center" delay={100}>
+              <div className="relative">
+                <div className="w-28 h-28 bg-gradient-to-br from-orange-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                  <span className="text-white text-4xl font-black">2</span>
+                </div>
+                <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-4">BOOK INSTANTLY</h3>
+              <p className="text-gray-800 font-bold text-base mb-4">
+                SECURE YOUR BOOKING IN UNDER 60 SECONDS WITH FLEXIBLE SCHEDULING AND INSTANT CONFIRMATION
+              </p>
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-orange-600 space-y-1">
+                  <div>⚡ 45-SECOND BOOKING PROCESS</div>
+                  <div>📅 FLEXIBLE DATE & TIME SLOTS</div>
+                  <div>💳 SECURE PAYMENT OPTIONS</div>
+                  <div>📧 INSTANT CONFIRMATION EMAIL</div>
+                </div>
+              </div>
             </ScrollReveal>
 
             <ScrollReveal className="text-center" delay={200}>
-              <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <span className="text-white text-3xl font-black">2</span>
+              <div className="relative">
+                <div className="w-28 h-28 bg-gradient-to-br from-green-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                  <span className="text-white text-4xl font-black">3</span>
+                </div>
+                <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
               </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-4">
-                {messages.how_it_works?.step2?.title || 'Book & Schedule'}
-              </h3>
-              <p className="text-gray-800 font-bold text-lg">
-                {messages.how_it_works?.step2?.description || 'Choose your preferred date and time, get matched with verified professionals instantly'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">TRACK & COMMUNICATE</h3>
+              <p className="text-gray-800 font-bold text-base mb-4">
+                REAL-TIME TRACKING, DIRECT MESSAGING, AND LIVE UPDATES FROM BOOKING TO COMPLETION
               </p>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-green-600 space-y-1">
+                  <div>📱 LIVE GPS TRACKING</div>
+                  <div>💬 DIRECT PROVIDER CHAT</div>
+                  <div>🔔 REAL-TIME NOTIFICATIONS</div>
+                  <div>📸 PROGRESS PHOTO UPDATES</div>
+                </div>
+              </div>
             </ScrollReveal>
 
-            <ScrollReveal className="text-center" delay={400}>
-              <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                <span className="text-white text-3xl font-black">3</span>
+            <ScrollReveal className="text-center" delay={300}>
+              <div className="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <span className="text-white text-4xl font-black">4</span>
               </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-4">
-                {messages.how_it_works?.step3?.title || 'Enjoy Quality Service'}
-              </h3>
-              <p className="text-gray-800 font-bold text-lg">
-                {messages.how_it_works?.step3?.description || 'Experienced professionals arrive on time and deliver exceptional results with satisfaction guaranteed'}
+              <h3 className="text-2xl font-black text-gray-900 mb-4">RATE & ENJOY</h3>
+              <p className="text-gray-800 font-bold text-base mb-4">
+                RATE YOUR EXPERIENCE, ENJOY GUARANTEED SATISFACTION, AND BOOK AGAIN WITH ONE CLICK
               </p>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-purple-600 space-y-1">
+                  <div>⭐ DETAILED RATING SYSTEM</div>
+                  <div>✅ 100% SATISFACTION GUARANTEE</div>
+                  <div>🔄 EASY REBOOKING OPTIONS</div>
+                  <div>🎁 LOYALTY REWARDS PROGRAM</div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-3xl text-white text-center mb-12">
+            <ScrollReveal>
+              <h3 className="text-3xl font-black mb-6">ADVANCED FEATURES FOR POWER USERS</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h4 className="text-xl font-black mb-3">🤖 AI-POWERED MATCHING</h4>
+                  <p className="font-bold">SMART ALGORITHMS MATCH YOU WITH THE PERFECT PROVIDER BASED ON YOUR HISTORY, PREFERENCES, AND REQUIREMENTS</p>
+                </div>
+                <div>
+                  <h4 className="text-xl font-black mb-3">📊 ANALYTICS DASHBOARD</h4>
+                  <p className="font-bold">TRACK YOUR SERVICE HISTORY, SPENDING PATTERNS, AND PROVIDER PERFORMANCE WITH DETAILED INSIGHTS</p>
+                </div>
+                <div>
+                  <h4 className="text-xl font-black mb-3">🔄 AUTOMATED SCHEDULING</h4>
+                  <p className="font-bold">SET UP RECURRING SERVICES WITH AUTOMATED BOOKING, PAYMENT, AND PROVIDER ROTATION</p>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <ScrollReveal>
+              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+                <div className="text-3xl font-black text-blue-600 mb-2">2MIN</div>
+                <div className="text-sm font-bold text-gray-700">AVERAGE BOOKING TIME</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+                <div className="text-3xl font-black text-green-600 mb-2">99.8%</div>
+                <div className="text-sm font-bold text-gray-700">ON-TIME ARRIVAL RATE</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+                <div className="text-3xl font-black text-orange-600 mb-2">24/7</div>
+                <div className="text-sm font-bold text-gray-700">CUSTOMER SUPPORT</div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={300}>
+              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+                <div className="text-3xl font-black text-purple-600 mb-2">100%</div>
+                <div className="text-sm font-bold text-gray-700">SATISFACTION GUARANTEE</div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* TEAM & COMPANY SHOWCASE */}
+      <section className="py-20 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">MEET THE TASKEGO TEAM</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                500+ DEDICATED PROFESSIONALS WORKING 24/7 TO DELIVER EXCEPTIONAL SERVICE EXPERIENCES
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
+                       alt="CEO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                  <h3 className="text-xl font-black mb-2">AHMAD AL-RASHID</h3>
+                  <p className="text-lg font-bold mb-3">CEO & FOUNDER</p>
+                  <p className="text-sm font-medium">15+ YEARS IN TECH, FORMER MICROSOFT & GOOGLE EXECUTIVE</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                       alt="CTO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                  <h3 className="text-xl font-black mb-2">SARA AHMED</h3>
+                  <p className="text-lg font-bold mb-3">CTO</p>
+                  <p className="text-sm font-medium">AI & MACHINE LEARNING EXPERT, PHD FROM MIT</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
+                       alt="COO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                  <h3 className="text-xl font-black mb-2">OMAR HASSAN</h3>
+                  <p className="text-lg font-bold mb-3">COO</p>
+                  <p className="text-sm font-medium">OPERATIONS SCALING SPECIALIST, FORMER MCKINSEY PARTNER</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" 
+                       alt="CMO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                  <h3 className="text-xl font-black mb-2">LAYLA KHALIL</h3>
+                  <p className="text-lg font-bold mb-3">CMO</p>
+                  <p className="text-sm font-medium">BRAND STRATEGY EXPERT, FORMER P&G & UNILEVER EXECUTIVE</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <ScrollReveal>
+              <div className="text-center">
+                <h3 className="text-3xl font-black mb-4">🏢 HEADQUARTERS</h3>
+                <p className="text-lg font-bold mb-2">DUBAI INTERNATIONAL FINANCIAL CENTRE</p>
+                <p className="font-medium">50,000 SQ FT MODERN OFFICE SPACE</p>
+                <p className="font-medium">500+ EMPLOYEES ACROSS 5 FLOORS</p>
+                <p className="font-medium">24/7 OPERATIONS CENTER</p>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <div className="text-center">
+                <h3 className="text-3xl font-black mb-4">🌍 GLOBAL OFFICES</h3>
+                <p className="text-lg font-bold mb-2">12 OFFICES ACROSS MENA REGION</p>
+                <p className="font-medium">RIYADH • DOHA • KUWAIT • CAIRO</p>
+                <p className="font-medium">AMMAN • BEIRUT • CASABLANCA</p>
+                <p className="font-medium">EXPANDING TO LONDON & SINGAPORE</p>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <div className="text-center">
+                <h3 className="text-3xl font-black mb-4">💰 FUNDING & GROWTH</h3>
+                <p className="text-lg font-bold mb-2">$100M SERIES C COMPLETED</p>
+                <p className="font-medium">BACKED BY SOFTBANK & SEQUOIA</p>
+                <p className="font-medium">400% YEAR-OVER-YEAR GROWTH</p>
+                <p className="font-medium">UNICORN STATUS BY 2025</p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* SECURITY & CERTIFICATIONS */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black text-gray-900 mb-4">ENTERPRISE-GRADE SECURITY</h2>
+              <p className="text-2xl text-gray-700 max-w-4xl mx-auto font-bold">
+                BANK-LEVEL SECURITY WITH INTERNATIONAL CERTIFICATIONS AND COMPLIANCE STANDARDS
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">ISO 27001 CERTIFIED</h3>
+                  <p className="text-gray-700 font-medium">INTERNATIONAL STANDARD FOR INFORMATION SECURITY MANAGEMENT</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">SOC 2 TYPE II</h3>
+                  <p className="text-gray-700 font-medium">AUDITED SECURITY CONTROLS FOR SERVICE ORGANIZATIONS</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">GDPR COMPLIANT</h3>
+                  <p className="text-gray-700 font-medium">FULL COMPLIANCE WITH EUROPEAN DATA PROTECTION REGULATION</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 shadow-xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">PCI DSS LEVEL 1</h3>
+                  <p className="text-gray-700 font-medium">HIGHEST LEVEL OF PAYMENT CARD INDUSTRY SECURITY</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-900 to-blue-900 p-12 rounded-3xl text-white text-center">
+            <ScrollReveal>
+              <h3 className="text-4xl font-black mb-8">SECURITY FEATURES & PROTOCOLS</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h4 className="text-2xl font-black mb-4">🔐 DATA ENCRYPTION</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>AES-256 ENCRYPTION AT REST</li>
+                    <li>TLS 1.3 IN TRANSIT</li>
+                    <li>END-TO-END ENCRYPTION</li>
+                    <li>ZERO-KNOWLEDGE ARCHITECTURE</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">🛡️ ACCESS CONTROL</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>MULTI-FACTOR AUTHENTICATION</li>
+                    <li>ROLE-BASED PERMISSIONS</li>
+                    <li>BIOMETRIC VERIFICATION</li>
+                    <li>SESSION MANAGEMENT</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">📊 MONITORING</h4>
+                  <ul className="space-y-2 font-bold">
+                    <li>24/7 SECURITY OPERATIONS CENTER</li>
+                    <li>REAL-TIME THREAT DETECTION</li>
+                    <li>AUTOMATED INCIDENT RESPONSE</li>
+                    <li>CONTINUOUS VULNERABILITY SCANNING</li>
+                  </ul>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
