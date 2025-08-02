@@ -307,6 +307,96 @@ export default function Home({ messages }: HomeProps) {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">
+                Why Choose Taskego?
+              </h2>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto font-bold">
+                We've built the most trusted and comprehensive service platform in the region
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <ScrollReveal>
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">100% Verified Providers</h3>
+                  <p className="text-gray-700 font-medium">Every service provider undergoes thorough background checks, skill verification, and insurance validation before joining our platform.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Clock className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">24/7 Support</h3>
+                  <p className="text-gray-700 font-medium">Round-the-clock customer support in both Arabic and English. Emergency services available within 2-4 hours of booking.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Satisfaction Guarantee</h3>
+                  <p className="text-gray-700 font-medium">Not satisfied with the service? We'll make it right or provide a full refund. Your satisfaction is our top priority.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Trusted Community</h3>
+                  <p className="text-gray-700 font-medium">Join over 50,000 satisfied customers and 1,200+ professional service providers across the Middle East region.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={400}>
+              <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Premium Quality</h3>
+                  <p className="text-gray-700 font-medium">4.9-star average rating with consistent high-quality service delivery. Only the best providers make it to our platform.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={500}>
+              <Card className="bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg border-0 h-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ArrowRight className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">Instant Booking</h3>
+                  <p className="text-gray-700 font-medium">Book services instantly with real-time availability. Schedule for today or plan weeks ahead with our flexible booking system.</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-20 bg-khadamati-light">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -365,25 +455,227 @@ export default function Home({ messages }: HomeProps) {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">Transparent Pricing</h2>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto font-bold">
+                No hidden fees, no surprises. Know exactly what you'll pay before booking.
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <ScrollReveal>
+              <Card className="bg-white shadow-lg border-2 border-gray-200 h-full">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Basic Services</h3>
+                  <div className="text-4xl font-black text-blue-600 mb-6">$25-50</div>
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Basic cleaning services
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Simple delivery tasks
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Basic maintenance
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      1-hour minimum
+                    </li>
+                  </ul>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                    Book Now
+                  </Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl border-0 h-full transform scale-105">
+                <CardContent className="p-8 text-center text-white">
+                  <div className="bg-yellow-400 text-orange-600 px-3 py-1 rounded-full text-sm font-black mb-4 inline-block">
+                    MOST POPULAR
+                  </div>
+                  <h3 className="text-2xl font-black mb-4">Professional Services</h3>
+                  <div className="text-4xl font-black mb-6">$50-100</div>
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-center font-medium">
+                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      Deep cleaning & maintenance
+                    </li>
+                    <li className="flex items-center font-medium">
+                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      Plumbing & electrical work
+                    </li>
+                    <li className="flex items-center font-medium">
+                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      Professional tutoring
+                    </li>
+                    <li className="flex items-center font-medium">
+                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      Priority support
+                    </li>
+                  </ul>
+                  <Button className="w-full bg-white text-orange-600 hover:bg-gray-100 font-black">
+                    Book Now
+                  </Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white shadow-lg border-2 border-gray-200 h-full">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Premium Services</h3>
+                  <div className="text-4xl font-black text-blue-600 mb-6">$100+</div>
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Specialized technical work
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Personal training sessions
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      Complex installations
+                    </li>
+                    <li className="flex items-center text-gray-700 font-medium">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      White-glove service
+                    </li>
+                  </ul>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                    Book Now
+                  </Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile App Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <ScrollReveal>
+              <div>
+                <h2 className="text-4xl font-black mb-6">Get the Taskego Mobile App</h2>
+                <p className="text-xl font-bold mb-8">
+                  Book services on the go, track your appointments, and manage everything from your smartphone.
+                </p>
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <span className="font-medium">Real-time booking and tracking</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <span className="font-medium">Instant notifications and updates</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <span className="font-medium">Direct chat with service providers</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <span className="font-medium">Secure payment processing</span>
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <Button className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-6 py-3">
+                    Download for iOS
+                  </Button>
+                  <Button className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-6 py-3">
+                    Download for Android
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <div className="text-center">
+                <img 
+                  src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=600&fit=crop" 
+                  alt="Mobile App Screenshot" 
+                  className="rounded-3xl shadow-2xl mx-auto max-w-sm"
+                />
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats & Achievements */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-4xl font-black mb-4">Our Impact in Numbers</h2>
+              <p className="text-xl font-bold max-w-2xl mx-auto">
+                See how we're transforming the service industry across the Middle East
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <ScrollReveal className="text-center">
+              <div className="text-5xl font-black mb-2">
+                <AnimatedCounter end={125000} suffix="+" />
+              </div>
+              <div className="text-lg font-bold">Services Completed</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center" delay={100}>
+              <div className="text-5xl font-black mb-2">
+                <AnimatedCounter end={25} suffix="+" />
+              </div>
+              <div className="text-lg font-bold">Cities Covered</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center" delay={200}>
+              <div className="text-5xl font-black mb-2">98%</div>
+              <div className="text-lg font-bold">Customer Satisfaction</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center" delay={300}>
+              <div className="text-5xl font-black mb-2">
+                <AnimatedCounter end={45} suffix="" />min
+              </div>
+              <div className="text-lg font-bold">Average Response Time</div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow text-white">
+      <section className="py-20 bg-gradient-to-br from-orange-500 to-blue-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-4xl font-black mb-4">
               {messages.cta?.title || 'Ready to Get Started?'}
             </h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
+            <p className="text-xl font-bold mb-8 max-w-2xl mx-auto">
               {messages.cta?.description || 'Join thousands of satisfied customers who trust Taskego for their service needs.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/services">
-                <Button size="lg" className="px-8 py-4 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white hover:from-blue-700 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 shadow-xl">
+                <Button size="lg" className="px-8 py-4 bg-white text-blue-600 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-xl font-black text-lg">
                   {messages.cta?.download_app || 'Get Started Now'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/about">
-                <Button size="lg" variant="outline" className="px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-khadamati-blue transition-all duration-300">
+                <Button size="lg" variant="outline" className="px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-blue-600 transition-all duration-300 font-black text-lg">
                   {messages.cta?.learn_more || 'Learn More'}
                 </Button>
               </Link>
