@@ -107,19 +107,19 @@
 @layer components {
   /* Khadamati Theme Classes */
   .khadamati-blue {
-    @apply text-[hsl(207,90%,54%)];
+    @apply text-[hsl(220,85%,45%)];
   }
   
   .bg-khadamati-blue {
-    @apply bg-[hsl(207,90%,54%)];
+    @apply bg-[hsl(220,85%,45%)];
   }
   
   .khadamati-yellow {
-    @apply text-[hsl(45,95%,50%)];
+    @apply text-[hsl(42,100%,45%)];
   }
   
   .bg-khadamati-yellow {
-    @apply bg-[hsl(45,95%,50%)];
+    @apply bg-[hsl(42,100%,45%)];
   }
   
   .khadamati-success {
@@ -155,32 +155,38 @@
   }
   
   .khadamati-dark {
-    @apply text-[hsl(222,84%,4.9%)];
+    @apply text-[hsl(220,30%,15%)];
   }
   
   .bg-khadamati-dark {
-    @apply bg-[hsl(222,84%,4.9%)];
+    @apply bg-[hsl(220,30%,15%)];
   }
   
-  /* Gradient Text */
+  /* Gradient Text - Fixed for better visibility */
   .text-gradient {
-    background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(45, 95%, 50%) 100%);
+    background: linear-gradient(135deg, hsl(220, 85%, 45%) 0%, hsl(42, 100%, 45%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    font-weight: 700;
   }
   
-  /* Yellow Accent Classes */
+  /* High Contrast Text Classes */
   .text-yellow-bright {
-    @apply text-[hsl(45,95%,50%)];
+    @apply text-[hsl(42,100%,35%)];
   }
   
   .bg-yellow-bright {
-    @apply bg-[hsl(45,95%,50%)];
+    @apply bg-[hsl(42,100%,50%)];
   }
   
   .border-yellow-bright {
-    @apply border-[hsl(45,95%,50%)];
+    @apply border-[hsl(42,100%,45%)];
+  }
+  
+  /* Dark text for better readability */
+  .text-dark-readable {
+    @apply text-[hsl(220,30%,25%)];
   }
   
   /* Floating Animation */
@@ -210,14 +216,20 @@
   
   /* Button Fixes for Better Contrast */
   .btn-primary {
-    background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(37, 91%, 55%) 100%) !important;
+    background: linear-gradient(135deg, hsl(220, 85%, 45%) 0%, hsl(42, 100%, 50%) 100%) !important;
     color: white !important;
     border: none !important;
+    font-weight: 600 !important;
   }
   
   .btn-primary:hover {
-    background: linear-gradient(135deg, hsl(207, 90%, 44%) 0%, hsl(37, 91%, 45%) 100%) !important;
+    background: linear-gradient(135deg, hsl(220, 85%, 35%) 0%, hsl(42, 100%, 40%) 100%) !important;
     transform: scale(1.05);
+  }
+  
+  /* Text shadow for better readability */
+  .text-shadow-lg {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   }
   
   .glow-yellow {
