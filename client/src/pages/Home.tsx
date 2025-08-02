@@ -178,7 +178,7 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
             <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl">
               <div className="text-4xl font-black text-orange-400 mb-2">
                 <AnimatedCounter end={1200} suffix="+" />
@@ -225,6 +225,28 @@ export default function Home({ messages }: HomeProps) {
             <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={700}>
               <div className="text-4xl font-black text-teal-400 mb-2">2HR</div>
               <div className="text-white font-bold text-sm">AVG RESPONSE</div>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+              <div className="text-4xl font-black text-red-400 mb-2">ISO</div>
+              <div className="text-white font-bold text-sm">CERTIFIED SECURITY</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={100}>
+              <div className="text-4xl font-black text-cyan-400 mb-2">AI</div>
+              <div className="text-white font-bold text-sm">POWERED MATCHING</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={200}>
+              <div className="text-4xl font-black text-lime-400 mb-2">MENA</div>
+              <div className="text-white font-bold text-sm">MARKET LEADER</div>
+            </ScrollReveal>
+            
+            <ScrollReveal className="text-center bg-white/10 backdrop-blur-lg p-6 rounded-xl" delay={300}>
+              <div className="text-4xl font-black text-rose-400 mb-2">NEXT</div>
+              <div className="text-white font-bold text-sm">UNICORN STATUS</div>
             </ScrollReveal>
           </div>
 
@@ -298,6 +320,94 @@ export default function Home({ messages }: HomeProps) {
                 <div className="bg-white/20 p-4 rounded-lg">
                   <div className="text-2xl font-black text-white mb-1">95%</div>
                   <div className="text-xs text-white font-bold">RETENTION RATE</div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* TECHNOLOGY STACK */}
+      <section className="py-20 bg-gradient-to-br from-emerald-600 to-cyan-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">CUTTING-EDGE TECHNOLOGY</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                POWERED BY THE LATEST AI, MACHINE LEARNING, AND CLOUD TECHNOLOGIES
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <div className="text-4xl mb-6">🤖</div>
+                  <h3 className="text-2xl font-black mb-4">AI MATCHING ENGINE</h3>
+                  <p className="font-bold mb-4">ADVANCED MACHINE LEARNING ALGORITHMS</p>
+                  <ul className="space-y-2 text-sm font-medium">
+                    <li>• NEURAL NETWORK PROVIDER MATCHING</li>
+                    <li>• PREDICTIVE DEMAND FORECASTING</li>
+                    <li>• INTELLIGENT PRICING OPTIMIZATION</li>
+                    <li>• AUTOMATED QUALITY SCORING</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <div className="text-4xl mb-6">☁️</div>
+                  <h3 className="text-2xl font-black mb-4">CLOUD INFRASTRUCTURE</h3>
+                  <p className="font-bold mb-4">SCALABLE ENTERPRISE ARCHITECTURE</p>
+                  <ul className="space-y-2 text-sm font-medium">
+                    <li>• AWS MULTI-REGION DEPLOYMENT</li>
+                    <li>• KUBERNETES ORCHESTRATION</li>
+                    <li>• REAL-TIME DATA PROCESSING</li>
+                    <li>• 99.9% UPTIME GUARANTEE</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <div className="text-4xl mb-6">📱</div>
+                  <h3 className="text-2xl font-black mb-4">MOBILE FIRST</h3>
+                  <p className="font-bold mb-4">NATIVE MOBILE APPLICATIONS</p>
+                  <ul className="space-y-2 text-sm font-medium">
+                    <li>• REACT NATIVE CROSS-PLATFORM</li>
+                    <li>• OFFLINE CAPABILITY</li>
+                    <li>• PUSH NOTIFICATIONS</li>
+                    <li>• BIOMETRIC AUTHENTICATION</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl text-center">
+            <ScrollReveal>
+              <h3 className="text-3xl font-black mb-6">DEVELOPMENT METRICS</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div>
+                  <div className="text-3xl font-black mb-2">50+</div>
+                  <div className="font-bold">ENGINEERS</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-black mb-2">1M+</div>
+                  <div className="font-bold">LINES OF CODE</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-black mb-2">99.9%</div>
+                  <div className="font-bold">CODE COVERAGE</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-black mb-2">24/7</div>
+                  <div className="font-bold">MONITORING</div>
                 </div>
               </div>
             </ScrollReveal>
@@ -779,6 +889,102 @@ export default function Home({ messages }: HomeProps) {
         </div>
       </section>
 
+      {/* CUSTOMER SUCCESS STORIES */}
+      <section className="py-20 bg-gradient-to-br from-pink-600 to-rose-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">CUSTOMER SUCCESS STORIES</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                REAL STORIES FROM SATISFIED CUSTOMERS ACROSS THE MIDDLE EAST
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-6">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop&crop=face" 
+                         alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                    <div>
+                      <h4 className="font-black">FATIMA AL-ZAHRA</h4>
+                      <p className="text-sm font-bold">DUBAI RESIDENT</p>
+                    </div>
+                  </div>
+                  <p className="font-bold mb-4">"SAVED $5,000 ANNUALLY ON HOME MAINTENANCE"</p>
+                  <p className="text-sm font-medium">"Taskego's verified providers helped me maintain my villa at 40% lower cost while ensuring premium quality. The AI matching found perfect specialists every time."</p>
+                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-6">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face" 
+                         alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                    <div>
+                      <h4 className="font-black">MOHAMMED HASSAN</h4>
+                      <p className="text-sm font-bold">BUSINESS OWNER</p>
+                    </div>
+                  </div>
+                  <p className="font-bold mb-4">"STREAMLINED OFFICE OPERATIONS COMPLETELY"</p>
+                  <p className="text-sm font-medium">"From cleaning to IT support, Taskego handles all our office services. The enterprise dashboard gives us full visibility and control. Game changer for efficiency."</p>
+                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8">
+                  <div className="flex items-center mb-6">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face" 
+                         alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                    <div>
+                      <h4 className="font-black">AISHA MOHAMED</h4>
+                      <p className="text-sm font-bold">WORKING MOTHER</p>
+                    </div>
+                  </div>
+                  <p className="font-bold mb-4">"RECLAIMED 15 HOURS WEEKLY FOR FAMILY"</p>
+                  <p className="text-sm font-medium">"Between work and kids, I had no time for household tasks. Taskego's reliable providers handle everything from groceries to repairs. Life-changing convenience."</p>
+                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="text-center">
+            <ScrollReveal>
+              <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
+                <h3 className="text-3xl font-black mb-6">SUCCESS METRICS</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div>
+                    <div className="text-3xl font-black mb-2">98%</div>
+                    <div className="font-bold">CUSTOMER SATISFACTION</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black mb-2">$2.5M</div>
+                    <div className="font-bold">CUSTOMER SAVINGS</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black mb-2">150K+</div>
+                    <div className="font-bold">HOURS SAVED MONTHLY</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black mb-2">4.9★</div>
+                    <div className="font-bold">AVERAGE RATING</div>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1124,6 +1330,109 @@ export default function Home({ messages }: HomeProps) {
                 <AnimatedCounter end={45} suffix="" />min
               </div>
               <div className="text-lg font-bold">Average Response Time</div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING & PLANS */}
+      <section className="py-20 bg-gradient-to-br from-gray-900 to-purple-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">COMPREHENSIVE PRICING PLANS</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                FLEXIBLE PRICING OPTIONS FOR EVERY BUDGET AND REQUIREMENT
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">PAY PER USE</h3>
+                  <div className="text-4xl font-black mb-4">$0</div>
+                  <p className="font-bold mb-6">NO MONTHLY FEES</p>
+                  <ul className="space-y-3 text-sm font-medium mb-8">
+                    <li>✓ PAY ONLY WHEN YOU BOOK</li>
+                    <li>✓ STANDARD PRICING</li>
+                    <li>✓ BASIC SUPPORT</li>
+                    <li>✓ NO COMMITMENT</li>
+                  </ul>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 font-black">SIGN UP FREE</Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/20 backdrop-blur-lg shadow-2xl border-2 border-yellow-400">
+                <CardContent className="p-8 text-center">
+                  <div className="bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-black mb-4 inline-block">MOST POPULAR</div>
+                  <h3 className="text-2xl font-black mb-4">TASKEGO PLUS</h3>
+                  <div className="text-4xl font-black mb-4">$29</div>
+                  <p className="font-bold mb-6">PER MONTH</p>
+                  <ul className="space-y-3 text-sm font-medium mb-8">
+                    <li>✓ 15% DISCOUNT ON ALL SERVICES</li>
+                    <li>✓ PRIORITY BOOKING</li>
+                    <li>✓ 24/7 SUPPORT</li>
+                    <li>✓ FREE CANCELLATIONS</li>
+                  </ul>
+                  <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-300 font-black">START TRIAL</Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">TASKEGO PRO</h3>
+                  <div className="text-4xl font-black mb-4">$99</div>
+                  <p className="font-bold mb-6">PER MONTH</p>
+                  <ul className="space-y-3 text-sm font-medium mb-8">
+                    <li>✓ 25% DISCOUNT ON ALL SERVICES</li>
+                    <li>✓ SAME-DAY BOOKING</li>
+                    <li>✓ DEDICATED MANAGER</li>
+                    <li>✓ UNLIMITED CANCELLATIONS</li>
+                  </ul>
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 font-black">UPGRADE NOW</Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-2xl font-black mb-4">ENTERPRISE</h3>
+                  <div className="text-4xl font-black mb-4">CUSTOM</div>
+                  <p className="font-bold mb-6">TAILORED SOLUTIONS</p>
+                  <ul className="space-y-3 text-sm font-medium mb-8">
+                    <li>✓ VOLUME DISCOUNTS</li>
+                    <li>✓ API INTEGRATION</li>
+                    <li>✓ WHITE-LABEL OPTIONS</li>
+                    <li>✓ SLA GUARANTEES</li>
+                  </ul>
+                  <Button className="w-full bg-orange-600 hover:bg-orange-700 font-black">CONTACT SALES</Button>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="text-center">
+            <ScrollReveal>
+              <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
+                <h3 className="text-3xl font-black mb-6">ALL PLANS INCLUDE</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm font-bold">
+                  <div>🔒 SECURE PAYMENTS</div>
+                  <div>📱 MOBILE APP ACCESS</div>
+                  <div>⭐ VERIFIED PROVIDERS</div>
+                  <div>💬 IN-APP MESSAGING</div>
+                  <div>📍 GPS TRACKING</div>
+                  <div>📊 SERVICE HISTORY</div>
+                  <div>🏆 QUALITY GUARANTEE</div>
+                  <div>🎯 INSTANT MATCHING</div>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
@@ -1695,6 +2004,191 @@ export default function Home({ messages }: HomeProps) {
                     <li>STARTUP GRIND DUBAI</li>
                     <li>GULF ENTREPRENEURS SHOW</li>
                     <li>ARAB INNOVATION TALKS</li>
+                  </ul>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* GLOBAL EXPANSION & FUTURE */}
+      <section className="py-20 bg-gradient-to-br from-indigo-900 to-purple-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">GLOBAL EXPANSION & ROADMAP</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                OUR AMBITIOUS PLANS TO REVOLUTIONIZE SERVICE MARKETPLACES WORLDWIDE
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-16">
+            <ScrollReveal>
+              <div>
+                <h3 className="text-4xl font-black mb-8">2025 EXPANSION TARGETS</h3>
+                <div className="space-y-6">
+                  <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">🌍 NEW MARKETS</h4>
+                    <ul className="space-y-2 font-bold">
+                      <li>• TURKEY & CYPRUS (Q1 2025)</li>
+                      <li>• PAKISTAN & BANGLADESH (Q2 2025)</li>
+                      <li>• NORTH AFRICA EXPANSION (Q3 2025)</li>
+                      <li>• SOUTHEAST ASIA ENTRY (Q4 2025)</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">🚀 PLATFORM EVOLUTION</h4>
+                    <ul className="space-y-2 font-bold">
+                      <li>• AI-POWERED PRICE OPTIMIZATION</li>
+                      <li>• BLOCKCHAIN PAYMENT SYSTEM</li>
+                      <li>• VR SERVICE PREVIEWS</li>
+                      <li>• VOICE-ACTIVATED BOOKING</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <div>
+                <h3 className="text-4xl font-black mb-8">INVESTMENT & GROWTH</h3>
+                <div className="space-y-6">
+                  <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">💰 FUNDING ROUNDS</h4>
+                    <ul className="space-y-2 font-bold">
+                      <li>• SERIES D: $200M (PLANNED Q2 2025)</li>
+                      <li>• SERIES E: $500M (PLANNED 2026)</li>
+                      <li>• IPO TARGET: 2027</li>
+                      <li>• VALUATION TARGET: $10B</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-lg p-6 rounded-xl">
+                    <h4 className="text-xl font-black mb-3">📈 GROWTH PROJECTIONS</h4>
+                    <ul className="space-y-2 font-bold">
+                      <li>• 5M+ ACTIVE USERS BY 2025</li>
+                      <li>• 50K+ SERVICE PROVIDERS</li>
+                      <li>• $1B+ ANNUAL REVENUE</li>
+                      <li>• 25+ COUNTRIES PRESENCE</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          <div className="text-center">
+            <ScrollReveal>
+              <div className="bg-white/10 backdrop-blur-lg p-12 rounded-3xl">
+                <h3 className="text-4xl font-black mb-8">JOIN THE REVOLUTION</h3>
+                <p className="text-xl font-bold mb-8 max-w-3xl mx-auto">
+                  BE PART OF THE FASTEST-GROWING SERVICE PLATFORM THAT'S RESHAPING HOW PEOPLE ACCESS SERVICES GLOBALLY
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <Button className="bg-yellow-400 text-black hover:bg-yellow-300 font-black text-lg py-4">
+                    🚀 JOIN AS PROVIDER
+                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700 font-black text-lg py-4">
+                    📱 DOWNLOAD APP
+                  </Button>
+                  <Button className="bg-green-600 hover:bg-green-700 font-black text-lg py-4">
+                    💼 INVEST WITH US
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* COMMUNITY & SOCIAL IMPACT */}
+      <section className="py-20 bg-gradient-to-br from-teal-600 to-emerald-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <ScrollReveal>
+              <h2 className="text-5xl font-black mb-4">COMMUNITY & SOCIAL IMPACT</h2>
+              <p className="text-2xl font-bold max-w-4xl mx-auto">
+                EMPOWERING COMMUNITIES AND CREATING POSITIVE SOCIAL CHANGE ACROSS THE REGION
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <ScrollReveal>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🤝</div>
+                  <h3 className="text-xl font-black mb-3">COMMUNITY SUPPORT</h3>
+                  <div className="text-3xl font-black mb-2">15K+</div>
+                  <p className="font-bold">FAMILIES SUPPORTED</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={100}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">💼</div>
+                  <h3 className="text-xl font-black mb-3">JOB CREATION</h3>
+                  <div className="text-3xl font-black mb-2">25K+</div>
+                  <p className="font-bold">JOBS CREATED</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={200}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🎓</div>
+                  <h3 className="text-xl font-black mb-3">SKILLS TRAINING</h3>
+                  <div className="text-3xl font-black mb-2">5K+</div>
+                  <p className="font-bold">PROVIDERS TRAINED</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+
+            <ScrollReveal delay={300}>
+              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+                <CardContent className="p-8">
+                  <div className="text-4xl mb-4">🌱</div>
+                  <h3 className="text-xl font-black mb-3">SUSTAINABILITY</h3>
+                  <div className="text-3xl font-black mb-2">30%</div>
+                  <p className="font-bold">CARBON REDUCTION</p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-lg p-12 rounded-3xl text-center">
+            <ScrollReveal>
+              <h3 className="text-4xl font-black mb-8">OUR SOCIAL INITIATIVES</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h4 className="text-2xl font-black mb-4">🏫 EDUCATION PROGRAM</h4>
+                  <ul className="space-y-2 font-bold text-left">
+                    <li>• FREE DIGITAL SKILLS TRAINING</li>
+                    <li>• ENTREPRENEURSHIP WORKSHOPS</li>
+                    <li>• WOMEN EMPOWERMENT INITIATIVES</li>
+                    <li>• YOUTH MENTORSHIP PROGRAMS</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">🌍 SUSTAINABILITY</h4>
+                  <ul className="space-y-2 font-bold text-left">
+                    <li>• CARBON NEUTRAL OPERATIONS</li>
+                    <li>• GREEN SERVICE PROVIDERS</li>
+                    <li>• WASTE REDUCTION PROGRAMS</li>
+                    <li>• RENEWABLE ENERGY PARTNERS</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black mb-4">❤️ COMMUNITY CARE</h4>
+                  <ul className="space-y-2 font-bold text-left">
+                    <li>• FREE SERVICES FOR SENIORS</li>
+                    <li>• DISASTER RELIEF SUPPORT</li>
+                    <li>• CHARITY PARTNERSHIPS</li>
+                    <li>• HEALTHCARE ACCESSIBILITY</li>
                   </ul>
                 </div>
               </div>
