@@ -429,31 +429,29 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {serviceCategories.map((category, index) => (
-              <ScrollReveal key={category.id} delay={index * 50}>
-                <Link href={category.href}>
-                  <Card className="bg-white rounded-xl shadow-lg border-0 h-full cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <CardContent className="p-6 text-center">
-                      <div className={`w-14 h-14 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center mx-auto mb-4`}>
-                        <span className="text-xl">{category.icon}</span>
-                      </div>
-                      <h3 className="text-lg font-black text-gray-900 mb-2">
-                        {category.name}
-                      </h3>
-                      <p className="text-gray-700 text-sm font-medium mb-3 leading-tight">
-                        {category.description}
-                      </p>
-                      <div className="text-white font-black text-sm bg-gradient-to-r from-orange-500 to-blue-600 px-3 py-2 rounded-full shadow-lg mb-2">
-                        {category.price}
-                      </div>
-                      <div className="text-xs text-gray-500 font-bold">
-                        {category.id <= 3 ? '500+' : category.id <= 6 ? '300+' : category.id <= 9 ? '200+' : '150+'} PROVIDERS
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </ScrollReveal>
+              <Link key={category.id} href={category.href}>
+                <Card className="bg-white rounded-xl shadow-lg border-0 h-full cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center mx-auto mb-3`}>
+                      <span className="text-lg">{category.icon}</span>
+                    </div>
+                    <h3 className="text-base font-black text-gray-900 mb-2">
+                      {category.name}
+                    </h3>
+                    <p className="text-gray-700 text-xs font-medium mb-2 leading-tight">
+                      {category.description}
+                    </p>
+                    <div className="text-white font-black text-xs bg-gradient-to-r from-orange-500 to-blue-600 px-2 py-1 rounded-full shadow-lg mb-2">
+                      {category.price}
+                    </div>
+                    <div className="text-xs text-gray-500 font-bold">
+                      {category.id <= 3 ? '500+' : category.id <= 6 ? '300+' : category.id <= 9 ? '200+' : '150+'} PROVIDERS
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
