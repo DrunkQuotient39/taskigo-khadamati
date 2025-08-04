@@ -67,5 +67,9 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    log(`🚀 Taskego Server with AI & Payments ready!`);
+    log(`📚 API Documentation: http://localhost:${port}/docs`);
+    log(`🤖 AI Features: /api/ai/* and /api/chat-ai/*`);
+    log(`💳 Payment System: /api/payments/* (Apple Pay ready)`);
   });
 })();

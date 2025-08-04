@@ -1,0 +1,331 @@
+Build a scalable, bilingual, AI-powered backend for Taskego (Khadamati) – an intelligent service marketplace
+
+Prompt Body:
+You are a top-tier backend engineer. Architect and implement a clean, scalable, modular Node.js + Express backend for Taskego (Khadamati) — a bilingual, AI-enhanced marketplace connecting users with service providers across domains like cleaning, maintenance, tech help, delivery, events, and personal care.
+
+🧱 Tech Stack & System Architecture
+Runtime: Node.js 20+
+
+Framework: Express.js
+
+Database: MongoDB (Mongoose ODM)
+
+Auth: Role-based JWT (client, provider, admin)
+
+AI Support: Gemini API + fallback to local NLP
+
+Docs: Swagger + Postman Collection
+
+Testing: Jest + Supertest
+
+Code Standards: ESLint, Prettier, folder-based modularization
+
+🧩 Backend Folder Structure (Clean Separation)
+bash
+Copy
+Edit
+/controllers
+/routes
+/models
+/middleware
+/utils
+/config
+/validators
+/tests
+/docs
+🔐 Authentication & User Management
+JWT-based login/signup system
+
+Email verification, password reset
+
+Secure password hashing (bcrypt)
+
+Role-based middleware (client/provider/admin)
+
+User status: isBlocked, isVerified, isPremium
+
+🗃️ MongoDB Schemas
+User Schema:
+ts
+Copy
+Edit
+{
+  name,
+  email,
+  phone,
+  passwordHash,
+  role: ['client', 'provider', 'admin'],
+  language: ['en', 'ar'],
+  location: {
+    city,
+    coordinates
+  },
+  isBlocked,
+  isVerified,
+  walletBalance,
+  createdAt
+}
+Service Schema:
+ts
+Copy
+Edit
+{
+  title,
+  title_ar,
+  description,
+  description_ar,
+  category,
+  subcategory,
+  price,
+  images,
+  location,
+  providerId,
+  availability: [DateTime],
+  tags,
+  rating: { avg, count },
+  status: ['pending', 'approved', 'rejected'],
+  createdAt
+}
+Booking Schema:
+ts
+Copy
+Edit
+{
+  clientId,
+  providerId,
+  serviceId,
+  date,
+  time,
+  status: ['pending', 'accepted', 'in_progress', 'completed', 'cancelled'],
+  cancellationReason,
+  systemLogs,
+  createdAt
+}
+Review Schema:
+ts
+Copy
+Edit
+{
+  serviceId,
+  userId,
+  rating: 1–5,
+  text,
+  timestamp
+}
+Wallet Schema:
+ts
+Copy
+Edit
+{
+  userId,
+  balance,
+  transactionHistory: [{
+    type: ['recharge', 'payment', 'refund'],
+    amount,
+    status,
+    createdAt
+  }],
+  refundStatus,
+  paymentStatus
+}
+🌍 Bilingual Logic
+Store dual fields for every string: title, title_ar, description, description_ar
+
+Auto-detect accept-language in headers or default to en
+
+Localization-ready backend responses
+
+Support for RTL formatting flag via frontend header
+
+📦 Core Backend Routes
+Auth
+
+POST /api/auth/signup
+
+POST /api/auth/login
+
+POST /api/auth/reset-password
+
+GET /api/auth/verify/:token
+
+Users
+
+GET /api/users/me
+
+PATCH /api/users/profile
+
+GET /api/users/providers
+
+Services
+
+GET /api/services/
+
+POST /api/services/ (provider only)
+
+PATCH /api/services/:id
+
+DELETE /api/services/:id
+
+GET /api/services/:id
+
+Bookings
+
+POST /api/bookings/
+
+PATCH /api/bookings/:id/status
+
+GET /api/bookings/history
+
+Reviews
+
+POST /api/reviews/
+
+GET /api/reviews/service/:id
+
+Wallet
+
+GET /api/wallet/
+
+POST /api/wallet/recharge
+
+POST /api/wallet/refund
+
+Admin
+
+GET /api/admin/stats
+
+PATCH /api/admin/users/:id/block
+
+PATCH /api/admin/services/:id/approve
+
+GET /api/admin/logs
+
+AI Chat
+
+POST /api/chat-ai/message — integrates Gemini
+
+📊 Admin Logic
+Admin dashboard routes to:
+
+View system stats (users, bookings, top providers)
+
+Approve/reject services
+
+Block/unblock users
+
+Trigger full/partial refunds
+
+Log history of changes, disputes, system events
+
+🤖 AI Support (Coming Phase)
+Endpoint: POST /api/chat-ai/message
+
+Gemini/NLP logic:
+
+Suggest services by location, price, availability
+
+Compare providers by rating, pricing
+
+Answer smart queries: "cheapest cleaning in Beirut this Thursday?"
+
+Fallback logic if Gemini API is unreachable
+
+⚡ Smart Recommendation Engine
+Schedule smart jobs: "Book me something at 5PM"
+
+Auto-suggestions based on:
+
+geolocation + category
+
+budget + date
+
+past usage behavior
+
+Future logic ready: recommendationEngine.ts
+
+🔐 Security + Middleware
+CORS, helmet, rate-limiter
+
+Input validation (express-validator)
+
+Global error handler
+
+Token expiration + refresh flow (optional)
+
+API key guard for AI routes
+
+🧪 Testing & Docs
+Unit tests: Jest + Supertest
+
+Postman Collection: auto-exported from routes
+
+Swagger: GET /docs
+
+📁 Categories (Dual-Language):
+markdown
+Copy
+Edit
+Maintenance:
+  - Electrical Repair
+  - Plumbing
+  - AC/Fridge
+  - Carpentry
+  - Home Appliances
+
+Cleaning:
+  - Homes
+  - Offices
+  - Carpets
+  - Glass facades
+  - Water Tanks
+
+Delivery:
+  - Furniture
+  - Documents
+  - Express Packages
+
+Events:
+  - Hospitality (Coffee, Buffets)
+  - Tent Rentals
+  - Photography
+
+Care:
+  - Elderly
+  - Babysitting
+  - Patient Companion
+
+Gardens:
+  - Pest Control
+  - Irrigation
+  - Tree trimming
+
+Auto:
+  - Car Wash
+  - Oil Check
+  - Roadside Help
+
+Tech:
+  - Laptop Repair
+  - WiFi Setup
+  - Camera Installation
+
+Admin:
+  - Gov Paperwork
+  - Legal Docs
+  - Certified Translation
+📦 Deployment & Dev Tools
+Dev with Nodemon, lint via ESLint/Prettier
+
+MongoDB Atlas recommended (Free tier)
+
+Firebase or Render for deploy
+
+CI/CD ready with GitHub Actions
+
+🧠 Final Notes
+This backend must be modular and clean
+
+Easily extendable for mobile app and real-time features
+
+Real-time AI + WebSocket chat logic to be plugged in Phase 3
+

@@ -5,6 +5,10 @@ import {
   bookings, 
   reviews, 
   notifications,
+  chatConversations,
+  chatMessages,
+  aiRecommendations,
+  sentimentAnalysis,
   type User, 
   type InsertUser,
   type UpsertUser,
@@ -17,7 +21,15 @@ import {
   type Review,
   type InsertReview,
   type Notification,
-  type InsertNotification
+  type InsertNotification,
+  type ChatConversation,
+  type InsertChatConversation,
+  type ChatMessage,
+  type InsertChatMessage,
+  type AiRecommendation,
+  type InsertAiRecommendation,
+  type SentimentAnalysis,
+  type InsertSentimentAnalysis
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, like, ilike } from "drizzle-orm";
@@ -68,6 +80,26 @@ export interface IStorage {
   getPendingApprovals(): Promise<any[]>;
   approveItem(id: number): Promise<any>;
   rejectItem(id: number): Promise<any>;
+
+  // AI-related functions
+  // Chat conversations
+  getChatConversations(userId: string): Promise<ChatConversation[]>;
+  getChatConversation(id: number): Promise<ChatConversation | undefined>;
+  createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation>;
+  updateChatConversation(id: number, conversation: Partial<ChatConversation>): Promise<ChatConversation | undefined>;
+  
+  // Chat messages
+  getChatMessages(conversationId: number): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  
+  // AI recommendations
+  getAiRecommendations(userId: string): Promise<AiRecommendation[]>;
+  createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation>;
+  updateAiRecommendation(id: number, recommendation: Partial<AiRecommendation>): Promise<AiRecommendation | undefined>;
+  
+  // Sentiment analysis
+  getSentimentAnalysis(referenceType: string, referenceId: number): Promise<SentimentAnalysis | undefined>;
+  createSentimentAnalysis(analysis: InsertSentimentAnalysis): Promise<SentimentAnalysis>;
 }
 
 export class MemStorage implements IStorage {
@@ -675,6 +707,68 @@ export class MemStorage implements IStorage {
     this.pendingApprovals.delete(id);
     return { success: true, message: 'Item rejected successfully' };
   }
+
+  // AI-related methods for MemStorage
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return [];
+  }
+
+  async getChatConversation(id: number): Promise<ChatConversation | undefined> {
+    return undefined;
+  }
+
+  async createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation> {
+    return {
+      id: 1,
+      ...conversation,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async updateChatConversation(id: number, conversation: Partial<ChatConversation>): Promise<ChatConversation | undefined> {
+    return undefined;
+  }
+
+  async getChatMessages(conversationId: number): Promise<ChatMessage[]> {
+    return [];
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    return {
+      id: 1,
+      ...message,
+      createdAt: new Date()
+    };
+  }
+
+  async getAiRecommendations(userId: string): Promise<AiRecommendation[]> {
+    return [];
+  }
+
+  async createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation> {
+    return {
+      id: 1,
+      ...recommendation,
+      createdAt: new Date()
+    };
+  }
+
+  async updateAiRecommendation(id: number, recommendation: Partial<AiRecommendation>): Promise<AiRecommendation | undefined> {
+    return undefined;
+  }
+
+  async getSentimentAnalysis(referenceType: string, referenceId: number): Promise<SentimentAnalysis | undefined> {
+    return undefined;
+  }
+
+  async createSentimentAnalysis(analysis: InsertSentimentAnalysis): Promise<SentimentAnalysis> {
+    return {
+      id: 1,
+      ...analysis,
+      processedAt: new Date()
+    };
+  }
 }
 
 // Database Storage Implementation
@@ -939,6 +1033,86 @@ export class DatabaseStorage implements IStorage {
   async rejectItem(id: number): Promise<{ success: boolean; message: string }> {
     await this.rejectService(id);
     return { success: true, message: 'Item rejected successfully' };
+  }
+
+  // AI-related methods for DatabaseStorage
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return await db.select().from(chatConversations)
+      .where(eq(chatConversations.userId, userId))
+      .orderBy(desc(chatConversations.updatedAt));
+  }
+
+  async getChatConversation(id: number): Promise<ChatConversation | undefined> {
+    const [conversation] = await db.select().from(chatConversations)
+      .where(eq(chatConversations.id, id));
+    return conversation || undefined;
+  }
+
+  async createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation> {
+    const [created] = await db.insert(chatConversations)
+      .values(conversation)
+      .returning();
+    return created;
+  }
+
+  async updateChatConversation(id: number, conversation: Partial<ChatConversation>): Promise<ChatConversation | undefined> {
+    const [updated] = await db.update(chatConversations)
+      .set({ ...conversation, updatedAt: new Date() })
+      .where(eq(chatConversations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getChatMessages(conversationId: number): Promise<ChatMessage[]> {
+    return await db.select().from(chatMessages)
+      .where(eq(chatMessages.conversationId, conversationId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [created] = await db.insert(chatMessages)
+      .values(message)
+      .returning();
+    return created;
+  }
+
+  async getAiRecommendations(userId: string): Promise<AiRecommendation[]> {
+    return await db.select().from(aiRecommendations)
+      .where(eq(aiRecommendations.userId, userId))
+      .orderBy(desc(aiRecommendations.createdAt));
+  }
+
+  async createAiRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation> {
+    const [created] = await db.insert(aiRecommendations)
+      .values(recommendation)
+      .returning();
+    return created;
+  }
+
+  async updateAiRecommendation(id: number, recommendation: Partial<AiRecommendation>): Promise<AiRecommendation | undefined> {
+    const [updated] = await db.update(aiRecommendations)
+      .set(recommendation)
+      .where(eq(aiRecommendations.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getSentimentAnalysis(referenceType: string, referenceId: number): Promise<SentimentAnalysis | undefined> {
+    const [analysis] = await db.select().from(sentimentAnalysis)
+      .where(
+        and(
+          eq(sentimentAnalysis.referenceType, referenceType),
+          eq(sentimentAnalysis.referenceId, referenceId)
+        )
+      );
+    return analysis || undefined;
+  }
+
+  async createSentimentAnalysis(analysis: InsertSentimentAnalysis): Promise<SentimentAnalysis> {
+    const [created] = await db.insert(sentimentAnalysis)
+      .values(analysis)
+      .returning();
+    return created;
   }
 }
 
