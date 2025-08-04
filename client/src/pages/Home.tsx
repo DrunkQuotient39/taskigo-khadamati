@@ -678,94 +678,78 @@ export default function Home({ messages }: HomeProps) {
       <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <ScrollReveal>
-              <h2 className="text-5xl font-black mb-4">MEET THE TASKEGO TEAM</h2>
-              <p className="text-2xl font-bold max-w-4xl mx-auto">
-                500+ DEDICATED PROFESSIONALS WORKING 24/7 TO DELIVER EXCEPTIONAL SERVICE EXPERIENCES
-              </p>
-            </ScrollReveal>
+            <h2 className="text-5xl font-black mb-4">MEET THE TASKEGO TEAM</h2>
+            <p className="text-2xl font-bold max-w-4xl mx-auto">
+              500+ DEDICATED PROFESSIONALS WORKING 24/7 TO DELIVER EXCEPTIONAL SERVICE EXPERIENCES
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
-            <ScrollReveal>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
-                <CardContent className="p-8">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
-                       alt="CEO" className="w-24 h-24 rounded-full mx-auto mb-4" />
-                  <h3 className="text-xl font-black mb-2">AHMAD AL-RASHID</h3>
-                  <p className="text-lg font-bold mb-3">CEO & FOUNDER</p>
-                  <p className="text-sm font-medium">15+ YEARS IN TECH, FORMER MICROSOFT & GOOGLE EXECUTIVE</p>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+              <CardContent className="p-8">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
+                     alt="CEO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                <h3 className="text-xl font-black mb-2">AHMAD AL-RASHID</h3>
+                <p className="text-lg font-bold mb-3">CEO & FOUNDER</p>
+                <p className="text-sm font-medium">15+ YEARS IN TECH, FORMER MICROSOFT & GOOGLE EXECUTIVE</p>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={100}>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
-                <CardContent className="p-8">
-                  <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
-                       alt="CTO" className="w-24 h-24 rounded-full mx-auto mb-4" />
-                  <h3 className="text-xl font-black mb-2">SARA AHMED</h3>
-                  <p className="text-lg font-bold mb-3">CTO</p>
-                  <p className="text-sm font-medium">AI & MACHINE LEARNING EXPERT, PHD FROM MIT</p>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+              <CardContent className="p-8">
+                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                     alt="CTO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                <h3 className="text-xl font-black mb-2">SARA AHMED</h3>
+                <p className="text-lg font-bold mb-3">CTO</p>
+                <p className="text-sm font-medium">AI & MACHINE LEARNING EXPERT, PHD FROM MIT</p>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={200}>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
-                <CardContent className="p-8">
-                  <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
-                       alt="COO" className="w-24 h-24 rounded-full mx-auto mb-4" />
-                  <h3 className="text-xl font-black mb-2">OMAR HASSAN</h3>
-                  <p className="text-lg font-bold mb-3">COO</p>
-                  <p className="text-sm font-medium">OPERATIONS SCALING SPECIALIST, FORMER MCKINSEY PARTNER</p>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+              <CardContent className="p-8">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
+                     alt="COO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                <h3 className="text-xl font-black mb-2">OMAR HASSAN</h3>
+                <p className="text-lg font-bold mb-3">COO</p>
+                <p className="text-sm font-medium">OPERATIONS SCALING SPECIALIST, FORMER MCKINSEY PARTNER</p>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={300}>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
-                <CardContent className="p-8">
-                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" 
-                       alt="CMO" className="w-24 h-24 rounded-full mx-auto mb-4" />
-                  <h3 className="text-xl font-black mb-2">LAYLA KHALIL</h3>
-                  <p className="text-lg font-bold mb-3">CMO</p>
-                  <p className="text-sm font-medium">BRAND STRATEGY EXPERT, FORMER P&G & UNILEVER EXECUTIVE</p>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0 text-center">
+              <CardContent className="p-8">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" 
+                     alt="CMO" className="w-24 h-24 rounded-full mx-auto mb-4" />
+                <h3 className="text-xl font-black mb-2">LAYLA KHALIL</h3>
+                <p className="text-lg font-bold mb-3">CMO</p>
+                <p className="text-sm font-medium">BRAND STRATEGY EXPERT, FORMER P&G & UNILEVER EXECUTIVE</p>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollReveal>
-              <div className="text-center">
-                <h3 className="text-3xl font-black mb-4">🏢 HEADQUARTERS</h3>
-                <p className="text-lg font-bold mb-2">DUBAI INTERNATIONAL FINANCIAL CENTRE</p>
-                <p className="font-medium">50,000 SQ FT MODERN OFFICE SPACE</p>
-                <p className="font-medium">500+ EMPLOYEES ACROSS 5 FLOORS</p>
-                <p className="font-medium">24/7 OPERATIONS CENTER</p>
-              </div>
-            </ScrollReveal>
+            <div className="text-center">
+              <h3 className="text-3xl font-black mb-4">🏢 HEADQUARTERS</h3>
+              <p className="text-lg font-bold mb-2">DUBAI INTERNATIONAL FINANCIAL CENTRE</p>
+              <p className="font-medium">50,000 SQ FT MODERN OFFICE SPACE</p>
+              <p className="font-medium">500+ EMPLOYEES ACROSS 5 FLOORS</p>
+              <p className="font-medium">24/7 OPERATIONS CENTER</p>
+            </div>
 
-            <ScrollReveal delay={100}>
-              <div className="text-center">
-                <h3 className="text-3xl font-black mb-4">🌍 GLOBAL OFFICES</h3>
-                <p className="text-lg font-bold mb-2">12 OFFICES ACROSS MENA REGION</p>
-                <p className="font-medium">RIYADH • DOHA • KUWAIT • CAIRO</p>
-                <p className="font-medium">AMMAN • BEIRUT • CASABLANCA</p>
-                <p className="font-medium">EXPANDING TO LONDON & SINGAPORE</p>
-              </div>
-            </ScrollReveal>
+            <div className="text-center">
+              <h3 className="text-3xl font-black mb-4">🌍 GLOBAL OFFICES</h3>
+              <p className="text-lg font-bold mb-2">12 OFFICES ACROSS MENA REGION</p>
+              <p className="font-medium">RIYADH • DOHA • KUWAIT • CAIRO</p>
+              <p className="font-medium">AMMAN • BEIRUT • CASABLANCA</p>
+              <p className="font-medium">EXPANDING TO LONDON & SINGAPORE</p>
+            </div>
 
-            <ScrollReveal delay={200}>
-              <div className="text-center">
-                <h3 className="text-3xl font-black mb-4">💰 FUNDING & GROWTH</h3>
-                <p className="text-lg font-bold mb-2">$100M SERIES C COMPLETED</p>
-                <p className="font-medium">BACKED BY SOFTBANK & SEQUOIA</p>
-                <p className="font-medium">400% YEAR-OVER-YEAR GROWTH</p>
-                <p className="font-medium">UNICORN STATUS BY 2025</p>
-              </div>
-            </ScrollReveal>
+            <div className="text-center">
+              <h3 className="text-3xl font-black mb-4">💰 FUNDING & GROWTH</h3>
+              <p className="text-lg font-bold mb-2">$100M SERIES C COMPLETED</p>
+              <p className="font-medium">BACKED BY SOFTBANK & SEQUOIA</p>
+              <p className="font-medium">400% YEAR-OVER-YEAR GROWTH</p>
+              <p className="font-medium">UNICORN STATUS BY 2025</p>
+            </div>
           </div>
         </div>
       </section>
@@ -1041,9 +1025,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={500}>
-              <Card className="bg-gradient-to-br from-teal-50 to-teal-100 shadow-lg border-0 h-full">
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-lg border-0 h-full">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-slate-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <ArrowRight className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">Instant Booking</h3>
@@ -1074,7 +1058,7 @@ export default function Home({ messages }: HomeProps) {
               <CardContent className="p-8 text-center">
                 <div className="flex justify-center mb-6">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-6 w-6 text-yellow-bright fill-current" />
+                    <Star key={i} className="h-6 w-6 text-blue-500 fill-current" />
                   ))}
                 </div>
                 <blockquote className="text-xl text-dark-readable mb-8 italic font-medium">
@@ -1105,7 +1089,7 @@ export default function Home({ messages }: HomeProps) {
                 key={index}
                 onClick={() => setCurrentTestimonial(index)}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  index === currentTestimonial ? 'bg-yellow-bright' : 'bg-gray-300'
+                  index === currentTestimonial ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
               />
             ))}
@@ -1133,19 +1117,19 @@ export default function Home({ messages }: HomeProps) {
                   <div className="text-4xl font-black text-blue-600 mb-6">$25-50</div>
                   <ul className="space-y-3 mb-8">
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Basic cleaning services
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Simple delivery tasks
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Basic maintenance
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       1-hour minimum
                     </li>
                   </ul>
@@ -1157,20 +1141,20 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={100}>
-              <Card className="bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl border-0 h-full transform scale-105">
+              <Card className="bg-gradient-to-br from-blue-500 to-slate-600 shadow-xl border-0 h-full transform scale-105">
                 <CardContent className="p-8 text-center text-white">
-                  <div className="bg-yellow-400 text-orange-600 px-3 py-1 rounded-full text-sm font-black mb-4 inline-block">
+                  <div className="bg-blue-400 text-white px-3 py-1 rounded-full text-sm font-black mb-4 inline-block">
                     MOST POPULAR
                   </div>
                   <h3 className="text-2xl font-black mb-4">Professional Services</h3>
                   <div className="text-4xl font-black mb-6">$50-100</div>
                   <ul className="space-y-3 mb-8">
                     <li className="flex items-center font-medium">
-                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-200 mr-3" />
                       Deep cleaning & maintenance
                     </li>
                     <li className="flex items-center font-medium">
-                      <CheckCircle className="h-5 w-5 text-yellow-300 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-200 mr-3" />
                       Plumbing & electrical work
                     </li>
                     <li className="flex items-center font-medium">
@@ -1182,7 +1166,7 @@ export default function Home({ messages }: HomeProps) {
                       Priority support
                     </li>
                   </ul>
-                  <Button className="w-full bg-white text-orange-600 hover:bg-gray-100 font-black">
+                  <Button className="w-full bg-white text-blue-600 hover:bg-gray-100 font-black">
                     Book Now
                   </Button>
                 </CardContent>
@@ -1196,19 +1180,19 @@ export default function Home({ messages }: HomeProps) {
                   <div className="text-4xl font-black text-blue-600 mb-6">$100+</div>
                   <ul className="space-y-3 mb-8">
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Specialized technical work
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Personal training sessions
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       Complex installations
                     </li>
                     <li className="flex items-center text-gray-700 font-medium">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3" />
                       White-glove service
                     </li>
                   </ul>
@@ -1223,7 +1207,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* Mobile App Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-slate-900 to-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <ScrollReveal>
@@ -1234,19 +1218,19 @@ export default function Home({ messages }: HomeProps) {
                 </p>
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center">
-                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <CheckCircle className="h-6 w-6 text-blue-400 mr-4" />
                     <span className="font-medium">Real-time booking and tracking</span>
                   </div>
                   <div className="flex items-center">
-                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <CheckCircle className="h-6 w-6 text-blue-400 mr-4" />
                     <span className="font-medium">Instant notifications and updates</span>
                   </div>
                   <div className="flex items-center">
-                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <CheckCircle className="h-6 w-6 text-blue-400 mr-4" />
                     <span className="font-medium">Direct chat with service providers</span>
                   </div>
                   <div className="flex items-center">
-                    <CheckCircle className="h-6 w-6 text-green-400 mr-4" />
+                    <CheckCircle className="h-6 w-6 text-blue-400 mr-4" />
                     <span className="font-medium">Secure payment processing</span>
                   </div>
                 </div>
@@ -1274,7 +1258,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* Stats & Achievements */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
