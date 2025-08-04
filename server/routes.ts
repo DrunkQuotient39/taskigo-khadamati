@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { aiService } from "./ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -203,6 +204,252 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Message sent successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // AI Routes
+  // AI Chatbot endpoint
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message, conversationId, language = 'en' } = req.body;
+      const userId = req.user?.claims?.sub || 'anonymous';
+      
+      // Get conversation history if provided
+      let conversationHistory = [];
+      if (conversationId) {
+        conversationHistory = await storage.getChatMessages(conversationId);
+      }
+      
+      const response = await aiService.chatbotResponse(message, {
+        userId,
+        language,
+        conversationHistory: conversationHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      });
+      
+      // Save the conversation
+      if (userId !== 'anonymous') {
+        const conversation = conversationId 
+          ? await storage.getChatConversation(conversationId)
+          : await storage.createChatConversation({
+              userId,
+              title: message.substring(0, 50) + '...',
+              language
+            });
+        
+        // Save user message
+        await storage.createChatMessage({
+          conversationId: conversation.id,
+          role: 'user',
+          content: message,
+          metadata: {}
+        });
+        
+        // Save AI response
+        await storage.createChatMessage({
+          conversationId: conversation.id,
+          role: 'assistant',
+          content: response,
+          metadata: {}
+        });
+      }
+      
+      res.json({ response, conversationId: conversationId || null });
+    } catch (error) {
+      console.error('AI chat error:', error);
+      res.status(500).json({ error: "Failed to process chat message" });
+    }
+  });
+
+  // AI Service Recommendations
+  app.get("/api/ai/recommendations", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { location, budget, category } = req.query;
+      
+      const user = await storage.getUser(userId);
+      const services = await storage.getServices({});
+      const categories = await storage.getServiceCategories();
+      
+      const userPreferences = {
+        location: location || user?.location,
+        budget: budget ? parseFloat(budget as string) : null,
+        preferredCategory: category || null,
+        language: user?.language || 'en'
+      };
+      
+      const recommendations = await aiService.generateServiceRecommendations(
+        userId,
+        userPreferences,
+        services,
+        categories
+      );
+      
+      // Save recommendations for tracking
+      if (recommendations.length > 0) {
+        await storage.createAiRecommendation({
+          userId,
+          serviceIds: recommendations.map(s => s.id),
+          reason: 'Generated based on user preferences and service analysis',
+          confidence: 0.85
+        });
+      }
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error('AI recommendations error:', error);
+      res.status(500).json({ error: "Failed to generate recommendations" });
+    }
+  });
+
+  // Smart Service Search with AI
+  app.post("/api/ai/search", async (req, res) => {
+    try {
+      const { description } = req.body;
+      
+      const services = await storage.getServices({});
+      const categories = await storage.getServiceCategories();
+      
+      const searchResults = await aiService.matchServicesByDescription(
+        description,
+        services,
+        categories
+      );
+      
+      res.json(searchResults);
+    } catch (error) {
+      console.error('AI search error:', error);
+      res.status(500).json({ error: "Failed to process AI search" });
+    }
+  });
+
+  // AI Pricing Analysis
+  app.post("/api/ai/pricing", async (req, res) => {
+    try {
+      const { serviceType, location, duration } = req.body;
+      
+      // Get competitor prices from database
+      const similarServices = await storage.getServices({ category: serviceType });
+      const competitorPrices = similarServices.map(s => parseFloat(s.price)).filter(p => !isNaN(p));
+      
+      const pricingAnalysis = await aiService.generatePricingSuggestions(
+        serviceType,
+        location,
+        duration,
+        competitorPrices
+      );
+      
+      res.json(pricingAnalysis);
+    } catch (error) {
+      console.error('AI pricing error:', error);
+      res.status(500).json({ error: "Failed to analyze pricing" });
+    }
+  });
+
+  // Sentiment Analysis for Reviews
+  app.post("/api/ai/sentiment", async (req, res) => {
+    try {
+      const { text, referenceType, referenceId } = req.body;
+      
+      const sentimentResult = await aiService.analyzeSentiment(text);
+      
+      // Save sentiment analysis
+      if (referenceType && referenceId) {
+        await storage.createSentimentAnalysis({
+          referenceType,
+          referenceId,
+          sentiment: sentimentResult.sentiment,
+          score: sentimentResult.score.toString(),
+          keywords: sentimentResult.keywords
+        });
+      }
+      
+      res.json(sentimentResult);
+    } catch (error) {
+      console.error('Sentiment analysis error:', error);
+      res.status(500).json({ error: "Failed to analyze sentiment" });
+    }
+  });
+
+  // Provider Profile Assessment
+  app.get("/api/ai/provider-assessment", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'provider') {
+        return res.status(403).json({ error: "Access denied. Provider role required." });
+      }
+      
+      const providerServices = await storage.getProviderServices();
+      const assessment = await aiService.assessProviderProfile(user, providerServices);
+      
+      res.json(assessment);
+    } catch (error) {
+      console.error('Provider assessment error:', error);
+      res.status(500).json({ error: "Failed to assess provider profile" });
+    }
+  });
+
+  // Auto-response generation for support
+  app.post("/api/ai/auto-response", async (req, res) => {
+    try {
+      const { query, queryType, context } = req.body;
+      
+      const response = await aiService.generateAutoResponse(
+        query,
+        queryType || 'general',
+        context || {}
+      );
+      
+      res.json({ response });
+    } catch (error) {
+      console.error('Auto-response error:', error);
+      res.status(500).json({ error: "Failed to generate auto-response" });
+    }
+  });
+
+  // Get chat conversations for a user
+  app.get("/api/ai/conversations", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversations = await storage.getChatConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Get conversations error:', error);
+      res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  // Get messages for a specific conversation
+  app.get("/api/ai/conversations/:id/messages", isAuthenticated, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const messages = await storage.getChatMessages(conversationId);
+      res.json(messages);
+    } catch (error) {
+      console.error('Get messages error:', error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Feedback on AI recommendations
+  app.post("/api/ai/recommendations/:id/feedback", isAuthenticated, async (req, res) => {
+    try {
+      const recommendationId = parseInt(req.params.id);
+      const { feedback, isUsed } = req.body;
+      
+      await storage.updateAiRecommendation(recommendationId, {
+        userFeedback: feedback,
+        isUsed: isUsed || false
+      });
+      
+      res.json({ message: "Feedback recorded successfully" });
+    } catch (error) {
+      console.error('Recommendation feedback error:', error);
+      res.status(500).json({ error: "Failed to record feedback" });
     }
   });
 
