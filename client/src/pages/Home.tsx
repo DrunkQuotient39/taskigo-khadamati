@@ -340,77 +340,69 @@ export default function Home({ messages }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <ScrollReveal>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <div className="text-4xl mb-6">🤖</div>
-                  <h3 className="text-2xl font-black mb-4">AI MATCHING ENGINE</h3>
-                  <p className="font-bold mb-4">ADVANCED MACHINE LEARNING ALGORITHMS</p>
-                  <ul className="space-y-2 text-sm font-medium">
-                    <li>• NEURAL NETWORK PROVIDER MATCHING</li>
-                    <li>• PREDICTIVE DEMAND FORECASTING</li>
-                    <li>• INTELLIGENT PRICING OPTIMIZATION</li>
-                    <li>• AUTOMATED QUALITY SCORING</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <div className="text-4xl mb-6">🤖</div>
+                <h3 className="text-2xl font-black mb-4">AI MATCHING ENGINE</h3>
+                <p className="font-bold mb-4">ADVANCED MACHINE LEARNING ALGORITHMS</p>
+                <ul className="space-y-2 text-sm font-medium">
+                  <li>• NEURAL NETWORK PROVIDER MATCHING</li>
+                  <li>• PREDICTIVE DEMAND FORECASTING</li>
+                  <li>• INTELLIGENT PRICING OPTIMIZATION</li>
+                  <li>• AUTOMATED QUALITY SCORING</li>
+                </ul>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={100}>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <div className="text-4xl mb-6">☁️</div>
-                  <h3 className="text-2xl font-black mb-4">CLOUD INFRASTRUCTURE</h3>
-                  <p className="font-bold mb-4">SCALABLE ENTERPRISE ARCHITECTURE</p>
-                  <ul className="space-y-2 text-sm font-medium">
-                    <li>• AWS MULTI-REGION DEPLOYMENT</li>
-                    <li>• KUBERNETES ORCHESTRATION</li>
-                    <li>• REAL-TIME DATA PROCESSING</li>
-                    <li>• 99.9% UPTIME GUARANTEE</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <div className="text-4xl mb-6">☁️</div>
+                <h3 className="text-2xl font-black mb-4">CLOUD INFRASTRUCTURE</h3>
+                <p className="font-bold mb-4">SCALABLE ENTERPRISE ARCHITECTURE</p>
+                <ul className="space-y-2 text-sm font-medium">
+                  <li>• AWS MULTI-REGION DEPLOYMENT</li>
+                  <li>• KUBERNETES ORCHESTRATION</li>
+                  <li>• REAL-TIME DATA PROCESSING</li>
+                  <li>• 99.9% UPTIME GUARANTEE</li>
+                </ul>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={200}>
-              <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <div className="text-4xl mb-6">📱</div>
-                  <h3 className="text-2xl font-black mb-4">MOBILE FIRST</h3>
-                  <p className="font-bold mb-4">NATIVE MOBILE APPLICATIONS</p>
-                  <ul className="space-y-2 text-sm font-medium">
-                    <li>• REACT NATIVE CROSS-PLATFORM</li>
-                    <li>• OFFLINE CAPABILITY</li>
-                    <li>• PUSH NOTIFICATIONS</li>
-                    <li>• BIOMETRIC AUTHENTICATION</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-white/10 backdrop-blur-lg shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <div className="text-4xl mb-6">📱</div>
+                <h3 className="text-2xl font-black mb-4">MOBILE FIRST</h3>
+                <p className="font-bold mb-4">NATIVE MOBILE APPLICATIONS</p>
+                <ul className="space-y-2 text-sm font-medium">
+                  <li>• REACT NATIVE CROSS-PLATFORM</li>
+                  <li>• OFFLINE CAPABILITY</li>
+                  <li>• PUSH NOTIFICATIONS</li>
+                  <li>• BIOMETRIC AUTHENTICATION</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl text-center">
-            <ScrollReveal>
-              <h3 className="text-3xl font-black mb-6">DEVELOPMENT METRICS</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div>
-                  <div className="text-3xl font-black mb-2">50+</div>
-                  <div className="font-bold">ENGINEERS</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-black mb-2">1M+</div>
-                  <div className="font-bold">LINES OF CODE</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-black mb-2">99.9%</div>
-                  <div className="font-bold">CODE COVERAGE</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-black mb-2">24/7</div>
-                  <div className="font-bold">MONITORING</div>
-                </div>
+            <h3 className="text-3xl font-black mb-6">DEVELOPMENT METRICS</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div>
+                <div className="text-3xl font-black mb-2">50+</div>
+                <div className="font-bold">ENGINEERS</div>
               </div>
-            </ScrollReveal>
+              <div>
+                <div className="text-3xl font-black mb-2">1M+</div>
+                <div className="font-bold">LINES OF CODE</div>
+              </div>
+              <div>
+                <div className="text-3xl font-black mb-2">99.9%</div>
+                <div className="font-bold">CODE COVERAGE</div>
+              </div>
+              <div>
+                <div className="text-3xl font-black mb-2">24/7</div>
+                <div className="font-bold">MONITORING</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -470,8 +462,8 @@ export default function Home({ messages }: HomeProps) {
                       <li>✓ 24/7 SUPPORT</li>
                     </ul>
                   </div>
-                  <div className="bg-white/30 backdrop-blur-lg p-6 rounded-xl border-2 border-yellow-400">
-                    <div className="bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-black mb-3 inline-block">MOST POPULAR</div>
+                  <div className="bg-white/30 backdrop-blur-lg p-6 rounded-xl border-2 border-blue-400">
+                    <div className="bg-blue-400 text-white px-3 py-1 rounded-full text-xs font-black mb-3 inline-block">MOST POPULAR</div>
                     <h4 className="text-xl font-black mb-3">PREMIUM BUNDLE</h4>
                     <div className="text-2xl font-black mb-2">$399/month</div>
                     <ul className="space-y-2 text-sm font-bold">
