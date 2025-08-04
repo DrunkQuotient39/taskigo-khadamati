@@ -24,15 +24,15 @@
   --ring: hsl(207, 90%, 54%);
   --radius: 0.5rem;
   
-  /* Taskego Professional Colors */
-  --taskego-primary: hsl(211, 100%, 43%); /* Professional Blue */
-  --taskego-secondary: hsl(142, 69%, 58%); /* Success Green */
-  --taskego-accent: hsl(217, 91%, 60%); /* Action Blue */
-  --taskego-warning: hsl(38, 92%, 50%); /* Warning Orange */
-  --taskego-neutral: hsl(220, 13%, 91%); /* Light Gray */
-  --taskego-dark: hsl(222, 47%, 11%); /* Dark Blue-Gray */
-  --taskego-urgent: hsl(4, 90%, 58%); /* Urgent Red */
-  --taskego-complete: hsl(120, 43%, 48%); /* Complete Green */
+  /* Taskego Warm Professional Colors */
+  --taskego-primary: hsl(211, 85%, 45%); /* Warm Professional Blue */
+  --taskego-secondary: hsl(220, 15%, 65%); /* Warm Gray */
+  --taskego-accent: hsl(200, 50%, 55%); /* Soft Blue */
+  --taskego-neutral: hsl(220, 10%, 88%); /* Warm Light Gray */
+  --taskego-dark: hsl(215, 25%, 20%); /* Warm Dark Gray */
+  --taskego-muted: hsl(210, 15%, 70%); /* Muted Blue-Gray */
+  --taskego-subtle: hsl(205, 20%, 75%); /* Subtle Blue */
+  --taskego-contrast: hsl(215, 40%, 35%); /* Contrast Blue */
 }
 
 .dark {
