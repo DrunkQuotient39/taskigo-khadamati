@@ -4,6 +4,16 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { aiService } from "./ai";
 
+// Import AI controllers
+const { chatWithAI, getServiceRecommendations, analyzeSentiment, getSuggestedPricing } = require('./controllers/aiController');
+const { 
+  createApplePaySession, 
+  processApplePayment, 
+  createPaymentIntent, 
+  getPaymentHistory, 
+  getSupportedPaymentMethods 
+} = require('./controllers/paymentController');
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -44,6 +54,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(category);
     } catch (error) {
       res.status(500).json({ error: "Failed to create category" });
+    }
+  });
+
+  // AI-powered Chat Routes (Bilingual Assistant)
+  app.post("/api/chat-ai/message", async (req, res) => {
+    try {
+      await chatWithAI(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "AI chat service temporarily unavailable" });
+    }
+  });
+
+  // AI Service Recommendations (Smart Matching)
+  app.post("/api/ai/recommendations", async (req, res) => {
+    try {
+      await getServiceRecommendations(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "AI recommendation service unavailable" });
+    }
+  });
+
+  // AI Sentiment Analysis for Reviews
+  app.post("/api/ai/sentiment", async (req, res) => {
+    try {
+      await analyzeSentiment(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Sentiment analysis service unavailable" });
+    }
+  });
+
+  // AI Pricing Suggestions for Providers
+  app.post("/api/ai/pricing", isAuthenticated, async (req, res) => {
+    try {
+      await getSuggestedPricing(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "AI pricing service unavailable" });
+    }
+  });
+
+  // Apple Pay Payment Processing
+  app.post("/api/payments/apple-pay/session", async (req, res) => {
+    try {
+      await createApplePaySession(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Apple Pay session creation failed" });
+    }
+  });
+
+  app.post("/api/payments/apple-pay/process", isAuthenticated, async (req, res) => {
+    try {
+      await processApplePayment(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Apple Pay processing failed" });
+    }
+  });
+
+  app.post("/api/payments/intent", isAuthenticated, async (req, res) => {
+    try {
+      await createPaymentIntent(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Payment intent creation failed" });
+    }
+  });
+
+  app.get("/api/payments/history", isAuthenticated, async (req, res) => {
+    try {
+      await getPaymentHistory(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get payment history" });
+    }
+  });
+
+  app.get("/api/payments/methods/supported", async (req, res) => {
+    try {
+      await getSupportedPaymentMethods(req, res);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get supported payment methods" });
     }
   });
 
