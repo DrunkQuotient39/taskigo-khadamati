@@ -253,47 +253,41 @@ export default function Home({ messages }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <ScrollReveal>
-              <Card className="bg-gradient-to-br from-blue-600 to-slate-600 text-white shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <h3 className="text-2xl font-black mb-4">MARKET LEADER</h3>
-                  <p className="text-lg font-bold mb-4">#1 SERVICE PLATFORM IN THE MIDDLE EAST</p>
-                  <div className="space-y-2">
-                    <div className="text-sm font-bold">🏆 FASTEST GROWING PLATFORM 2024</div>
-                    <div className="text-sm font-bold">🏆 BEST CUSTOMER SERVICE AWARD</div>
-                    <div className="text-sm font-bold">🏆 MOST TRUSTED BRAND AWARD</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-gradient-to-br from-blue-600 to-slate-600 text-white shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-2xl font-black mb-4">MARKET LEADER</h3>
+                <p className="text-lg font-bold mb-4">#1 SERVICE PLATFORM IN THE MIDDLE EAST</p>
+                <div className="space-y-2">
+                  <div className="text-sm font-bold">🏆 FASTEST GROWING PLATFORM 2024</div>
+                  <div className="text-sm font-bold">🏆 BEST CUSTOMER SERVICE AWARD</div>
+                  <div className="text-sm font-bold">🏆 MOST TRUSTED BRAND AWARD</div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={100}>
-              <Card className="bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <h3 className="text-2xl font-black mb-4">GLOBAL EXPANSION</h3>
-                  <p className="text-lg font-bold mb-4">EXPANDING TO 15 NEW COUNTRIES IN 2025</p>
-                  <div className="space-y-2">
-                    <div className="text-sm font-bold">🌍 EUROPE LAUNCH Q2 2025</div>
-                    <div className="text-sm font-bold">🌍 ASIA EXPANSION Q3 2025</div>
-                    <div className="text-sm font-bold">🌍 AFRICA ENTRY Q4 2025</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-gradient-to-br from-slate-600 to-blue-600 text-white shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-2xl font-black mb-4">GLOBAL EXPANSION</h3>
+                <p className="text-lg font-bold mb-4">EXPANDING TO 15 NEW COUNTRIES IN 2025</p>
+                <div className="space-y-2">
+                  <div className="text-sm font-bold">🌍 EUROPE LAUNCH Q2 2025</div>
+                  <div className="text-sm font-bold">🌍 ASIA EXPANSION Q3 2025</div>
+                  <div className="text-sm font-bold">🌍 AFRICA ENTRY Q4 2025</div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <ScrollReveal delay={200}>
-              <Card className="bg-gradient-to-br from-green-600 to-teal-600 text-white shadow-2xl border-0">
-                <CardContent className="p-8 text-center">
-                  <h3 className="text-2xl font-black mb-4">TECHNOLOGY LEADER</h3>
-                  <p className="text-lg font-bold mb-4">AI-POWERED MATCHING & AUTOMATION</p>
-                  <div className="space-y-2">
-                    <div className="text-sm font-bold">🤖 SMART PROVIDER MATCHING</div>
-                    <div className="text-sm font-bold">🤖 PREDICTIVE SCHEDULING</div>
-                    <div className="text-sm font-bold">🤖 AUTOMATED QUALITY CONTROL</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
+            <Card className="bg-gradient-to-br from-blue-500 to-slate-500 text-white shadow-2xl border-0">
+              <CardContent className="p-8 text-center">
+                <h3 className="text-2xl font-black mb-4">TECHNOLOGY LEADER</h3>
+                <p className="text-lg font-bold mb-4">AI-POWERED MATCHING & AUTOMATION</p>
+                <div className="space-y-2">
+                  <div className="text-sm font-bold">🤖 SMART PROVIDER MATCHING</div>
+                  <div className="text-sm font-bold">🤖 PREDICTIVE SCHEDULING</div>
+                  <div className="text-sm font-bold">🤖 AUTOMATED QUALITY CONTROL</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="text-center">
@@ -328,15 +322,13 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* TECHNOLOGY STACK */}
-      <section className="py-20 bg-gradient-to-br from-emerald-600 to-cyan-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <ScrollReveal>
-              <h2 className="text-5xl font-black mb-4">CUTTING-EDGE TECHNOLOGY</h2>
-              <p className="text-2xl font-bold max-w-4xl mx-auto">
-                POWERED BY THE LATEST AI, MACHINE LEARNING, AND CLOUD TECHNOLOGIES
-              </p>
-            </ScrollReveal>
+            <h2 className="text-5xl font-black mb-4">CUTTING-EDGE TECHNOLOGY</h2>
+            <p className="text-2xl font-bold max-w-4xl mx-auto">
+              POWERED BY THE LATEST AI, MACHINE LEARNING, AND CLOUD TECHNOLOGIES
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -411,14 +403,12 @@ export default function Home({ messages }: HomeProps) {
       <section className="py-20 bg-khadamati-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <ScrollReveal>
-              <h2 className="text-4xl font-bold text-khadamati-dark mb-4">
-                {messages.services?.title || 'Our Services'}
-              </h2>
-              <p className="text-xl text-khadamati-gray max-w-2xl mx-auto">
-                {messages.services?.description || 'Explore our wide range of professional services designed to make your life easier.'}
-              </p>
-            </ScrollReveal>
+            <h2 className="text-4xl font-bold text-khadamati-dark mb-4">
+              {messages.services?.title || 'Our Services'}
+            </h2>
+            <p className="text-xl text-khadamati-gray max-w-2xl mx-auto">
+              {messages.services?.description || 'Explore our wide range of professional services designed to make your life easier.'}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -448,8 +438,7 @@ export default function Home({ messages }: HomeProps) {
           </div>
 
           <div className="mt-16">
-            <ScrollReveal>
-              <div className="bg-gradient-to-br from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-8">
+            <div className="bg-gradient-to-br from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-8">
                 <h3 className="text-3xl font-black mb-4">EXCLUSIVE SERVICE PACKAGES</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
@@ -533,7 +522,7 @@ export default function Home({ messages }: HomeProps) {
                   DOWNLOAD MOBILE APP
                 </Button>
               </div>
-            </ScrollReveal>
+            </div>
           </div>
         </div>
       </section>
@@ -542,14 +531,12 @@ export default function Home({ messages }: HomeProps) {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <ScrollReveal>
-              <h2 className="text-5xl font-black text-gray-900 mb-4">
-                THE COMPLETE TASKEGO EXPERIENCE
-              </h2>
-              <p className="text-2xl text-gray-700 max-w-4xl mx-auto font-bold">
-                FROM BROWSING TO COMPLETION - EVERY STEP IS DESIGNED FOR MAXIMUM CONVENIENCE AND QUALITY
-              </p>
-            </ScrollReveal>
+            <h2 className="text-5xl font-black text-gray-900 mb-4">
+              THE COMPLETE TASKEGO EXPERIENCE
+            </h2>
+            <p className="text-2xl text-gray-700 max-w-4xl mx-auto font-bold">
+              FROM BROWSING TO COMPLETION - EVERY STEP IS DESIGNED FOR MAXIMUM CONVENIENCE AND QUALITY
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
@@ -1734,7 +1721,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* Location Coverage */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
@@ -1792,7 +1779,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* MOBILE APP SHOWCASE */}
-      <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
@@ -1809,7 +1796,7 @@ export default function Home({ messages }: HomeProps) {
                 <h3 className="text-4xl font-black mb-8">APP FEATURES & BENEFITS</h3>
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-2xl">📱</span>
                     </div>
                     <div>
@@ -1818,7 +1805,7 @@ export default function Home({ messages }: HomeProps) {
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-green-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-slate-400 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-2xl">📍</span>
                     </div>
                     <div>
