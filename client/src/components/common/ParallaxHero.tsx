@@ -136,7 +136,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
           >
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-6">
-              <Badge className="bg-orange-500 text-white px-6 py-3 text-lg font-bold shadow-xl border-2 border-orange-600">
+              <Badge className="bg-blue-600 text-white px-6 py-3 text-lg font-bold shadow-xl border-2 border-blue-700">
                 🚀 #1 Service Platform in the Region
               </Badge>
             </motion.div>
@@ -156,7 +156,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
             <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-800 mb-8 leading-relaxed max-w-2xl font-bold">
               Connect with verified professionals for 
               <span className="text-blue-700 font-black"> cleaning</span>,
-              <span className="text-orange-600 font-black"> repairs</span>, and
+              <span className="text-slate-600 font-black"> repairs</span>, and
               <span className="text-blue-700 font-black"> maintenance</span> services. 
               Available in English and Arabic.
             </motion.p>
@@ -166,7 +166,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               <Button
                 onClick={onGetStarted}
                 size="lg"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold shadow-xl border-2 border-orange-600 hover:scale-105 transition-all duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-xl font-bold shadow-xl border-2 border-blue-700 hover:scale-105 transition-all duration-300"
               >
                 Get Started Free
                 <ArrowDown className="w-5 h-5 ml-2" />
@@ -212,17 +212,17 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               className="relative z-10"
             >
               <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-gradient-to-br from-khadamati-blue/10 to-khadamati-yellow/10 rounded-2xl p-6">
+                <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-slate-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
                   </div>
                   
                   <div className="space-y-4">
                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                    <div className="h-8 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow rounded-lg"></div>
+                    <div className="h-8 bg-gradient-to-r from-blue-600 to-slate-600 rounded-lg"></div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="h-16 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
                       <div className="h-16 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
@@ -248,7 +248,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               variants={floatingVariants}
               initial="initial"
               animate="animate"
-              className="absolute -bottom-6 -right-6 bg-gradient-to-r from-khadamati-blue to-khadamati-yellow text-white rounded-2xl shadow-xl p-4 text-center"
+              className="absolute -bottom-6 -right-6 bg-gradient-to-r from-blue-600 to-slate-600 text-white rounded-2xl shadow-xl p-4 text-center"
               style={{ animationDelay: '2s' }}
             >
               <div className="text-2xl mb-1">🚀</div>
