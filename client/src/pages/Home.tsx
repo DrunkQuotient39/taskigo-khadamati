@@ -167,7 +167,7 @@ export default function Home({ messages }: HomeProps) {
       />
 
       {/* MASSIVE Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-slate-800 to-blue-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
@@ -180,28 +180,28 @@ export default function Home({ messages }: HomeProps) {
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-orange-400 mb-1">
+              <div className="text-3xl font-black text-blue-400 mb-1">
                 <AnimatedCounter end={1200} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">SERVICE PROVIDERS</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-blue-400 mb-1">
+              <div className="text-3xl font-black text-green-400 mb-1">
                 <AnimatedCounter end={50000} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">HAPPY CUSTOMERS</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-green-400 mb-1">
+              <div className="text-3xl font-black text-slate-400 mb-1">
                 <AnimatedCounter end={125000} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">SERVICES COMPLETED</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-yellow-400 mb-1">4.9⭐</div>
+              <div className="text-3xl font-black text-amber-400 mb-1">4.9⭐</div>
               <div className="text-white font-bold text-xs">AVERAGE RATING</div>
             </div>
           </div>
@@ -443,7 +443,7 @@ export default function Home({ messages }: HomeProps) {
                     <p className="text-gray-700 text-xs font-medium mb-2 leading-tight">
                       {category.description}
                     </p>
-                    <div className="text-white font-black text-xs bg-gradient-to-r from-orange-500 to-blue-600 px-2 py-1 rounded-full shadow-lg mb-2">
+                    <div className="text-white font-black text-xs bg-gradient-to-r from-blue-600 to-slate-600 px-2 py-1 rounded-full shadow-lg mb-2">
                       {category.price}
                     </div>
                     <div className="text-xs text-gray-500 font-bold">
@@ -457,7 +457,7 @@ export default function Home({ messages }: HomeProps) {
 
           <div className="mt-16">
             <ScrollReveal>
-              <div className="bg-gradient-to-br from-orange-500 to-blue-600 p-8 rounded-3xl text-white text-center mb-8">
+              <div className="bg-gradient-to-br from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-8">
                 <h3 className="text-3xl font-black mb-4">EXCLUSIVE SERVICE PACKAGES</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
@@ -532,7 +532,7 @@ export default function Home({ messages }: HomeProps) {
                   </div>
                 </div>
                 <Link href="/services">
-                  <Button size="lg" className="px-12 py-6 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-black text-xl shadow-2xl border-0 transition-all duration-300 transform hover:scale-105 mr-4">
+                  <Button size="lg" className="px-12 py-6 bg-gradient-to-r from-blue-600 to-slate-600 hover:from-blue-700 hover:to-slate-700 text-white font-black text-xl shadow-2xl border-0 transition-all duration-300 transform hover:scale-105 mr-4">
                     VIEW ALL 12+ SERVICE CATEGORIES
                     <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
