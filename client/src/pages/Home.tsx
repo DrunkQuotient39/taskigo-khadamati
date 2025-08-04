@@ -563,7 +563,7 @@ export default function Home({ messages }: HomeProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             <ScrollReveal className="text-center">
               <div className="relative">
-                <div className="w-28 h-28 bg-gradient-to-br from-blue-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-600 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">1</span>
                 </div>
                 <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
@@ -584,7 +584,7 @@ export default function Home({ messages }: HomeProps) {
 
             <ScrollReveal className="text-center" delay={100}>
               <div className="relative">
-                <div className="w-28 h-28 bg-gradient-to-br from-orange-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <div className="w-28 h-28 bg-gradient-to-br from-slate-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">2</span>
                 </div>
                 <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
@@ -593,8 +593,8 @@ export default function Home({ messages }: HomeProps) {
               <p className="text-gray-800 font-bold text-base mb-4">
                 SECURE YOUR BOOKING IN UNDER 60 SECONDS WITH FLEXIBLE SCHEDULING AND INSTANT CONFIRMATION
               </p>
-              <div className="bg-orange-50 p-4 rounded-lg">
-                <div className="text-sm font-bold text-orange-600 space-y-1">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-slate-600 space-y-1">
                   <div>⚡ 45-SECOND BOOKING PROCESS</div>
                   <div>📅 FLEXIBLE DATE & TIME SLOTS</div>
                   <div>💳 SECURE PAYMENT OPTIONS</div>
@@ -605,7 +605,7 @@ export default function Home({ messages }: HomeProps) {
 
             <ScrollReveal className="text-center" delay={200}>
               <div className="relative">
-                <div className="w-28 h-28 bg-gradient-to-br from-green-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-slate-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">3</span>
                 </div>
                 <div className="absolute top-14 left-full w-8 h-1 bg-gray-300 hidden md:block"></div>
@@ -614,8 +614,8 @@ export default function Home({ messages }: HomeProps) {
               <p className="text-gray-800 font-bold text-base mb-4">
                 REAL-TIME TRACKING, DIRECT MESSAGING, AND LIVE UPDATES FROM BOOKING TO COMPLETION
               </p>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm font-bold text-green-600 space-y-1">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-blue-600 space-y-1">
                   <div>📱 LIVE GPS TRACKING</div>
                   <div>💬 DIRECT PROVIDER CHAT</div>
                   <div>🔔 REAL-TIME NOTIFICATIONS</div>
@@ -625,15 +625,15 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal className="text-center" delay={300}>
-              <div className="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+              <div className="w-28 h-28 bg-gradient-to-br from-slate-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                 <span className="text-white text-4xl font-black">4</span>
               </div>
               <h3 className="text-2xl font-black text-gray-900 mb-4">RATE & ENJOY</h3>
               <p className="text-gray-800 font-bold text-base mb-4">
                 RATE YOUR EXPERIENCE, ENJOY GUARANTEED SATISFACTION, AND BOOK AGAIN WITH ONE CLICK
               </p>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <div className="text-sm font-bold text-purple-600 space-y-1">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <div className="text-sm font-bold text-slate-600 space-y-1">
                   <div>⭐ DETAILED RATING SYSTEM</div>
                   <div>✅ 100% SATISFACTION GUARANTEE</div>
                   <div>🔄 EASY REBOOKING OPTIONS</div>
@@ -643,7 +643,7 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-3xl text-white text-center mb-12">
+          <div className="bg-gradient-to-r from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-12">
             <ScrollReveal>
               <h3 className="text-3xl font-black mb-6">ADVANCED FEATURES FOR POWER USERS</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -672,19 +672,19 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
             <ScrollReveal delay={100}>
               <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-green-600 mb-2">99.8%</div>
+                <div className="text-3xl font-black text-blue-600 mb-2">99.8%</div>
                 <div className="text-sm font-bold text-gray-700">ON-TIME ARRIVAL RATE</div>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={200}>
               <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-orange-600 mb-2">24/7</div>
+                <div className="text-3xl font-black text-slate-600 mb-2">24/7</div>
                 <div className="text-sm font-bold text-gray-700">CUSTOMER SUPPORT</div>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={300}>
               <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-purple-600 mb-2">100%</div>
+                <div className="text-3xl font-black text-slate-600 mb-2">100%</div>
                 <div className="text-sm font-bold text-gray-700">SATISFACTION GUARANTEE</div>
               </div>
             </ScrollReveal>
@@ -693,7 +693,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* TEAM & COMPANY SHOWCASE */}
-      <section className="py-20 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
