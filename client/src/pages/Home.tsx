@@ -180,74 +180,74 @@ export default function Home({ messages }: HomeProps) {
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-blue-400 mb-1">
+              <div className="text-3xl font-black text-blue-300 mb-1">
                 <AnimatedCounter end={1200} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">SERVICE PROVIDERS</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-green-400 mb-1">
+              <div className="text-3xl font-black text-slate-300 mb-1">
                 <AnimatedCounter end={50000} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">HAPPY CUSTOMERS</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-slate-400 mb-1">
+              <div className="text-3xl font-black text-blue-200 mb-1">
                 <AnimatedCounter end={125000} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">SERVICES COMPLETED</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-amber-400 mb-1">4.9⭐</div>
+              <div className="text-3xl font-black text-slate-200 mb-1">4.9⭐</div>
               <div className="text-white font-bold text-xs">AVERAGE RATING</div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-purple-400 mb-1">
+              <div className="text-3xl font-black text-blue-300 mb-1">
                 <AnimatedCounter end={25} suffix="+" />
               </div>
               <div className="text-white font-bold text-xs">CITIES COVERED</div>
             </div>
 
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-pink-400 mb-1">98%</div>
+              <div className="text-3xl font-black text-slate-300 mb-1">98%</div>
               <div className="text-white font-bold text-xs">SATISFACTION RATE</div>
             </div>
 
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-indigo-400 mb-1">24/7</div>
+              <div className="text-3xl font-black text-blue-200 mb-1">24/7</div>
               <div className="text-white font-bold text-xs">SUPPORT AVAILABLE</div>
             </div>
 
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-teal-400 mb-1">2HR</div>
+              <div className="text-3xl font-black text-slate-200 mb-1">2HR</div>
               <div className="text-white font-bold text-xs">AVG RESPONSE</div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-red-400 mb-1">ISO</div>
+              <div className="text-3xl font-black text-blue-300 mb-1">ISO</div>
               <div className="text-white font-bold text-xs">CERTIFIED SECURITY</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-cyan-400 mb-1">AI</div>
+              <div className="text-3xl font-black text-slate-300 mb-1">AI</div>
               <div className="text-white font-bold text-xs">POWERED MATCHING</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-lime-400 mb-1">MENA</div>
+              <div className="text-3xl font-black text-blue-200 mb-1">MENA</div>
               <div className="text-white font-bold text-xs">MARKET LEADER</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl">
-              <div className="text-3xl font-black text-rose-400 mb-1">NEXT</div>
+              <div className="text-3xl font-black text-slate-200 mb-1">NEXT</div>
               <div className="text-white font-bold text-xs">UNICORN STATUS</div>
             </div>
           </div>
@@ -2209,32 +2209,32 @@ export default function Home({ messages }: HomeProps) {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-yellow-400 mb-1">LIVE</div>
+              <div className="text-2xl font-black text-blue-300 mb-1">LIVE</div>
               <div className="text-xs font-bold">ACTIVE BOOKINGS</div>
               <div className="text-lg font-black mt-2">2,847</div>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-green-400 mb-1">ONLINE</div>
+              <div className="text-2xl font-black text-slate-300 mb-1">ONLINE</div>
               <div className="text-xs font-bold">PROVIDERS NOW</div>
               <div className="text-lg font-black mt-2">1,456</div>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-blue-400 mb-1">TODAY</div>
+              <div className="text-2xl font-black text-blue-200 mb-1">TODAY</div>
               <div className="text-xs font-bold">SERVICES BOOKED</div>
               <div className="text-lg font-black mt-2">8,923</div>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-purple-400 mb-1">THIS HOUR</div>
+              <div className="text-2xl font-black text-slate-200 mb-1">THIS HOUR</div>
               <div className="text-xs font-bold">NEW USERS</div>
               <div className="text-lg font-black mt-2">247</div>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-cyan-400 mb-1">PROCESSING</div>
+              <div className="text-2xl font-black text-blue-300 mb-1">PROCESSING</div>
               <div className="text-xs font-bold">PAYMENTS</div>
               <div className="text-lg font-black mt-2">$147K</div>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-4 rounded-xl text-center">
-              <div className="text-2xl font-black text-pink-400 mb-1">AVERAGE</div>
+              <div className="text-2xl font-black text-slate-300 mb-1">AVERAGE</div>
               <div className="text-xs font-bold">RESPONSE TIME</div>
               <div className="text-lg font-black mt-2">1.2 SEC</div>
             </div>
@@ -2248,22 +2248,22 @@ export default function Home({ messages }: HomeProps) {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="font-bold">UAE</span>
-                      <div className="bg-yellow-400 h-3 w-24 rounded-full"></div>
+                      <div className="bg-blue-300 h-3 w-24 rounded-full"></div>
                       <span className="font-black">87%</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">SAUDI</span>
-                      <div className="bg-green-400 h-3 w-20 rounded-full"></div>
+                      <div className="bg-slate-300 h-3 w-20 rounded-full"></div>
                       <span className="font-black">72%</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">QATAR</span>
-                      <div className="bg-blue-400 h-3 w-16 rounded-full"></div>
+                      <div className="bg-blue-200 h-3 w-16 rounded-full"></div>
                       <span className="font-black">64%</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">KUWAIT</span>
-                      <div className="bg-purple-400 h-3 w-14 rounded-full"></div>
+                      <div className="bg-slate-200 h-3 w-14 rounded-full"></div>
                       <span className="font-black">58%</span>
                     </div>
                   </div>
@@ -2304,23 +2304,23 @@ export default function Home({ messages }: HomeProps) {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="font-bold">API RESPONSE</span>
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="font-black text-green-400">OPTIMAL</span>
+                      <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                      <span className="font-black text-blue-300">OPTIMAL</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">DATABASE</span>
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="font-black text-green-400">HEALTHY</span>
+                      <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
+                      <span className="font-black text-slate-300">HEALTHY</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">PAYMENTS</span>
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="font-black text-green-400">PROCESSING</span>
+                      <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                      <span className="font-black text-blue-300">PROCESSING</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-bold">MOBILE APP</span>
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="font-black text-green-400">STABLE</span>
+                      <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
+                      <span className="font-black text-slate-300">STABLE</span>
                     </div>
                   </div>
                 </CardContent>
@@ -2332,7 +2332,7 @@ export default function Home({ messages }: HomeProps) {
             <ScrollReveal>
               <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl">
                 <h3 className="text-3xl font-black mb-6">PLATFORM HEALTH SCORE</h3>
-                <div className="text-6xl font-black text-yellow-400 mb-4">99.7%</div>
+                <div className="text-6xl font-black text-blue-300 mb-4">99.7%</div>
                 <p className="text-xl font-bold mb-6">ALL SYSTEMS OPERATING AT PEAK PERFORMANCE</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm font-bold">
                   <div>🚀 RESPONSE TIME: 1.2S</div>
