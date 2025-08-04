@@ -553,7 +553,7 @@ export default function Home({ messages }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
-            <ScrollReveal className="text-center">
+            <div className="text-center">
               <div className="relative">
                 <div className="w-28 h-28 bg-gradient-to-br from-blue-600 to-slate-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">1</span>
@@ -572,9 +572,9 @@ export default function Home({ messages }: HomeProps) {
                   <div>📍 LOCATION-BASED MATCHING</div>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
 
-            <ScrollReveal className="text-center" delay={100}>
+            <div className="text-center">
               <div className="relative">
                 <div className="w-28 h-28 bg-gradient-to-br from-slate-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">2</span>
@@ -593,9 +593,9 @@ export default function Home({ messages }: HomeProps) {
                   <div>📧 INSTANT CONFIRMATION EMAIL</div>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
 
-            <ScrollReveal className="text-center" delay={200}>
+            <div className="text-center">
               <div className="relative">
                 <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-slate-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-white text-4xl font-black">3</span>
@@ -614,9 +614,9 @@ export default function Home({ messages }: HomeProps) {
                   <div>📸 PROGRESS PHOTO UPDATES</div>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
 
-            <ScrollReveal className="text-center" delay={300}>
+            <div className="text-center">
               <div className="w-28 h-28 bg-gradient-to-br from-slate-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                 <span className="text-white text-4xl font-black">4</span>
               </div>
@@ -632,54 +632,44 @@ export default function Home({ messages }: HomeProps) {
                   <div>🎁 LOYALTY REWARDS PROGRAM</div>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
           </div>
 
           <div className="bg-gradient-to-r from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-12">
-            <ScrollReveal>
-              <h3 className="text-3xl font-black mb-6">ADVANCED FEATURES FOR POWER USERS</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <h4 className="text-xl font-black mb-3">🤖 AI-POWERED MATCHING</h4>
-                  <p className="font-bold">SMART ALGORITHMS MATCH YOU WITH THE PERFECT PROVIDER BASED ON YOUR HISTORY, PREFERENCES, AND REQUIREMENTS</p>
-                </div>
-                <div>
-                  <h4 className="text-xl font-black mb-3">📊 ANALYTICS DASHBOARD</h4>
-                  <p className="font-bold">TRACK YOUR SERVICE HISTORY, SPENDING PATTERNS, AND PROVIDER PERFORMANCE WITH DETAILED INSIGHTS</p>
-                </div>
-                <div>
-                  <h4 className="text-xl font-black mb-3">🔄 AUTOMATED SCHEDULING</h4>
-                  <p className="font-bold">SET UP RECURRING SERVICES WITH AUTOMATED BOOKING, PAYMENT, AND PROVIDER ROTATION</p>
-                </div>
+            <h3 className="text-3xl font-black mb-6">ADVANCED FEATURES FOR POWER USERS</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h4 className="text-xl font-black mb-3">🤖 AI-POWERED MATCHING</h4>
+                <p className="font-bold">SMART ALGORITHMS MATCH YOU WITH THE PERFECT PROVIDER BASED ON YOUR HISTORY, PREFERENCES, AND REQUIREMENTS</p>
               </div>
-            </ScrollReveal>
+              <div>
+                <h4 className="text-xl font-black mb-3">📊 ANALYTICS DASHBOARD</h4>
+                <p className="font-bold">TRACK YOUR SERVICE HISTORY, SPENDING PATTERNS, AND PROVIDER PERFORMANCE WITH DETAILED INSIGHTS</p>
+              </div>
+              <div>
+                <h4 className="text-xl font-black mb-3">🔄 AUTOMATED SCHEDULING</h4>
+                <p className="font-bold">SET UP RECURRING SERVICES WITH AUTOMATED BOOKING, PAYMENT, AND PROVIDER ROTATION</p>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <ScrollReveal>
-              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-blue-600 mb-2">2MIN</div>
-                <div className="text-sm font-bold text-gray-700">AVERAGE BOOKING TIME</div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={100}>
-              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-blue-600 mb-2">99.8%</div>
-                <div className="text-sm font-bold text-gray-700">ON-TIME ARRIVAL RATE</div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={200}>
-              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-slate-600 mb-2">24/7</div>
-                <div className="text-sm font-bold text-gray-700">CUSTOMER SUPPORT</div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={300}>
-              <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-                <div className="text-3xl font-black text-slate-600 mb-2">100%</div>
-                <div className="text-sm font-bold text-gray-700">SATISFACTION GUARANTEE</div>
-              </div>
-            </ScrollReveal>
+            <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+              <div className="text-3xl font-black text-blue-600 mb-2">2MIN</div>
+              <div className="text-sm font-bold text-gray-700">AVERAGE BOOKING TIME</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+              <div className="text-3xl font-black text-blue-600 mb-2">99.8%</div>
+              <div className="text-sm font-bold text-gray-700">ON-TIME ARRIVAL RATE</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+              <div className="text-3xl font-black text-slate-600 mb-2">24/7</div>
+              <div className="text-sm font-bold text-gray-700">CUSTOMER SUPPORT</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+              <div className="text-3xl font-black text-slate-600 mb-2">100%</div>
+              <div className="text-sm font-bold text-gray-700">SATISFACTION GUARANTEE</div>
+            </div>
           </div>
         </div>
       </section>
@@ -794,9 +784,9 @@ export default function Home({ messages }: HomeProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             <ScrollReveal>
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 shadow-xl border-0 text-center">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-xl border-0 text-center">
                 <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">ISO 27001 CERTIFIED</h3>
@@ -818,9 +808,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={200}>
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 shadow-xl border-0 text-center">
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-xl border-0 text-center">
                 <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Star className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">GDPR COMPLIANT</h3>
@@ -830,9 +820,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={300}>
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 shadow-xl border-0 text-center">
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-xl border-0 text-center">
                 <CardContent className="p-8">
-                  <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">PCI DSS LEVEL 1</h3>
@@ -842,7 +832,7 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-900 to-blue-900 p-12 rounded-3xl text-white text-center">
+          <div className="bg-gradient-to-br from-slate-900 to-blue-900 p-12 rounded-3xl text-white text-center">
             <ScrollReveal>
               <h3 className="text-4xl font-black mb-8">SECURITY FEATURES & PROTOCOLS</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -880,7 +870,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* CUSTOMER SUCCESS STORIES */}
-      <section className="py-20 bg-gradient-to-br from-pink-600 to-rose-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
@@ -905,7 +895,7 @@ export default function Home({ messages }: HomeProps) {
                   </div>
                   <p className="font-bold mb-4">"SAVED $5,000 ANNUALLY ON HOME MAINTENANCE"</p>
                   <p className="text-sm font-medium">"Taskego's verified providers helped me maintain my villa at 40% lower cost while ensuring premium quality. The AI matching found perfect specialists every time."</p>
-                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                  <div className="flex text-blue-400 mt-4">⭐⭐⭐⭐⭐</div>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -923,7 +913,7 @@ export default function Home({ messages }: HomeProps) {
                   </div>
                   <p className="font-bold mb-4">"STREAMLINED OFFICE OPERATIONS COMPLETELY"</p>
                   <p className="text-sm font-medium">"From cleaning to IT support, Taskego handles all our office services. The enterprise dashboard gives us full visibility and control. Game changer for efficiency."</p>
-                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                  <div className="flex text-blue-400 mt-4">⭐⭐⭐⭐⭐</div>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -941,7 +931,7 @@ export default function Home({ messages }: HomeProps) {
                   </div>
                   <p className="font-bold mb-4">"RECLAIMED 15 HOURS WEEKLY FOR FAMILY"</p>
                   <p className="text-sm font-medium">"Between work and kids, I had no time for household tasks. Taskego's reliable providers handle everything from groceries to repairs. Life-changing convenience."</p>
-                  <div className="flex text-yellow-400 mt-4">⭐⭐⭐⭐⭐</div>
+                  <div className="flex text-blue-400 mt-4">⭐⭐⭐⭐⭐</div>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -1003,9 +993,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={100}>
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg border-0 h-full">
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-lg border-0 h-full">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-slate-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Clock className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">24/7 Support</h3>
@@ -1015,9 +1005,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={200}>
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 shadow-lg border-0 h-full">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg border-0 h-full">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">Satisfaction Guarantee</h3>
@@ -1027,9 +1017,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={300}>
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg border-0 h-full">
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-lg border-0 h-full">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-slate-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">Trusted Community</h3>
@@ -1039,9 +1029,9 @@ export default function Home({ messages }: HomeProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={400}>
-              <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 shadow-lg border-0 h-full">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg border-0 h-full">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Star className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-4">Premium Quality</h3>
