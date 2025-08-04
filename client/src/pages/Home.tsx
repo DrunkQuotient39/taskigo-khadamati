@@ -39,7 +39,7 @@ export default function Home({ messages }: HomeProps) {
       name: messages.services?.electrical?.title || 'Electrical',
       description: messages.services?.electrical?.description || 'Licensed electrical services and repairs',
       icon: '⚡',
-      color: 'from-yellow-500 to-orange-600',
+      color: 'from-blue-500 to-slate-600',
       price: 'Starting from $50',
       href: '/services?category=electrical'
     },
@@ -111,7 +111,7 @@ export default function Home({ messages }: HomeProps) {
       name: messages.services?.fitness?.title || 'Personal Training',
       description: messages.services?.fitness?.description || 'Fitness coaching and personal training sessions',
       icon: '💪',
-      color: 'from-red-500 to-orange-600',
+      color: 'from-slate-500 to-blue-600',
       price: 'Starting from $55',
       href: '/services?category=fitness'
     },
@@ -254,7 +254,7 @@ export default function Home({ messages }: HomeProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <ScrollReveal>
-              <Card className="bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-2xl border-0">
+              <Card className="bg-gradient-to-br from-blue-600 to-slate-600 text-white shadow-2xl border-0">
                 <CardContent className="p-8 text-center">
                   <h3 className="text-2xl font-black mb-4">MARKET LEADER</h3>
                   <p className="text-lg font-bold mb-4">#1 SERVICE PLATFORM IN THE MIDDLE EAST</p>
@@ -499,16 +499,16 @@ export default function Home({ messages }: HomeProps) {
                   <div className="text-2xl font-black text-blue-600 mb-1">INSTANT</div>
                   <div className="text-sm font-bold text-gray-700">BOOKING CONFIRMATION</div>
                 </div>
-                <div className="text-center bg-green-50 p-4 rounded-lg">
-                  <div className="text-2xl font-black text-green-600 mb-1">SECURE</div>
+                <div className="text-center bg-blue-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-blue-600 mb-1">SECURE</div>
                   <div className="text-sm font-bold text-gray-700">PAYMENT PROCESSING</div>
                 </div>
-                <div className="text-center bg-orange-50 p-4 rounded-lg">
-                  <div className="text-2xl font-black text-orange-600 mb-1">LIVE</div>
+                <div className="text-center bg-slate-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-slate-600 mb-1">LIVE</div>
                   <div className="text-sm font-bold text-gray-700">TRACKING & UPDATES</div>
                 </div>
-                <div className="text-center bg-purple-50 p-4 rounded-lg">
-                  <div className="text-2xl font-black text-purple-600 mb-1">GUARANTEED</div>
+                <div className="text-center bg-slate-50 p-4 rounded-lg">
+                  <div className="text-2xl font-black text-slate-600 mb-1">GUARANTEED</div>
                   <div className="text-sm font-bold text-gray-700">SATISFACTION</div>
                 </div>
               </div>
@@ -2347,7 +2347,7 @@ export default function Home({ messages }: HomeProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-orange-500 to-blue-600 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-slate-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <h2 className="text-4xl font-black mb-4">
