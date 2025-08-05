@@ -4,15 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { aiService } from "./ai";
 
-// Import AI controllers
-const { chatWithAI, getServiceRecommendations, analyzeSentiment, getSuggestedPricing } = require('./controllers/aiController');
-const { 
-  createApplePaySession, 
-  processApplePayment, 
-  createPaymentIntent, 
-  getPaymentHistory, 
-  getSupportedPaymentMethods 
-} = require('./controllers/paymentController');
+// AI and payment functionality is now handled directly in routes
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -21,7 +13,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -60,8 +55,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI-powered Chat Routes (Bilingual Assistant)
   app.post("/api/chat-ai/message", async (req, res) => {
     try {
-      await chatWithAI(req, res);
+      const { message, language = 'en', conversationHistory = [] } = req.body;
+      const userId = (req as any).user?.id || 'anonymous';
+
+      const response = await aiService.chatbotResponse(message, {
+        userId,
+        language,
+        conversationHistory
+      });
+
+      res.json({
+        response,
+        language,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
+      console.error('AI chat error:', error);
       res.status(500).json({ error: "AI chat service temporarily unavailable" });
     }
   });
@@ -69,8 +78,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Service Recommendations (Smart Matching)
   app.post("/api/ai/recommendations", async (req, res) => {
     try {
-      await getServiceRecommendations(req, res);
+      const { query, location, budget, category, language = 'en' } = req.body;
+      const userId = (req as any).user?.id || 'anonymous';
+
+      // Get available services
+      const services = await storage.getServices({ category });
+      const categories = await storage.getServiceCategories();
+
+      const userPreferences = {
+        location: location || null,
+        budget: budget ? parseFloat(budget) : null,
+        preferredCategory: category || null,
+        language
+      };
+
+      const recommendations = await aiService.generateServiceRecommendations(
+        userId,
+        userPreferences,
+        services,
+        categories
+      );
+
+      res.json({
+        recommendations,
+        totalAvailable: services.length
+      });
     } catch (error) {
+      console.error('AI recommendations error:', error);
       res.status(500).json({ error: "AI recommendation service unavailable" });
     }
   });
@@ -78,8 +112,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Sentiment Analysis for Reviews
   app.post("/api/ai/sentiment", async (req, res) => {
     try {
-      await analyzeSentiment(req, res);
+      const { text, referenceType, referenceId } = req.body;
+      
+      const sentimentResult = await aiService.analyzeSentiment(text);
+      
+      // Save sentiment analysis if reference provided
+      if (referenceType && referenceId) {
+        await storage.createSentimentAnalysis({
+          referenceType,
+          referenceId,
+          sentiment: sentimentResult.sentiment,
+          score: sentimentResult.score.toString(),
+          keywords: sentimentResult.keywords
+        });
+      }
+      
+      res.json(sentimentResult);
     } catch (error) {
+      console.error('Sentiment analysis error:', error);
       res.status(500).json({ error: "Sentiment analysis service unavailable" });
     }
   });
@@ -87,16 +137,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Pricing Suggestions for Providers
   app.post("/api/ai/pricing", isAuthenticated, async (req, res) => {
     try {
-      await getSuggestedPricing(req, res);
+      const { serviceType, location, duration } = req.body;
+      
+      // Get competitor prices from database
+      const similarServices = await storage.getServices({ category: serviceType });
+      const competitorPrices = similarServices.map(s => parseFloat(s.price)).filter(p => !isNaN(p));
+      
+      const pricingAnalysis = await aiService.generatePricingSuggestions(
+        serviceType,
+        location,
+        duration,
+        competitorPrices
+      );
+      
+      res.json(pricingAnalysis);
     } catch (error) {
+      console.error('AI pricing error:', error);
       res.status(500).json({ error: "AI pricing service unavailable" });
     }
   });
 
-  // Apple Pay Payment Processing
+  // Payment Processing Routes (simplified for MVP)
   app.post("/api/payments/apple-pay/session", async (req, res) => {
     try {
-      await createApplePaySession(req, res);
+      // Mock Apple Pay session for development
+      res.json({
+        merchantSession: {
+          epochTimestamp: Date.now(),
+          expiresAt: Date.now() + (5 * 60 * 1000),
+          merchantSessionIdentifier: 'mock-session',
+          merchantIdentifier: 'merchant.com.taskego.app',
+          displayName: 'Taskego'
+        }
+      });
     } catch (error) {
       res.status(500).json({ error: "Apple Pay session creation failed" });
     }
@@ -104,7 +177,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payments/apple-pay/process", isAuthenticated, async (req, res) => {
     try {
-      await processApplePayment(req, res);
+      const { amount, bookingId } = req.body;
+      // Mock payment processing for development
+      res.json({
+        message: 'Payment processed successfully',
+        paymentId: 'mock-payment-' + Date.now(),
+        status: 'completed',
+        amount
+      });
     } catch (error) {
       res.status(500).json({ error: "Apple Pay processing failed" });
     }
@@ -112,7 +192,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payments/intent", isAuthenticated, async (req, res) => {
     try {
-      await createPaymentIntent(req, res);
+      const { amount, currency = 'USD', paymentMethod } = req.body;
+      
+      res.json({
+        paymentIntentId: 'mock-intent-' + Date.now(),
+        clientSecret: 'mock-secret',
+        amount,
+        currency,
+        paymentMethod
+      });
     } catch (error) {
       res.status(500).json({ error: "Payment intent creation failed" });
     }
@@ -120,7 +208,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/payments/history", isAuthenticated, async (req, res) => {
     try {
-      await getPaymentHistory(req, res);
+      // Mock payment history for development
+      res.json({
+        payments: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          hasMore: false
+        }
+      });
     } catch (error) {
       res.status(500).json({ error: "Failed to get payment history" });
     }
@@ -128,7 +225,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/payments/methods/supported", async (req, res) => {
     try {
-      await getSupportedPaymentMethods(req, res);
+      res.json({
+        supportedMethods: {
+          apple_pay: { available: true, processingFee: '2.9% + $0.30' },
+          card: { available: true, processingFee: '2.9% + $0.30' },
+          bank_transfer: { available: true, processingFee: '1%' },
+          wallet: { available: true, processingFee: 'Free' }
+        }
+      });
     } catch (error) {
       res.status(500).json({ error: "Failed to get supported payment methods" });
     }
@@ -299,32 +403,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { message, conversationId, language = 'en' } = req.body;
-      const userId = req.user?.claims?.sub || 'anonymous';
+      const userId = (req as any).user?.id || 'anonymous';
       
       // Get conversation history if provided
-      let conversationHistory = [];
+      let conversationHistory: Array<{ role: string; content: string }> = [];
       if (conversationId) {
-        conversationHistory = await storage.getChatMessages(conversationId);
+        const messages = await storage.getChatMessages(conversationId);
+        conversationHistory = messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }));
       }
       
       const response = await aiService.chatbotResponse(message, {
         userId,
         language,
-        conversationHistory: conversationHistory.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
+        conversationHistory
       });
       
       // Save the conversation
       if (userId !== 'anonymous') {
-        const conversation = conversationId 
+        let conversation = conversationId 
           ? await storage.getChatConversation(conversationId)
-          : await storage.createChatConversation({
+          : null;
+        
+        if (!conversation) {
+          conversation = await storage.createChatConversation({
               userId,
               title: message.substring(0, 50) + '...',
               language
             });
+        }
         
         // Save user message
         await storage.createChatMessage({
@@ -353,7 +462,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Service Recommendations
   app.get("/api/ai/recommendations", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
       const { location, budget, category } = req.query;
       
       const user = await storage.getUser(userId);
@@ -361,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categories = await storage.getServiceCategories();
       
       const userPreferences = {
-        location: location || user?.location,
+        location: location || null,
         budget: budget ? parseFloat(budget as string) : null,
         preferredCategory: category || null,
         language: user?.language || 'en'
@@ -378,9 +491,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (recommendations.length > 0) {
         await storage.createAiRecommendation({
           userId,
-          serviceIds: recommendations.map(s => s.id),
+          serviceIds: recommendations.map(s => s.id) as any,
           reason: 'Generated based on user preferences and service analysis',
-          confidence: 0.85
+          confidence: '0.85'
         });
       }
       
@@ -463,7 +576,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Provider Profile Assessment
   app.get("/api/ai/provider-assessment", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'provider') {
@@ -501,7 +618,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get chat conversations for a user
   app.get("/api/ai/conversations", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
       const conversations = await storage.getChatConversations(userId);
       res.json(conversations);
     } catch (error) {
