@@ -271,6 +271,10 @@ export class AIService {
         }
       `;
 
+      if (!openai) {
+        throw new Error('OpenAI not configured');
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: prompt }],
@@ -360,6 +364,10 @@ export class AIService {
         general: "You are a general assistant for the Taskego platform. Be helpful and informative."
       };
 
+      if (!openai) {
+        throw new Error('OpenAI not configured');
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -410,6 +418,10 @@ export class AIService {
         
         Return JSON format.
       `;
+
+      if (!openai) {
+        throw new Error('OpenAI not configured');
+      }
 
       const response = await openai.chat.completions.create({
         model: "gpt-4",
