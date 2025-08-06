@@ -51,8 +51,8 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
           <Route path="/services" component={() => <Services messages={messages} />} />
           <Route path="/service/:slug" component={() => <ServiceDetail messages={messages} />} />
           <Route path="/booking" component={() => <Booking messages={messages} />} />
-          <Route path="/about" component={() => <About messages={messages} />} />
-          <Route path="/contact" component={() => <Contact messages={messages} />} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
           <Route path="/chat" component={() => <Chat messages={messages} />} />
           <Route path="/terms" component={() => <Terms messages={messages} />} />
           <Route path="/providers/dashboard" component={() => <ProviderDashboard messages={messages} />} />
