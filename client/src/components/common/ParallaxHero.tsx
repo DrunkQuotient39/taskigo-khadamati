@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ArrowDown, Play, Star, Users, CheckCircle, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import ScrollReveal from './ScrollReveal';
 import type { Messages } from '@/lib/i18n';
 
@@ -187,13 +188,15 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
             <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {stats.map((stat, index) => (
                 <ScrollReveal key={index} delay={index * 0.1}>
-                  <div className="text-center">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg mb-3 ${stat.color}`}>
-                      <stat.icon className="w-6 h-6" />
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
-                  </div>
+                  <Card className="text-center bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <CardContent className="p-4">
+                      <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg mb-3 ${stat.color}`}>
+                        <stat.icon className="w-6 h-6" />
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                      <div className="text-sm text-gray-600">{stat.label}</div>
+                    </CardContent>
+                  </Card>
                 </ScrollReveal>
               ))}
             </motion.div>
@@ -211,25 +214,27 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               animate="animate"
               className="relative z-10"
             >
-              <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-slate-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                    <div className="h-8 bg-gradient-to-r from-blue-600 to-slate-600 rounded-lg"></div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="h-16 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
-                      <div className="h-16 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <CardContent className="p-8">
+                  <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-slate-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-8 bg-gradient-to-r from-blue-600 to-slate-600 rounded-lg"></div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="h-16 bg-gray-100 rounded-lg"></div>
+                        <div className="h-16 bg-gray-100 rounded-lg"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </motion.div>
 
             {/* Floating Cards */}
@@ -237,22 +242,30 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               variants={floatingVariants}
               initial="initial"
               animate="animate"
-              className="absolute -top-6 -left-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 text-center"
+              className="absolute -top-6 -left-6"
               style={{ animationDelay: '1s' }}
             >
-              <div className="text-2xl mb-1">⭐</div>
-              <div className="text-sm font-semibold text-khadamati-blue">4.9/5 Rating</div>
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl mb-1">⭐</div>
+                  <div className="text-sm font-semibold text-khadamati-blue">4.9/5 Rating</div>
+                </CardContent>
+              </Card>
             </motion.div>
 
             <motion.div
               variants={floatingVariants}
               initial="initial"
               animate="animate"
-              className="absolute -bottom-6 -right-6 bg-gradient-to-r from-blue-600 to-slate-600 text-white rounded-2xl shadow-xl p-4 text-center"
+              className="absolute -bottom-6 -right-6"
               style={{ animationDelay: '2s' }}
             >
-              <div className="text-2xl mb-1">🚀</div>
-              <div className="text-sm font-semibold">50K+ Users</div>
+              <Card className="bg-gradient-to-r from-blue-600 to-slate-600 border-0 shadow-xl">
+                <CardContent className="p-4 text-center text-white">
+                  <div className="text-2xl mb-1">🚀</div>
+                  <div className="text-sm font-semibold">50K+ Users</div>
+                </CardContent>
+              </Card>
             </motion.div>
           </motion.div>
         </div>
