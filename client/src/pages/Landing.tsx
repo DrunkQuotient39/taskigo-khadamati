@@ -45,7 +45,7 @@ export default function Landing({ messages }: LandingProps) {
               size="lg"
               variant="outline"
               className="px-8 py-4 text-lg"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/provider-signup'}
             >
               {messages.becomeProvider || 'Become a Provider'}
             </Button>
