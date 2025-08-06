@@ -26,6 +26,7 @@ import Contact from '@/pages/Contact';
 import Chat from '@/pages/Chat';
 import Terms from '@/pages/Terms';
 import ProviderDashboard from '@/pages/ProviderDashboard';
+import ProviderSignUp from '@/pages/ProviderSignUp';
 import AdminPanel from '@/pages/AdminPanel';
 import NotFound from '@/pages/not-found';
 
@@ -57,6 +58,8 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
           <Route path="/terms" component={() => <Terms messages={messages} />} />
           <Route path="/providers/dashboard" component={() => <ProviderDashboard messages={messages} />} />
           <Route path="/provider-dashboard" component={() => <ProviderDashboard messages={messages} />} />
+          <Route path="/provider-signup" component={() => <ProviderSignUp messages={messages} />} />
+          <Route path="/become-provider" component={() => <ProviderSignUp messages={messages} />} />
           <Route path="/admin" component={() => <AdminPanel messages={messages} />} />
           <Route path="/admin-panel" component={() => <AdminPanel messages={messages} />} />
           <Route component={NotFound} />

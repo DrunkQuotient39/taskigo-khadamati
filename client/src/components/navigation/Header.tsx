@@ -113,6 +113,14 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
               </DropdownMenu>
             ) : (
               <div className="hidden md:flex items-center space-x-3">
+                <Link href="/provider-signup">
+                  <Button 
+                    variant="ghost" 
+                    className="text-khadamati-blue hover:bg-blue-50 font-semibold"
+                  >
+                    Become a Provider
+                  </Button>
+                </Link>
                 <Button 
                   variant="outline" 
                   className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white"
