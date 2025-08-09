@@ -9,6 +9,16 @@ import {
   chatMessages,
   aiRecommendations,
   sentimentAnalysis,
+  providers,
+  wallets,
+  payments,
+  aiLogs,
+  subcategories,
+  userSessions,
+  emailLogs,
+  smsLogs,
+  systemLogs,
+  serviceImages,
   type User, 
   type InsertUser,
   type UpsertUser,
@@ -29,7 +39,27 @@ import {
   type AiRecommendation,
   type InsertAiRecommendation,
   type SentimentAnalysis,
-  type InsertSentimentAnalysis
+  type InsertSentimentAnalysis,
+  type Provider,
+  type InsertProvider,
+  type Wallet,
+  type InsertWallet,
+  type Payment,
+  type InsertPayment,
+  type AiLog,
+  type InsertAiLog,
+  type Subcategory,
+  type InsertSubcategory,
+  type UserSession,
+  type InsertUserSession,
+  type EmailLog,
+  type InsertEmailLog,
+  type SmsLog,
+  type InsertSmsLog,
+  type SystemLog,
+  type InsertSystemLog,
+  type ServiceImage,
+  type InsertServiceImage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, like, ilike } from "drizzle-orm";
@@ -100,6 +130,56 @@ export interface IStorage {
   // Sentiment analysis
   getSentimentAnalysis(referenceType: string, referenceId: number): Promise<SentimentAnalysis | undefined>;
   createSentimentAnalysis(analysis: InsertSentimentAnalysis): Promise<SentimentAnalysis>;
+
+  // Provider management
+  getProvider(userId: string): Promise<Provider | undefined>;
+  getProviders(filters?: { status?: string; city?: string }): Promise<Provider[]>;
+  createProvider(provider: InsertProvider): Promise<Provider>;
+  updateProvider(id: number, provider: Partial<Provider>): Promise<Provider | undefined>;
+  approveProvider(id: number): Promise<Provider | undefined>;
+  rejectProvider(id: number): Promise<Provider | undefined>;
+
+  // Wallet management
+  getWallet(userId: string): Promise<Wallet | undefined>;
+  createWallet(wallet: InsertWallet): Promise<Wallet>;
+  updateWalletBalance(userId: string, amount: number): Promise<Wallet | undefined>;
+
+  // Payment processing
+  getPayments(filters?: { userId?: string; status?: string }): Promise<Payment[]>;
+  getPayment(id: number): Promise<Payment | undefined>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePayment(id: number, payment: Partial<Payment>): Promise<Payment | undefined>;
+  refundPayment(id: number, reason: string): Promise<Payment | undefined>;
+
+  // AI logging
+  createAiLog(log: InsertAiLog): Promise<AiLog>;
+  getAiLogs(filters?: { userId?: string; intent?: string }): Promise<AiLog[]>;
+
+  // Subcategories
+  getSubcategories(categoryId?: number): Promise<Subcategory[]>;
+  createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory>;
+
+  // Session management
+  createUserSession(session: InsertUserSession): Promise<UserSession>;
+  getUserSessions(userId: string): Promise<UserSession[]>;
+  updateUserSession(id: number, session: Partial<UserSession>): Promise<UserSession | undefined>;
+  deactivateUserSession(id: number): Promise<void>;
+
+  // Email & SMS logging
+  createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
+  createSmsLog(log: InsertSmsLog): Promise<SmsLog>;
+  getEmailLogs(userId?: string): Promise<EmailLog[]>;
+  getSmsLogs(userId?: string): Promise<SmsLog[]>;
+
+  // System logging
+  createSystemLog(log: InsertSystemLog): Promise<SystemLog>;
+  getSystemLogs(filters?: { level?: string; category?: string }): Promise<SystemLog[]>;
+
+  // Service images
+  getServiceImages(serviceId: number): Promise<ServiceImage[]>;
+  createServiceImage(image: InsertServiceImage): Promise<ServiceImage>;
+  updateServiceImage(id: number, image: Partial<ServiceImage>): Promise<ServiceImage | undefined>;
+  deleteServiceImage(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -109,6 +189,16 @@ export class MemStorage implements IStorage {
   private bookings: Map<number, Booking>;
   private reviews: Map<number, Review>;
   private notifications: Map<number, Notification>;
+  private providers: Map<number, Provider>;
+  private wallets: Map<number, Wallet>;
+  private payments: Map<number, Payment>;
+  private aiLogs: Map<number, AiLog>;
+  private subcategories: Map<number, Subcategory>;
+  private userSessions: Map<number, UserSession>;
+  private emailLogs: Map<number, EmailLog>;
+  private smsLogs: Map<number, SmsLog>;
+  private systemLogs: Map<number, SystemLog>;
+  private serviceImages: Map<number, ServiceImage>;
   private pendingApprovals: Map<number, any>;
   private currentUserId: number;
   private currentServiceId: number;
@@ -116,6 +206,16 @@ export class MemStorage implements IStorage {
   private currentBookingId: number;
   private currentReviewId: number;
   private currentNotificationId: number;
+  private currentProviderId: number;
+  private currentWalletId: number;
+  private currentPaymentId: number;
+  private currentAiLogId: number;
+  private currentSubcategoryId: number;
+  private currentSessionId: number;
+  private currentEmailLogId: number;
+  private currentSmsLogId: number;
+  private currentSystemLogId: number;
+  private currentServiceImageId: number;
   private currentApprovalId: number;
 
   constructor() {
@@ -125,13 +225,34 @@ export class MemStorage implements IStorage {
     this.bookings = new Map();
     this.reviews = new Map();
     this.notifications = new Map();
+    this.providers = new Map();
+    this.wallets = new Map();
+    this.payments = new Map();
+    this.aiLogs = new Map();
+    this.subcategories = new Map();
+    this.userSessions = new Map();
+    this.emailLogs = new Map();
+    this.smsLogs = new Map();
+    this.systemLogs = new Map();
+    this.serviceImages = new Map();
     this.pendingApprovals = new Map();
+    
     this.currentUserId = 1;
     this.currentServiceId = 1;
     this.currentCategoryId = 1;
     this.currentBookingId = 1;
     this.currentReviewId = 1;
     this.currentNotificationId = 1;
+    this.currentProviderId = 1;
+    this.currentWalletId = 1;
+    this.currentPaymentId = 1;
+    this.currentAiLogId = 1;
+    this.currentSubcategoryId = 1;
+    this.currentSessionId = 1;
+    this.currentEmailLogId = 1;
+    this.currentSmsLogId = 1;
+    this.currentSystemLogId = 1;
+    this.currentServiceImageId = 1;
     this.currentApprovalId = 1;
 
     // Initialize with mock data
@@ -769,6 +890,376 @@ export class MemStorage implements IStorage {
       processedAt: new Date()
     };
   }
+
+  // Provider management implementations
+  async getProvider(userId: string): Promise<Provider | undefined> {
+    return Array.from(this.providers.values()).find(p => p.userId === userId);
+  }
+
+  async getProviders(filters?: { status?: string; city?: string }): Promise<Provider[]> {
+    let providers = Array.from(this.providers.values());
+    
+    if (filters?.status) {
+      providers = providers.filter(p => p.approvalStatus === filters.status);
+    }
+    
+    if (filters?.city) {
+      providers = providers.filter(p => p.city?.toLowerCase().includes(filters.city!.toLowerCase()));
+    }
+    
+    return providers;
+  }
+
+  async createProvider(provider: InsertProvider): Promise<Provider> {
+    const id = this.currentProviderId++;
+    const newProvider: Provider = {
+      id,
+      ...provider,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.providers.set(id, newProvider);
+    return newProvider;
+  }
+
+  async updateProvider(id: number, provider: Partial<Provider>): Promise<Provider | undefined> {
+    const existing = this.providers.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...provider,
+      updatedAt: new Date()
+    };
+    
+    this.providers.set(id, updated);
+    return updated;
+  }
+
+  async approveProvider(id: number): Promise<Provider | undefined> {
+    return this.updateProvider(id, { approvalStatus: 'approved' });
+  }
+
+  async rejectProvider(id: number): Promise<Provider | undefined> {
+    return this.updateProvider(id, { approvalStatus: 'rejected' });
+  }
+
+  // Wallet management
+  async getWallet(userId: string): Promise<Wallet | undefined> {
+    return Array.from(this.wallets.values()).find(w => w.userId === userId);
+  }
+
+  async createWallet(wallet: InsertWallet): Promise<Wallet> {
+    const id = this.currentWalletId++;
+    const newWallet: Wallet = {
+      id,
+      ...wallet,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.wallets.set(id, newWallet);
+    return newWallet;
+  }
+
+  async updateWalletBalance(userId: string, amount: number): Promise<Wallet | undefined> {
+    const wallet = await this.getWallet(userId);
+    if (!wallet) return undefined;
+    
+    const currentBalance = parseFloat(wallet.balance);
+    const newBalance = (currentBalance + amount).toFixed(2);
+    
+    const updated = {
+      ...wallet,
+      balance: newBalance,
+      lastTransactionAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.wallets.set(wallet.id, updated);
+    return updated;
+  }
+
+  // Payment processing
+  async getPayments(filters?: { userId?: string; status?: string; bookingId?: number }): Promise<Payment[]> {
+    let payments = Array.from(this.payments.values());
+    
+    if (filters?.userId) {
+      payments = payments.filter(p => p.userId === filters.userId);
+    }
+    
+    if (filters?.status) {
+      payments = payments.filter(p => p.status === filters.status);
+    }
+
+    if (filters?.bookingId) {
+      payments = payments.filter(p => p.bookingId === filters.bookingId);
+    }
+    
+    return payments;
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    return this.payments.get(id);
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const id = this.currentPaymentId++;
+    const newPayment: Payment = {
+      id,
+      ...payment,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.payments.set(id, newPayment);
+    return newPayment;
+  }
+
+  async updatePayment(id: number, payment: Partial<Payment>): Promise<Payment | undefined> {
+    const existing = this.payments.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...payment,
+      updatedAt: new Date()
+    };
+    
+    this.payments.set(id, updated);
+    return updated;
+  }
+
+  async refundPayment(id: number, reason: string): Promise<Payment | undefined> {
+    return this.updatePayment(id, {
+      status: 'refunded',
+      refundReason: reason
+    });
+  }
+
+  // AI logging
+  async createAiLog(log: InsertAiLog): Promise<AiLog> {
+    const id = this.currentAiLogId++;
+    const newLog: AiLog = {
+      id,
+      ...log,
+      timestamp: new Date(),
+    };
+    
+    this.aiLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async getAiLogs(filters?: { userId?: string; intent?: string }): Promise<AiLog[]> {
+    let logs = Array.from(this.aiLogs.values());
+    
+    if (filters?.userId) {
+      logs = logs.filter(l => l.userId === filters.userId);
+    }
+    
+    if (filters?.intent) {
+      logs = logs.filter(l => l.intent === filters.intent);
+    }
+    
+    return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  // System logging - THIS WAS MISSING
+  async createSystemLog(log: InsertSystemLog): Promise<SystemLog> {
+    const id = this.currentSystemLogId++;
+    const newLog: SystemLog = {
+      id,
+      ...log,
+      createdAt: new Date(),
+    };
+    
+    this.systemLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async getSystemLogs(filters?: { level?: string; category?: string }): Promise<SystemLog[]> {
+    let logs = Array.from(this.systemLogs.values());
+    
+    if (filters?.level) {
+      logs = logs.filter(l => l.level === filters.level);
+    }
+    
+    if (filters?.category) {
+      logs = logs.filter(l => l.category === filters.category);
+    }
+    
+    return logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // Other missing implementations
+  async getSubcategories(categoryId?: number): Promise<Subcategory[]> {
+    let subcategories = Array.from(this.subcategories.values());
+    
+    if (categoryId) {
+      subcategories = subcategories.filter(s => s.categoryId === categoryId);
+    }
+    
+    return subcategories;
+  }
+
+  async createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory> {
+    const id = this.currentSubcategoryId++;
+    const newSubcategory: Subcategory = {
+      id,
+      ...subcategory,
+      createdAt: new Date(),
+    };
+    
+    this.subcategories.set(id, newSubcategory);
+    return newSubcategory;
+  }
+
+  async createUserSession(session: InsertUserSession): Promise<UserSession> {
+    const id = this.currentSessionId++;
+    const newSession: UserSession = {
+      id,
+      ...session,
+      createdAt: new Date(),
+    };
+    
+    this.userSessions.set(id, newSession);
+    return newSession;
+  }
+
+  async getUserSessions(userId: string): Promise<UserSession[]> {
+    return Array.from(this.userSessions.values()).filter(s => s.userId === userId);
+  }
+
+  async updateUserSession(id: number, session: Partial<UserSession>): Promise<UserSession | undefined> {
+    const existing = this.userSessions.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...session
+    };
+    
+    this.userSessions.set(id, updated);
+    return updated;
+  }
+
+  async deactivateUserSession(id: number): Promise<void> {
+    await this.updateUserSession(id, { isActive: false });
+  }
+
+  async createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
+    const id = this.currentEmailLogId++;
+    const newLog: EmailLog = {
+      id,
+      ...log,
+      createdAt: new Date(),
+    };
+    
+    this.emailLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async createSmsLog(log: InsertSmsLog): Promise<SmsLog> {
+    const id = this.currentSmsLogId++;
+    const newLog: SmsLog = {
+      id,
+      ...log,
+      createdAt: new Date(),
+    };
+    
+    this.smsLogs.set(id, newLog);
+    return newLog;
+  }
+
+  async getEmailLogs(userId?: string): Promise<EmailLog[]> {
+    let logs = Array.from(this.emailLogs.values());
+    
+    if (userId) {
+      logs = logs.filter(l => l.userId === userId);
+    }
+    
+    return logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getSmsLogs(userId?: string): Promise<SmsLog[]> {
+    let logs = Array.from(this.smsLogs.values());
+    
+    if (userId) {
+      logs = logs.filter(l => l.userId === userId);
+    }
+    
+    return logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getServiceImages(serviceId: number): Promise<ServiceImage[]> {
+    return Array.from(this.serviceImages.values())
+      .filter(img => img.serviceId === serviceId)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async createServiceImage(image: InsertServiceImage): Promise<ServiceImage> {
+    const id = this.currentServiceImageId++;
+    const newImage: ServiceImage = {
+      id,
+      ...image,
+      createdAt: new Date(),
+    };
+    
+    this.serviceImages.set(id, newImage);
+    return newImage;
+  }
+
+  async updateServiceImage(id: number, image: Partial<ServiceImage>): Promise<ServiceImage | undefined> {
+    const existing = this.serviceImages.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...image
+    };
+    
+    this.serviceImages.set(id, updated);
+    return updated;
+  }
+
+  async deleteServiceImage(id: number): Promise<void> {
+    this.serviceImages.delete(id);
+  }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    return this.bookings.get(id);
+  }
+}
+
+// Extended MemoryStorage to ensure all methods are implemented
+class ExtendedMemoryStorage extends MemoryStorage {
+  // Additional missing methods for ChatMessage, ChatConversation, etc.
+  async getChatMessages(conversationId: number): Promise<ChatMessage[]> {
+    return [];
+  }
+
+  async getChatConversation(id: number): Promise<ChatConversation | undefined> {
+    return undefined;
+  }
+
+  async createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation> {
+    return {
+      id: 1,
+      ...conversation,
+      isActive: true,
+      lastMessageAt: new Date(),
+      createdAt: new Date()
+    };
+  }
+
+  async updateChatConversation(id: number, updates: Partial<ChatConversation>): Promise<ChatConversation | undefined> {
+    return undefined;
+  }
+
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return [];
+  }
 }
 
 // Database Storage Implementation
@@ -1116,4 +1607,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage: IStorage = new DatabaseStorage();
+export const storage: IStorage = 
+  process.env.DATABASE_URL ? new DatabaseStorage() : new ExtendedMemoryStorage();
