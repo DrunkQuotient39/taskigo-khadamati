@@ -1232,35 +1232,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Extended MemoryStorage to ensure all methods are implemented
-class ExtendedMemoryStorage extends MemoryStorage {
-  // Additional missing methods for ChatMessage, ChatConversation, etc.
-  async getChatMessages(conversationId: number): Promise<ChatMessage[]> {
-    return [];
-  }
 
-  async getChatConversation(id: number): Promise<ChatConversation | undefined> {
-    return undefined;
-  }
-
-  async createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation> {
-    return {
-      id: 1,
-      ...conversation,
-      isActive: true,
-      lastMessageAt: new Date(),
-      createdAt: new Date()
-    };
-  }
-
-  async updateChatConversation(id: number, updates: Partial<ChatConversation>): Promise<ChatConversation | undefined> {
-    return undefined;
-  }
-
-  async getChatConversations(userId: string): Promise<ChatConversation[]> {
-    return [];
-  }
-}
 
 // Database Storage Implementation
 export class DatabaseStorage implements IStorage {
@@ -1605,7 +1577,276 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return created;
   }
+
+  // Add all missing methods that are in IStorage interface
+  async createSystemLog(log: InsertSystemLog): Promise<SystemLog> {
+    const [created] = await db.insert(systemLogs)
+      .values(log)
+      .returning();
+    return created;
+  }
+
+  async getSystemLogs(filters?: { level?: string; category?: string }): Promise<SystemLog[]> {
+    let query = db.select().from(systemLogs);
+    
+    if (filters?.level || filters?.category) {
+      const conditions = [];
+      if (filters.level) conditions.push(eq(systemLogs.level, filters.level));
+      if (filters.category) conditions.push(eq(systemLogs.category, filters.category));
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(systemLogs.createdAt));
+  }
+
+  async getProvider(userId: string): Promise<Provider | undefined> {
+    const [provider] = await db.select().from(providers)
+      .where(eq(providers.userId, userId));
+    return provider || undefined;
+  }
+
+  async getProviders(filters?: { status?: string; city?: string }): Promise<Provider[]> {
+    let query = db.select().from(providers);
+    
+    if (filters?.status || filters?.city) {
+      const conditions = [];
+      if (filters.status) conditions.push(eq(providers.approvalStatus, filters.status));
+      if (filters.city) conditions.push(ilike(providers.city, `%${filters.city}%`));
+      query = query.where(and(...conditions));
+    }
+    
+    return await query;
+  }
+
+  async createProvider(provider: InsertProvider): Promise<Provider> {
+    const [created] = await db.insert(providers)
+      .values(provider)
+      .returning();
+    return created;
+  }
+
+  async updateProvider(id: number, provider: Partial<Provider>): Promise<Provider | undefined> {
+    const [updated] = await db.update(providers)
+      .set({ ...provider, updatedAt: new Date() })
+      .where(eq(providers.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async approveProvider(id: number): Promise<Provider | undefined> {
+    return this.updateProvider(id, { approvalStatus: 'approved' });
+  }
+
+  async rejectProvider(id: number): Promise<Provider | undefined> {
+    return this.updateProvider(id, { approvalStatus: 'rejected' });
+  }
+
+  async getWallet(userId: string): Promise<Wallet | undefined> {
+    const [wallet] = await db.select().from(wallets)
+      .where(eq(wallets.userId, userId));
+    return wallet || undefined;
+  }
+
+  async createWallet(wallet: InsertWallet): Promise<Wallet> {
+    const [created] = await db.insert(wallets)
+      .values(wallet)
+      .returning();
+    return created;
+  }
+
+  async updateWalletBalance(userId: string, amount: number): Promise<Wallet | undefined> {
+    const wallet = await this.getWallet(userId);
+    if (!wallet) return undefined;
+    
+    const currentBalance = parseFloat(wallet.balance);
+    const newBalance = (currentBalance + amount).toFixed(2);
+    
+    const [updated] = await db.update(wallets)
+      .set({ 
+        balance: newBalance, 
+        lastTransactionAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(wallets.id, wallet.id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getPayments(filters?: { userId?: string; status?: string; bookingId?: number }): Promise<Payment[]> {
+    let query = db.select().from(payments);
+    
+    if (filters?.userId || filters?.status || filters?.bookingId) {
+      const conditions = [];
+      if (filters.userId) conditions.push(eq(payments.userId, filters.userId));
+      if (filters.status) conditions.push(eq(payments.status, filters.status));
+      if (filters.bookingId) conditions.push(eq(payments.bookingId, filters.bookingId));
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(payments.createdAt));
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments)
+      .where(eq(payments.id, id));
+    return payment || undefined;
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [created] = await db.insert(payments)
+      .values(payment)
+      .returning();
+    return created;
+  }
+
+  async updatePayment(id: number, payment: Partial<Payment>): Promise<Payment | undefined> {
+    const [updated] = await db.update(payments)
+      .set({ ...payment, updatedAt: new Date() })
+      .where(eq(payments.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async refundPayment(id: number, reason: string): Promise<Payment | undefined> {
+    return this.updatePayment(id, {
+      status: 'refunded',
+      refundReason: reason
+    });
+  }
+
+  async createAiLog(log: InsertAiLog): Promise<AiLog> {
+    const [created] = await db.insert(aiLogs)
+      .values(log)
+      .returning();
+    return created;
+  }
+
+  async getAiLogs(filters?: { userId?: string; intent?: string }): Promise<AiLog[]> {
+    let query = db.select().from(aiLogs);
+    
+    if (filters?.userId || filters?.intent) {
+      const conditions = [];
+      if (filters.userId) conditions.push(eq(aiLogs.userId, filters.userId));
+      if (filters.intent) conditions.push(eq(aiLogs.intent, filters.intent));
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(aiLogs.timestamp));
+  }
+
+  async getSubcategories(categoryId?: number): Promise<Subcategory[]> {
+    let query = db.select().from(subcategories);
+    
+    if (categoryId) {
+      query = query.where(eq(subcategories.categoryId, categoryId));
+    }
+    
+    return await query;
+  }
+
+  async createSubcategory(subcategory: InsertSubcategory): Promise<Subcategory> {
+    const [created] = await db.insert(subcategories)
+      .values(subcategory)
+      .returning();
+    return created;
+  }
+
+  async createUserSession(session: InsertUserSession): Promise<UserSession> {
+    const [created] = await db.insert(userSessions)
+      .values(session)
+      .returning();
+    return created;
+  }
+
+  async getUserSessions(userId: string): Promise<UserSession[]> {
+    return await db.select().from(userSessions)
+      .where(eq(userSessions.userId, userId))
+      .orderBy(desc(userSessions.createdAt));
+  }
+
+  async updateUserSession(id: number, session: Partial<UserSession>): Promise<UserSession | undefined> {
+    const [updated] = await db.update(userSessions)
+      .set(session)
+      .where(eq(userSessions.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deactivateUserSession(id: number): Promise<void> {
+    await this.updateUserSession(id, { isActive: false });
+  }
+
+  async createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
+    const [created] = await db.insert(emailLogs)
+      .values(log)
+      .returning();
+    return created;
+  }
+
+  async createSmsLog(log: InsertSmsLog): Promise<SmsLog> {
+    const [created] = await db.insert(smsLogs)
+      .values(log)
+      .returning();
+    return created;
+  }
+
+  async getEmailLogs(userId?: string): Promise<EmailLog[]> {
+    let query = db.select().from(emailLogs);
+    
+    if (userId) {
+      query = query.where(eq(emailLogs.userId, userId));
+    }
+    
+    return await query.orderBy(desc(emailLogs.createdAt));
+  }
+
+  async getSmsLogs(userId?: string): Promise<SmsLog[]> {
+    let query = db.select().from(smsLogs);
+    
+    if (userId) {
+      query = query.where(eq(smsLogs.userId, userId));
+    }
+    
+    return await query.orderBy(desc(smsLogs.createdAt));
+  }
+
+  async getServiceImages(serviceId: number): Promise<ServiceImage[]> {
+    return await db.select().from(serviceImages)
+      .where(eq(serviceImages.serviceId, serviceId))
+      .orderBy(serviceImages.sortOrder);
+  }
+
+  async createServiceImage(image: InsertServiceImage): Promise<ServiceImage> {
+    const [created] = await db.insert(serviceImages)
+      .values(image)
+      .returning();
+    return created;
+  }
+
+  async updateServiceImage(id: number, image: Partial<ServiceImage>): Promise<ServiceImage | undefined> {
+    const [updated] = await db.update(serviceImages)
+      .set(image)
+      .where(eq(serviceImages.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteServiceImage(id: number): Promise<void> {
+    await db.delete(serviceImages)
+      .where(eq(serviceImages.id, id));
+  }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings)
+      .where(eq(bookings.id, id));
+    return booking || undefined;
+  }
+
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return await db.select().from(chatConversations)
+      .where(eq(chatConversations.userId, userId))
+      .orderBy(desc(chatConversations.lastMessageAt));
+  }
 }
 
-export const storage: IStorage = 
-  process.env.DATABASE_URL ? new DatabaseStorage() : new ExtendedMemoryStorage();
+export const storage: IStorage = new DatabaseStorage();
