@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
-import { storage } from '../storage';
+import { storage } from '../storage-simple';
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
