@@ -1,255 +1,206 @@
-# Taskego (Khadamati) - Comprehensive Service Marketplace
+# Taskego (Khadamati) - AI-Powered Service Marketplace
 
-A bilingual AI-powered local service platform connecting clients with service providers. Features modern React frontend, Express.js backend, PostgreSQL database, and comprehensive enterprise functionality.
+A comprehensive bilingual (English/Arabic) service marketplace platform that connects clients with local service providers using AI-powered features, real-time communication, and integrated payment processing.
 
 ## 🚀 Features
 
 ### Core Platform
-- **Bilingual Support**: Full English/Arabic interface with RTL layout
-- **Multi-Role System**: Client, Provider, and Admin dashboards
-- **Real-time Features**: WebSocket integration for live updates
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Bilingual Support**: Full English/Arabic interface with RTL support
+- **Multi-Role System**: Clients, Service Providers, and Admin roles
+- **Service Management**: Complete CRUD operations for services and categories
+- **Booking System**: Advanced booking with scheduling and status tracking
+- **Review & Rating**: Customer feedback system with sentiment analysis
 
 ### AI-Powered Features
-- **Smart Chatbot**: GPT-4 powered bilingual assistant
-- **Service Recommendations**: Intelligent matching based on user preferences
-- **Sentiment Analysis**: Automated review and feedback analysis
-- **Dynamic Pricing**: AI-suggested pricing for providers
-- **Natural Language Search**: Find services using conversational queries
+- **Intelligent Chatbot**: GPT-4 powered assistant for customer support
+- **Smart Recommendations**: AI-driven service suggestions based on user behavior
+- **Sentiment Analysis**: Automatic review and feedback analysis
+- **Pricing Intelligence**: AI-suggested optimal pricing for providers
 
-### Payment System
-- **Multiple Methods**: Stripe, Apple Pay, and wallet integration
-- **Secure Processing**: PCI-compliant payment handling
+### Payment & Financial
+- **Stripe Integration**: Secure credit card and digital wallet payments
+- **Apple Pay Support**: Seamless mobile payment experience
+- **Multi-Currency**: Support for various currencies
 - **Commission Tracking**: Automated platform fee calculation
-- **Refund Management**: Automated refund processing
+- **Refund Management**: Built-in refund processing
+
+### Real-Time Features
+- **WebSocket Communication**: Live chat and notifications
+- **Real-Time Notifications**: Instant updates for bookings and messages
+- **Live Status Updates**: Real-time booking and service status changes
 
 ### Enterprise Features
-- **Provider Registration**: Business verification and approval workflow
-- **Advanced Analytics**: Comprehensive admin dashboard with insights
-- **Email/SMS Notifications**: Automated communication via Twilio
+- **Admin Dashboard**: Comprehensive management interface
+- **Provider Approval**: Verification workflow for service providers
+- **Analytics & Reporting**: Detailed insights and metrics
 - **File Management**: Cloudinary integration for images and documents
-- **Audit Logging**: Complete system activity tracking
+- **Email/SMS Notifications**: Automated communication system
 
-## 🏗️ Architecture
+## 🛠 Tech Stack
 
-### Frontend (`/client`)
+### Frontend
 - **React 18** with TypeScript
-- **Wouter** for lightweight routing
-- **Tailwind CSS** with custom theme
-- **Radix UI** component primitives
-- **TanStack Query** for server state
+- **Tailwind CSS** for styling
+- **Wouter** for routing
+- **TanStack Query** for state management
 - **Framer Motion** for animations
+- **Radix UI** components
 
-### Backend (`/server`)
+### Backend
 - **Express.js** with TypeScript
 - **PostgreSQL** with Drizzle ORM
 - **JWT Authentication** with role-based access
-- **WebSocket** real-time communication
-- **Comprehensive API** with Swagger documentation
+- **WebSocket** for real-time features
+- **Swagger** API documentation
 
-### Database Schema
-- **Users**: Multi-role authentication system
-- **Services**: Provider offerings with categories
-- **Bookings**: Appointment management
-- **Payments**: Transaction processing
-- **Reviews**: Rating and feedback system
-- **AI Logs**: Machine learning interaction tracking
+### External Services
+- **OpenAI GPT-4** for AI features
+- **Stripe** for payments
+- **Cloudinary** for file storage
+- **Twilio** for SMS notifications
+- **Nodemailer** for email services
 
-## 🛠️ Installation & Setup
+## 🚦 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - API keys for external services
 
-### Environment Variables
-Create a `.env` file with the following:
+### Installation
 
-```env
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/taskego"
-
-# Authentication
-JWT_SECRET="your-jwt-secret-key"
-
-# AI Features
-OPENAI_API_KEY="your-openai-api-key"
-
-# Payment Processing
-STRIPE_SECRET_KEY="your-stripe-secret-key"
-
-# SMS Notifications
-TWILIO_ACCOUNT_SID="your-twilio-sid"
-TWILIO_AUTH_TOKEN="your-twilio-token"
-
-# File Uploads
-CLOUDINARY_CLOUD_NAME="your-cloudinary-name"
-CLOUDINARY_API_KEY="your-cloudinary-key"
-CLOUDINARY_API_SECRET="your-cloudinary-secret"
+1. **Clone the repository:**
+```bash
+git clone https://github.com/DrunkQuotient39/taskigo-khadamati.git
+cd taskigo-khadamati
 ```
 
-### Installation Steps
+2. **Install dependencies:**
+```bash
+npm install
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-github-repo-url>
-   cd taskego
-   ```
+3. **Set up environment variables:**
+```bash
+cp .env.example .env
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+Edit `.env` with your configuration:
+```env
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_jwt_secret_key
+OPENAI_API_KEY=your_openai_api_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+```
 
-3. **Set up database**
-   ```bash
-   npm run db:push
-   ```
+4. **Initialize the database:**
+```bash
+npm run db:push
+```
 
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
+5. **Start the development server:**
+```bash
+npm run dev
+```
 
 The application will be available at `http://localhost:5000`
 
 ## 📁 Project Structure
 
 ```
-taskego/
-├── client/                 # Frontend React application
+taskigo-khadamati/
+├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
-│   │   ├── pages/         # Page components
-│   │   ├── lib/           # Utility functions
-│   │   └── App.tsx        # Main application component
-├── server/                 # Backend Express application
-│   ├── routes/            # API route handlers
-│   │   ├── auth.ts        # Authentication endpoints
-│   │   ├── services.ts    # Service management
-│   │   ├── bookings.ts    # Booking system
-│   │   ├── payments.ts    # Payment processing
-│   │   ├── providers.ts   # Provider management
-│   │   ├── admin.ts       # Admin panel
-│   │   └── ai.ts          # AI features
-│   ├── middleware/        # Express middleware
-│   │   ├── auth.ts        # Authentication middleware
-│   │   └── security.ts    # Security & validation
-│   ├── storage.ts         # Database abstraction layer
-│   ├── websocket.ts       # Real-time communication
-│   └── ai.ts              # AI service integration
-├── shared/                 # Shared types and schemas
-│   └── schema.ts          # Database schema & types
-└── package.json           # Dependencies and scripts
+│   │   ├── pages/         # Application pages
+│   │   └── lib/           # Utilities and hooks
+├── server/                # Express backend
+│   ├── routes/           # API route handlers
+│   ├── middleware/       # Express middleware
+│   ├── websocket.ts      # WebSocket server
+│   └── ai.ts            # AI service integration
+├── shared/               # Shared types and schemas
+│   └── schema.ts        # Database schema definitions
+└── docs/                # Documentation
 ```
 
-## 🔧 API Endpoints
+## 🔧 API Documentation
 
-### Authentication
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/signin` - User login
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/logout` - User logout
+Once running, visit `http://localhost:5000/docs` for interactive API documentation powered by Swagger.
 
-### Services
-- `GET /api/services` - List services with filtering
-- `POST /api/services/create` - Create new service (providers)
-- `GET /api/services/:id` - Get service details
-- `PUT /api/services/:id` - Update service
-- `POST /api/services/recommendations` - Get AI recommendations
+### Key Endpoints
 
-### Bookings
-- `POST /api/bookings/create` - Create booking
-- `GET /api/bookings/client/:id` - Get client bookings
-- `PUT /api/bookings/:id/status` - Update booking status
-- `POST /api/bookings/:id/cancel` - Cancel booking
+- **Authentication**: `/api/auth/*` - User registration, login, logout
+- **Services**: `/api/services/*` - Service CRUD operations
+- **Bookings**: `/api/bookings/*` - Booking management
+- **Payments**: `/api/payments/*` - Payment processing
+- **AI Features**: `/api/ai/*` - AI-powered features
+- **Admin**: `/api/admin/*` - Administrative functions
 
-### Payments
-- `POST /api/payments/create-stripe-session` - Create payment session
-- `POST /api/payments/verify-payment` - Verify payment completion
-- `GET /api/payments/history` - Payment history
-- `POST /api/payments/refund` - Process refund
+## 🌐 Deployment
 
-### AI Features
-- `POST /api/ai/chat` - Chatbot conversation
-- `POST /api/ai/recommend` - Smart recommendations
-- `POST /api/ai/sentiment` - Sentiment analysis
-- `POST /api/ai/price-suggest` - Pricing suggestions
+### Railway (Recommended)
+1. Connect your GitHub repository to Railway
+2. Add environment variables in Railway dashboard
+3. Deploy automatically with git push
+
+### Render
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Set build command: `npm run build`
+4. Set start command: `npm start`
+
+### Vercel
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run: `vercel`
+3. Follow the deployment prompts
 
 ## 🔐 Security Features
 
 - **Rate Limiting**: API endpoint protection
 - **Input Validation**: Comprehensive request validation
-- **CORS Configuration**: Secure cross-origin requests
-- **Helmet Security**: HTTP security headers
-- **JWT Authentication**: Secure token-based auth
-- **Password Hashing**: bcrypt encryption
-- **SQL Injection Protection**: Parameterized queries
+- **CORS Protection**: Configured cross-origin resource sharing
+- **Helmet.js**: Security headers and protection
+- **JWT Authentication**: Secure user authentication
+- **Role-Based Access**: Granular permission system
 
-## 🌍 Deployment
+## 🌍 Internationalization
 
-### Production Build
-```bash
-npm run build
-npm start
-```
-
-### Environment Configuration
-- Set `NODE_ENV=production`
-- Configure production database URL
-- Set up proper CORS origins
-- Enable logging and monitoring
-
-### Recommended Hosting
-- **Backend**: Railway, Render, or AWS
-- **Database**: Neon, Supabase, or AWS RDS
-- **Frontend**: Vercel, Netlify, or AWS S3
-
-## 📊 Monitoring & Analytics
-
-- **System Logs**: Comprehensive logging system
-- **API Analytics**: Request/response tracking
-- **User Behavior**: AI interaction monitoring
-- **Payment Tracking**: Transaction and commission reports
-- **Performance Metrics**: Response time and error tracking
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test -- auth.test.ts
-```
+The platform supports:
+- **English (LTR)**: Default language
+- **Arabic (RTL)**: Full right-to-left layout support
+- **Dynamic Language Switching**: Real-time language changes
+- **Localized Content**: Service descriptions and UI text
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new features
-5. Submit a pull request
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-For support and questions:
-- Create an issue on GitHub
-- Review the documentation
-- Check the API documentation at `/docs`
+For support, email support@taskego.com or create an issue in this repository.
 
-## 🗺️ Roadmap
+## 🙏 Acknowledgments
 
-- [ ] Mobile application (React Native)
-- [ ] Advanced AI features (GPT-4 Vision)
-- [ ] Multi-currency support
-- [ ] Video consultation features
-- [ ] Advanced analytics dashboard
-- [ ] Third-party integrations (Calendar, Maps)
+- Built with modern web technologies
+- Powered by OpenAI for AI features
+- Secured payments by Stripe
+- Real-time features with WebSocket
+- Responsive design with Tailwind CSS
+
+---
+
+**Taskego (Khadamati)** - Connecting communities through intelligent service marketplace technology.
