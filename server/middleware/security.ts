@@ -50,6 +50,11 @@ export const securityHeaders = helmet({
 // CORS configuration
 export const corsOptions = {
   origin: function (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) {
+    // In development, allow all origins
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
@@ -59,7 +64,8 @@ export const corsOptions = {
       'https://localhost:3000',
       'https://localhost:5000',
       /\.replit\.app$/,
-      /\.repl\.co$/
+      /\.repl\.co$/,
+      /\.replit\.dev$/
     ];
     
     const isAllowed = allowedOrigins.some(allowed => {
