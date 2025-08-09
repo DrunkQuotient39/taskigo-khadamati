@@ -3,10 +3,45 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { aiService } from "./ai";
+import { initializeWebSocket } from "./websocket";
+import { 
+  generalLimiter, 
+  securityHeaders, 
+  corsOptions, 
+  sanitizeInput, 
+  logRequest, 
+  errorHandler,
+  healthCheck
+} from "./middleware/security";
+import cors from "cors";
 
-// AI and payment functionality is now handled directly in routes
+// Import route modules
+import authRoutes from "./routes/auth";
+import providerRoutes from "./routes/providers";
+import serviceRoutes from "./routes/services";
+import bookingRoutes from "./routes/bookings";
+import paymentRoutes from "./routes/payments";
+import adminRoutes from "./routes/admin";
+import aiRoutes from "./routes/ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Create HTTP server
+  const server = createServer(app);
+  
+  // Initialize WebSocket
+  const wsService = initializeWebSocket(server);
+  
+  // Global middleware
+  app.use(cors(corsOptions));
+  app.use(securityHeaders);
+  app.use(generalLimiter);
+  app.use(sanitizeInput);
+  app.use(logRequest);
+
+  // Health check endpoint
+  app.get("/health", healthCheck);
+  app.get("/api/health", healthCheck);
+
   // Auth middleware
   await setupAuth(app);
 
@@ -206,22 +241,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/payments/history", isAuthenticated, async (req, res) => {
-    try {
-      // Mock payment history for development
-      res.json({
-        payments: [],
-        pagination: {
-          currentPage: 1,
-          totalPages: 0,
-          totalCount: 0,
-          hasMore: false
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to get payment history" });
-    }
-  });
+  // Mount route modules
+  app.use("/api/auth", authRoutes);
+  app.use("/api/providers", providerRoutes);
+  app.use("/api/services", serviceRoutes);
+  app.use("/api/bookings", bookingRoutes);
+  app.use("/api/payments", paymentRoutes);
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/ai", aiRoutes);
 
   app.get("/api/payments/methods/supported", async (req, res) => {
     try {

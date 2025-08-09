@@ -1,0 +1,281 @@
+Architect a Modular Node.js Backend for Taskego — AI-Powered Bilingual Service Marketplace”
+
+🧠 Prompt Body (for GPT-4, Claude, or Gemini):
+You are a senior backend architect.
+
+I want you to help me build the full backend for a bilingual web platform called Taskego (Khadamati) — a service marketplace that connects local providers (plumbers, electricians, cleaners, etc.) with users who want to book tasks.
+
+The platform includes AI-powered assistance, real-time features, and full admin control.
+
+🧱 STACK & ARCHITECTURE
+Runtime: Node.js 20+
+
+Framework: Express.js
+
+Database: PostgreSQL via Drizzle ORM
+
+Realtime: WebSockets (Socket.IO)
+
+AI Engine: GPT-4 or Gemini via REST API
+
+Cloud Compatibility: Ready for Replit deployment
+
+🔐 AUTHENTICATION
+Role-based JWT system: client, provider, admin
+
+Middleware to protect and restrict routes per role
+
+Optional integration: Replit Auth or Firebase Auth later
+
+🗄️ DATABASE TABLES (via Drizzle/PostgreSQL)
+users
+ts
+Copy
+Edit
+id, name, email, passwordHash, role, phone, city, language, avatarUrl,
+isVerified, isBanned, createdAt, updatedAt
+providers
+ts
+Copy
+Edit
+userId (FK), businessName, businessDocs (URL[]), approvalStatus (pending/approved/rejected), ratings, serviceCount
+services
+ts
+Copy
+Edit
+id, title_en, title_ar, description_en, description_ar,
+price, categoryId, subcategory, images (string[]),
+providerId (FK), isVisible, tags (string[]), createdAt, updatedAt
+bookings
+ts
+Copy
+Edit
+id, clientId (FK), providerId (FK), serviceId (FK),
+status (pending/accepted/in_progress/completed/cancelled),
+scheduledAt, notes, cancellationReason, createdAt
+reviews
+ts
+Copy
+Edit
+id, serviceId (FK), userId (FK), rating (1-5), comment, sentimentScore, createdAt
+wallets
+ts
+Copy
+Edit
+userId (FK), balance, lastTransactionAt
+payments
+ts
+Copy
+Edit
+bookingId (FK), method (stripe/paypal/applepay), amount, status (paid/refunded), txnId, createdAt
+notifications
+ts
+Copy
+Edit
+userId (FK), type, message, isRead, createdAt
+ai_logs
+ts
+Copy
+Edit
+userId (FK), query, response, intent, serviceMatchedId (optional), timestamp
+🧩 ROUTES (RESTful)
+🔑 /api/auth
+POST /signup
+
+POST /login
+
+POST /logout
+
+GET /me
+
+POST /forgot-password
+
+POST /reset-password
+
+👤 /api/users
+GET /profile
+
+PUT /update
+
+DELETE /deactivate
+
+POST /upload-avatar
+
+🧑‍🔧 /api/providers
+POST /apply
+
+GET /my-services
+
+GET /bookings
+
+PUT /service-status
+
+🛠 /api/services
+GET / — search, filter, category
+
+POST /create
+
+PUT /:id — edit service
+
+DELETE /:id
+
+GET /:id — service detail
+
+📅 /api/bookings
+POST /create
+
+GET /client/:id
+
+GET /provider/:id
+
+PUT /:id/status
+
+POST /:id/cancel
+
+⭐ /api/reviews
+POST /
+
+GET /service/:id
+
+GET /user/:id
+
+💳 /api/payments
+POST /create-stripe-session
+
+POST /verify-payment
+
+GET /history
+
+POST /refund
+
+🧠 /api/ai
+POST /chat — personalized GPT/Gemini chatbot
+
+POST /recommend — recommends best-matching services
+
+POST /sentiment — auto-analyze review tone
+
+POST /price-suggest — generate optimized pricing
+
+POST /action — call booking API from AI suggestion
+
+🛡 /api/admin
+GET /stats
+
+GET /users
+
+PUT /ban-user
+
+POST /approve-provider
+
+DELETE /delete-service/:id
+
+GET /logs
+
+GET /analytics
+
+⚙️ MIDDLEWARE & SECURITY
+JWT token check + role-based middleware
+
+CORS, Helmet, Rate limiting
+
+Bcrypt password hashing
+
+express-validator input sanitization
+
+Centralized error handling
+
+⚡ REAL-TIME FEATURES
+Using Socket.IO:
+
+🔔 Notifications: booking status, approval, messages
+
+📆 Real-time updates for bookings (status changes)
+
+🛠 Service update triggers for providers
+
+📩 Admin actions broadcast to affected users
+
+🧠 PERSONALIZED AI LAYER (via GPT-4 or Gemini)
+Goals:
+Let users ask in plain English/Arabic for what they need
+
+AI will:
+
+Match intent → recommend 3 nearby services
+
+Auto-book if intent is “I want to book now”
+
+Provide smart filters (by rating, time, city)
+
+Summarize available providers
+
+Respond with human-like tone
+
+Method:
+Use RAG (Retrieval-Augmented Generation)
+
+Embed service descriptions into Supabase vector DB or local cosine match
+
+Send top 5 matches into GPT/Gemini prompt like:
+
+txt
+Copy
+Edit
+System: You are Taskego’s AI Concierge. You help people find, filter, and book local services.
+User: I need a cheap fridge repair in Tyre today.
+📈 ADMIN DASHBOARD CONTROLS
+Block/unblock users
+
+Approve/reject providers
+
+Edit/delete services
+
+View system logs (bookings, cancels, refunds)
+
+Analytics:
+
+📊 Total Users
+
+🛠 Top Categories
+
+📅 Daily/Weekly Bookings
+
+💰 Revenue/Commissions
+
+💬 EMAIL / SMS (to add later)
+Send booking confirmations
+
+Send password reset emails
+
+Notify provider of new bookings
+
+Email AI chat summary (optional)
+
+📂 FILE UPLOADS (To Do)
+Upload service images (Cloudinary or Supabase Storage)
+
+Upload business documents
+
+Upload profile avatars
+
+Validate type/size
+
+🧪 TESTING
+Unit tests with Jest
+
+API tests with Supertest
+
+Swagger or Postman collection with every route
+
+✅ CORE GOALS OF THE PROMPT:
+Complete CRUD + Auth + Real-time + AI control
+
+No fluff. Modular and production-ready
+
+Fully RESTful
+
+Easily extendable to mobile or Electron frontend
+
+Future-ready for Firebase, Stripe, Maps, and Apple Pay
+
