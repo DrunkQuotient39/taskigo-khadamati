@@ -6,8 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import LanguageSwitcher from '../common/LanguageSwitcher';
-import { useQuery } from '@tanstack/react-query';
-import type { User as UserType } from '@shared/schema';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   currentLanguage: string;
@@ -19,11 +18,8 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   
-  // Get user data from auth hook
-  const { data: user } = useQuery<UserType | null>({
-    queryKey: ['/api/auth/user'],
-    retry: false,
-  });
+  // Get user via Firebase-backed auth hook
+  const { user } = useAuth();
 
   const navItems = [
     { href: '/', label: messages.nav?.home || 'Home' },

@@ -1,13 +1,15 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { authenticate, authorize, AuthRequest } from '../middleware/auth';
+import { authorize, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate } from '../middleware/security';
 import { body } from 'express-validator';
+import { isFirebaseStorageConfigured, uploadDataUrlToFirebase } from '../lib/uploads';
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
+// All routes require Firebase authentication
+router.use(firebaseAuthenticate as any);
 
 // Provider application
 router.post('/apply', validate([
@@ -15,6 +17,10 @@ router.post('/apply', validate([
   body('city').trim().isLength({ min: 2, max: 50 }).withMessage('City is required'),
   body('businessType').optional().trim(),
   body('licenseNumber').optional().trim(),
+  body('businessDocs').optional().isArray().withMessage('businessDocs must be an array'),
+  body('businessDocs.*.type').optional().isIn(['id_card','certification','description']).withMessage('Invalid doc type'),
+  body('businessDocs.*.dataUrl').optional().isString(),
+  body('businessDocs.*.text').optional().isString(),
 ]), async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
@@ -34,13 +40,37 @@ router.post('/apply', validate([
       insuranceInfo
     } = req.body;
 
+    // Persist documents to Firebase Storage if configured
+    let normalizedDocs = Array.isArray(businessDocs) ? businessDocs : [];
+    if (normalizedDocs.length > 0) {
+      const useFirebaseStorage = isFirebaseStorageConfigured();
+      const uploaded: any[] = [];
+      for (const doc of normalizedDocs) {
+        if ((doc.type === 'id_card' || doc.type === 'certification') && doc.dataUrl) {
+          try {
+            if (useFirebaseStorage) {
+              const url = await uploadDataUrlToFirebase(doc.dataUrl, { folder: `provider-docs/${userId}` });
+              uploaded.push({ type: doc.type, url });
+            } else {
+              uploaded.push({ type: doc.type, url: doc.dataUrl });
+            }
+          } catch {
+            uploaded.push({ type: doc.type, url: doc.dataUrl });
+          }
+        } else if (doc.type === 'description' && doc.text) {
+          uploaded.push({ type: doc.type, text: doc.text });
+        }
+      }
+      normalizedDocs = uploaded;
+    }
+
     const provider = await storage.createProvider({
       userId,
       businessName,
       city,
       businessType,
       licenseNumber,
-      businessDocs: businessDocs || [],
+      businessDocs: normalizedDocs || [],
       insuranceInfo: insuranceInfo || {},
       approvalStatus: 'pending',
       ratings: "0.00",

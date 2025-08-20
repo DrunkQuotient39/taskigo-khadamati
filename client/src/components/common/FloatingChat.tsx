@@ -18,17 +18,10 @@ interface ChatMessage {
 
 export default function FloatingChat({ messages }: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      text: messages.chat?.welcome || "Hello! I'm here to help you find the perfect service. What can I help you with today?",
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
     const newMessage: ChatMessage = {
@@ -41,16 +34,30 @@ export default function FloatingChat({ messages }: FloatingChatProps) {
     setChatMessages(prev => [...prev, newMessage]);
     setInputMessage('');
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: ChatMessage = {
+    try {
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ message: newMessage.text, language: document.documentElement.lang || 'en' })
+      });
+      const data = await res.json();
+      const bot: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: messages.chat?.response || "I found several available providers for your request. What's your location and preferred time?",
+        text: data?.response || messages.chat?.response || 'How can I help you with the website?',
         isUser: false,
         timestamp: new Date(),
       };
-      setChatMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+      setChatMessages(prev => [...prev, bot]);
+    } catch {
+      const fallback: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: 'Assistant is unavailable. Please try again later.',
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, fallback]);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

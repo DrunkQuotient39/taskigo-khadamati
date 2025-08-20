@@ -5,11 +5,16 @@ import * as schema from "../shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
+// Gracefully handle missing DATABASE_URL in local/dev by allowing in-memory storage fallback
+let poolInstance: Pool | null = null;
+let dbInstance: ReturnType<typeof drizzle> | null = null;
+
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.warn("DATABASE_URL not set. Falling back to in-memory storage. Database features will be disabled.");
+} else {
+  poolInstance = new Pool({ connectionString: process.env.DATABASE_URL });
+  dbInstance = drizzle({ client: poolInstance as any, schema });
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+export const pool = poolInstance as unknown as Pool;
+export const db = dbInstance as unknown as ReturnType<typeof drizzle>;

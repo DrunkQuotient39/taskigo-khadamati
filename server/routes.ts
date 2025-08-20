@@ -1,9 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage-simple";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { storage } from "./storage";
+// Replit OIDC not used by default anymore
+// import { setupAuth, isAuthenticated } from "./replitAuth";
+import { firebaseAuthenticate } from './middleware/firebaseAuth';
 import { aiService } from "./ai";
-import { initializeWebSocket } from "./websocket";
+// import { initializeWebSocket } from "./websocket";
 import { 
   generalLimiter, 
   securityHeaders, 
@@ -23,18 +25,20 @@ import bookingRoutes from "./routes/bookings";
 import paymentRoutes from "./routes/payments";
 import adminRoutes from "./routes/admin";
 import aiRoutes from "./routes/ai";
+import uploadRoutes from "./routes/uploads";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const server = createServer(app);
   
   // Initialize WebSocket
-  const wsService = initializeWebSocket(server);
+  // const wsService = initializeWebSocket(server);
   
   // Global middleware
   app.use(cors(corsOptions));
   app.use(securityHeaders);
-  app.use(generalLimiter);
+  // Apply rate limiting only to API routes to avoid throttling Vite/static in development
+  app.use('/api', generalLimiter);
   app.use(sanitizeInput);
   app.use(logRequest);
 
@@ -43,22 +47,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", healthCheck);
 
   // Auth middleware
-  await setupAuth(app);
+  // OIDC setup removed (Firebase ID tokens preferred)
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Removed session user route; use /api/auth/me-firebase instead
   // Service Categories Routes
   app.get("/api/categories", async (req, res) => {
     try {
@@ -170,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Pricing Suggestions for Providers
-  app.post("/api/ai/pricing", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/pricing", firebaseAuthenticate as any, async (req, res) => {
     try {
       const { serviceType, location, duration } = req.body;
       
@@ -210,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payments/apple-pay/process", isAuthenticated, async (req, res) => {
+  app.post("/api/payments/apple-pay/process", async (req, res) => {
     try {
       const { amount, bookingId } = req.body;
       // Mock payment processing for development
@@ -225,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payments/intent", isAuthenticated, async (req, res) => {
+  app.post("/api/payments/intent", async (req, res) => {
     try {
       const { amount, currency = 'USD', paymentMethod } = req.body;
       
@@ -249,6 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/payments", paymentRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/ai", aiRoutes);
+  app.use("/api/uploads", uploadRoutes);
 
   app.get("/api/payments/methods/supported", async (req, res) => {
     try {
@@ -278,6 +271,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(services);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch services" });
+    }
+  });
+
+  // Service analytics endpoints
+  app.get('/api/services/:id/analytics', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (Number.isNaN(id)) return res.status(400).json({ message: 'Invalid service id' });
+      const analytics = (await import('./analytics')).getServiceAnalytics(id);
+      res.json(analytics || { serviceId: id, views: 0, uniqueViews: 0 });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to get service analytics' });
     }
   });
 
@@ -487,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Service Recommendations
-  app.get("/api/ai/recommendations", isAuthenticated, async (req, res) => {
+  app.get("/api/ai/recommendations", firebaseAuthenticate as any, async (req, res) => {
     try {
       const userId = (req as any).user?.id;
       if (!userId) {
@@ -601,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Provider Profile Assessment
-  app.get("/api/ai/provider-assessment", isAuthenticated, async (req, res) => {
+  app.get("/api/ai/provider-assessment", async (req, res) => {
     try {
       const userId = (req as any).user?.id;
       if (!userId) {
@@ -643,7 +648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get chat conversations for a user
-  app.get("/api/ai/conversations", isAuthenticated, async (req, res) => {
+  app.get("/api/ai/conversations", firebaseAuthenticate as any, async (req, res) => {
     try {
       const userId = (req as any).user?.id;
       if (!userId) {
@@ -659,7 +664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get messages for a specific conversation
-  app.get("/api/ai/conversations/:id/messages", isAuthenticated, async (req, res) => {
+  app.get("/api/ai/conversations/:id/messages", firebaseAuthenticate as any, async (req, res) => {
     try {
       const conversationId = parseInt(req.params.id);
       const messages = await storage.getChatMessages(conversationId);
@@ -671,7 +676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feedback on AI recommendations
-  app.post("/api/ai/recommendations/:id/feedback", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/recommendations/:id/feedback", firebaseAuthenticate as any, async (req, res) => {
     try {
       const recommendationId = parseInt(req.params.id);
       const { feedback, isUsed } = req.body;
@@ -688,6 +693,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return server;
 }

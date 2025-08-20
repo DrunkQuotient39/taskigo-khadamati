@@ -7,9 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Messages } from '@/lib/i18n';
+import { auth } from '@/lib/firebase';
 
 interface ChatProps {
   messages: Messages;
+}
+
+interface ActionProposal {
+  intent: 'book' | 'cancel';
+  proposal?: any;
+  requires?: string[];
+  bookingId?: number;
 }
 
 interface ChatMessage {
@@ -17,7 +25,7 @@ interface ChatMessage {
   type: 'user' | 'bot';
   content: string;
   timestamp: Date;
-  suggestions?: string[];
+  actionProposal?: ActionProposal;
 }
 
 export default function Chat({ messages }: ChatProps) {
@@ -50,44 +58,101 @@ export default function Chat({ messages }: ChatProps) {
     scrollToBottom();
   }, [chatMessages]);
 
-  const simulateBotResponse = (userMessage: string) => {
+  const sendToAssistant = async (userMessage: string) => {
     setIsTyping(true);
-    
-    setTimeout(() => {
-      let botResponse = '';
-      let suggestions: string[] = [];
-
-      // Simple AI simulation based on keywords
-      const message = userMessage.toLowerCase();
-      
-      if (message.includes('clean') || message.includes('maid')) {
-        botResponse = 'I found several cleaning services in your area! Here are the top-rated options: Professional House Cleaning ($45/hour), Quick Clean Service ($35/hour), and Deep Clean Experts ($55/hour). Would you like me to show you more details or help you book?';
-        suggestions = ['Show cleaning details', 'Book Professional House Cleaning', 'Compare all cleaning services'];
-      } else if (message.includes('plumb') || message.includes('pipe') || message.includes('leak')) {
-        botResponse = 'For plumbing services, I recommend: FastFix Plumbers (24/7 emergency, $80/hour), Ahmed\'s Plumbing ($65/hour), or City Plumbing Solutions ($70/hour). They all have excellent ratings and can handle urgent repairs.';
-        suggestions = ['Emergency plumber now', 'Schedule plumbing visit', 'Compare plumber prices'];
-      } else if (message.includes('price') || message.includes('cost') || message.includes('cheap')) {
-        botResponse = 'I can help you find budget-friendly options! What type of service are you looking for? I can filter by your price range and show you the best value providers in your area.';
-        suggestions = ['Under $30 services', 'Under $50 services', 'Best value options'];
-      } else if (message.includes('urgent') || message.includes('emergency') || message.includes('now')) {
-        botResponse = 'I understand you need urgent help! Here are providers available right now: Emergency Repair Services (available 24/7), Quick Response Team (2-hour response), and Instant Fix Solutions (1-hour response). Should I help you contact them immediately?';
-        suggestions = ['Call emergency service', 'Book urgent appointment', 'Find 24/7 providers'];
-      } else {
-        botResponse = 'I can help you with that! To give you the best recommendations, could you tell me more about what type of service you need? I can help with cleaning, repairs, maintenance, delivery, and many other services.';
-        suggestions = ['Browse all services', 'Find providers near me', 'Show popular services'];
-      }
-
+    try {
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ message: userMessage, language: document.documentElement.lang || 'en' }),
+      });
+      const data = await res.json();
+      const botText: string = data?.response || 'Sorry, I could not process that right now.';
       const newMessage: ChatMessage = {
         id: Date.now().toString(),
         type: 'bot',
-        content: botResponse,
+        content: botText,
         timestamp: new Date(),
-        suggestions
       };
-
       setChatMessages(prev => [...prev, newMessage]);
+
+      // Attempt actionable flow (book/cancel) with confirmation
+      const lower = userMessage.toLowerCase();
+      const isBook = /\b(book|booking)\b/.test(lower);
+      const isCancel = /\b(cancel|unbook)\b/.test(lower);
+      if (isBook || isCancel) {
+        try {
+          const idToken = await auth.currentUser?.getIdToken();
+          if (!idToken) {
+            setChatMessages(prev => [...prev, { id: (Date.now()+2).toString(), type: 'bot', content: 'Please sign in to proceed with booking actions.', timestamp: new Date() }]);
+            return;
+          }
+          const actionRes = await fetch('/api/ai/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify({ intent: isBook ? 'book' : 'cancel', query: userMessage, confirm: false }),
+          });
+          if (actionRes.ok) {
+            const action = await actionRes.json();
+            const proposal: ActionProposal = {
+              intent: isBook ? 'book' : 'cancel',
+              proposal: action.proposal,
+              requires: action.requires,
+              bookingId: action.proposal?.bookingId,
+            };
+            const followUp: ChatMessage = {
+              id: (Date.now() + 3).toString(),
+              type: 'bot',
+              content: isBook
+                ? `Proposed booking. ${action.requires?.length ? `Missing: ${action.requires.join(', ')}` : 'Ready to confirm.'}`
+                : `Proposed cancellation${action.proposal?.bookingId ? ` for booking ${action.proposal.bookingId}` : ''}. Ready to confirm?`,
+              timestamp: new Date(),
+              actionProposal: proposal,
+            };
+            setChatMessages(prev => [...prev, followUp]);
+          }
+        } catch {}
+      }
+    } catch (e) {
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: 'bot',
+        content: 'Our assistant is temporarily unavailable. Please try again later.',
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, newMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
+  };
+
+  const confirmProposal = async (msg: ChatMessage) => {
+    if (!msg.actionProposal) return;
+    const idToken = await auth.currentUser?.getIdToken();
+    if (!idToken) {
+      setChatMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content: 'Please sign in to continue.', timestamp: new Date() }]);
+      return;
+    }
+    const intent = msg.actionProposal.intent;
+    const payload: any = { intent, query: msg.content, confirm: true };
+    if (intent === 'cancel' && msg.actionProposal.bookingId) payload.bookingId = msg.actionProposal.bookingId;
+    try {
+      const res = await fetch('/api/ai/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const text = intent === 'book' ? `Booking created (ID: ${data.bookingId}).` : `Booking ${data.bookingId} cancelled.`;
+        setChatMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content: text, timestamp: new Date() }]);
+      } else {
+        setChatMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content: data.error || 'Could not complete action.', timestamp: new Date() }]);
+      }
+    } catch (e) {
+      setChatMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content: 'Action failed. Try again.', timestamp: new Date() }]);
+    }
   };
 
   const handleSendMessage = () => {
@@ -102,8 +167,7 @@ export default function Chat({ messages }: ChatProps) {
 
     setChatMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-    
-    simulateBotResponse(inputMessage);
+    sendToAssistant(inputMessage);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -205,21 +269,15 @@ export default function Chat({ messages }: ChatProps) {
                                   }`}
                                 >
                                   <p className="text-sm">{message.content}</p>
+                                  {message.actionProposal && (
+                                    <div className="mt-2 flex gap-2">
+                                      <Button size="sm" className="h-7" onClick={() => confirmProposal(message)}>Confirm</Button>
+                                      <Button size="sm" variant="outline" className="h-7" onClick={() => setChatMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content: 'Cancelled.', timestamp: new Date() }])}>Cancel</Button>
+                                    </div>
+                                  )}
                                 </div>
                                 
-                                {message.suggestions && (
-                                  <div className="mt-2 space-y-1">
-                                    {message.suggestions.map((suggestion, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleSuggestionClick(suggestion)}
-                                        className="block text-xs text-khadamati-blue hover:text-khadamati-blue/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded transition-colors"
-                                      >
-                                        {suggestion}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
+                                {/* Suggestions removed to keep assistant strictly website-scoped */}
                                 
                                 <p className="text-xs text-gray-500 mt-1">
                                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

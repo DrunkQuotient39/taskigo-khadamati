@@ -1,23 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, ArrowRight, Shield, Users, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
+import { signUpWithEmail, signInWithGoogle } from '@/lib/firebase';
 
 interface SignUpProps {
   messages: Messages;
 }
 
 export default function SignUp({ messages }: SignUpProps) {
-  useEffect(() => {
-    // Auto-redirect to Replit Auth
-    const timer = setTimeout(() => {
-      window.location.href = '/api/login';
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -41,13 +36,27 @@ export default function SignUp({ messages }: SignUpProps) {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
-                onClick={() => window.location.href = '/api/login'}
-              >
-                {messages.signup?.button || 'Sign Up with Replit'}
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
+                  onClick={async () => { await signInWithGoogle(); }}
+                >
+                  {messages.signup?.button || 'Sign Up with Google'}
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+                <div className="grid grid-cols-1 gap-2">
+                  <input className="border rounded px-3 py-2" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input className="border rounded px-3 py-2" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full py-3 text-lg font-medium"
+                  onClick={async () => { await signUpWithEmail(email, password); }}
+                >
+                  Create Account with Email
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
               
               <div className="text-center text-sm text-gray-500">
                 {messages.signup?.secure || 'Secure registration powered by Replit'}

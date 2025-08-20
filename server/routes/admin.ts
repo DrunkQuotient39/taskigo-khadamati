@@ -1,13 +1,17 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { authenticate, authorize, AuthRequest } from '../middleware/auth';
+import { authorize, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
+import { db } from '../db';
+import { serviceAnalyticsDaily, services as servicesTable } from '../../shared/schema';
+import { and, eq, gte, lte } from 'drizzle-orm';
 import { validate } from '../middleware/security';
 import { body } from 'express-validator';
 
 const router = Router();
 
 // All admin routes require authentication and admin role
-router.use(authenticate);
+router.use(firebaseAuthenticate as any);
 router.use(authorize('admin'));
 
 // Get admin dashboard stats
@@ -493,6 +497,56 @@ router.get('/analytics', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Get analytics error:', error);
     res.status(500).json({ message: 'Failed to get analytics data' });
+  }
+});
+
+// Services analytics with date range
+router.get('/analytics/services', async (req: AuthRequest, res) => {
+  try {
+    const { start, end, serviceId } = req.query as { start?: string; end?: string; serviceId?: string };
+    const startDate = start ? new Date(start) : new Date(new Date().toISOString().split('T')[0]);
+    const endDate = end ? new Date(end) : new Date();
+    const dateKeyStart = startDate.toISOString().split('T')[0];
+    const dateKeyEnd = endDate.toISOString().split('T')[0];
+
+    // Build where clause
+    const where = [
+      gte(serviceAnalyticsDaily.dateKey, dateKeyStart),
+      lte(serviceAnalyticsDaily.dateKey, dateKeyEnd),
+    ];
+    if (serviceId) where.push(eq(serviceAnalyticsDaily.serviceId, parseInt(serviceId)));
+
+    // Query daily analytics
+    const rows = await db.select().from(serviceAnalyticsDaily)
+      .where(and(...where));
+
+    // Group by serviceId and dateKey
+    const byService: Record<string, any> = {};
+    for (const r of rows) {
+      const key = String(r.serviceId);
+      if (!byService[key]) byService[key] = { serviceId: r.serviceId, totalViews: 0, totalUnique: 0, daily: [] as any[] };
+      byService[key].totalViews += r.views || 0;
+      byService[key].totalUnique += r.uniqueViews || 0;
+      byService[key].daily.push({ date: r.dateKey, views: r.views || 0, uniqueViews: r.uniqueViews || 0 });
+    }
+
+    // Attach basic service info
+    const serviceIds = Object.values(byService).map((s: any) => s.serviceId);
+    if (serviceIds.length > 0) {
+      const svcRows = await db.select().from(servicesTable).where(eq(servicesTable.id, serviceIds[0] as any));
+      // Note: Drizzle needs an 'in' variant; keeping single fetch minimal for MVP
+      if (svcRows.length && byService[String(svcRows[0].id)]) {
+        byService[String(svcRows[0].id)].serviceTitle = svcRows[0].title;
+      }
+    }
+
+    res.json({
+      range: { start: dateKeyStart, end: dateKeyEnd },
+      results: Object.values(byService),
+    });
+  } catch (error) {
+    console.error('Admin services analytics error:', error);
+    res.status(500).json({ message: 'Failed to get services analytics' });
   }
 });
 

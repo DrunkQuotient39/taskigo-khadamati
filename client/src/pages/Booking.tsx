@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -45,6 +45,21 @@ export default function Booking({ messages }: BookingProps) {
       name: '',
     },
   });
+
+  // Prefill from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const serviceType = params.get('serviceType');
+    const date = params.get('date');
+    const time = params.get('time');
+    const location = params.get('location');
+    const details = params.get('details');
+    if (serviceType) form.setValue('serviceType', serviceType);
+    if (date) form.setValue('date', date);
+    if (time) form.setValue('time', time);
+    if (location) form.setValue('location', location);
+    if (details) form.setValue('details', details);
+  }, [form]);
 
   const onSubmit = async (data: BookingForm) => {
     setIsSubmitting(true);

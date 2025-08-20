@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { authenticate, authorize, optionalAuth, AuthRequest } from '../middleware/auth';
+import { ensureServiceAnalytics, recordServiceView, getServiceAnalytics, getServiceAnalyticsByDateRange } from '../analytics';
+import { authorize, optionalAuth, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, serviceValidation } from '../middleware/security';
 import { body } from 'express-validator';
 
@@ -62,7 +64,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
 });
 
 // Create new service (providers only)
-router.post('/create', authenticate, authorize('provider'), validate([
+router.post('/create', firebaseAuthenticate as any, authorize('provider'), validate([
   serviceValidation.title,
   serviceValidation.description,
   serviceValidation.price,
@@ -115,6 +117,9 @@ router.post('/create', authenticate, authorize('provider'), validate([
       isActive: true
     });
 
+    // Initialize analytics for this service
+    try { ensureServiceAnalytics(service.id); } catch {}
+
     // Update provider service count
     await storage.updateProvider(provider.id, {
       serviceCount: provider.serviceCount + 1
@@ -163,11 +168,16 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
     // Get provider info
     const provider = await storage.getProvider(service.providerId);
     
-    // Get service reviews
-    const reviews = await storage.getReviews(serviceId);
+    // Get service reviews (DB-backed implementation returns all; filter by serviceId below if needed)
+    const reviews = await storage.getReviews(serviceId as any);
     
     // Get service images
     const images = await storage.getServiceImages(serviceId);
+
+    // Record a view for analytics
+    try { await recordServiceView(serviceId, req as any); } catch {}
+
+    const analytics = getServiceAnalytics(serviceId);
 
     res.json({
       service: {
@@ -179,7 +189,8 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
         } : null,
         images,
         reviews: reviews.slice(0, 5), // Latest 5 reviews
-        totalReviews: reviews.length
+        totalReviews: reviews.length,
+        analytics,
       }
     });
   } catch (error) {
@@ -188,8 +199,55 @@ router.get('/:id', optionalAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// Get analytics for a service (admin or provider of this service; or public summary if allowed)
+router.get('/:id/analytics', optionalAuth, async (req: AuthRequest, res) => {
+  try {
+    const serviceId = parseInt(req.params.id);
+    if (isNaN(serviceId)) return res.status(400).json({ message: 'Invalid service ID' });
+
+    const { startDate, endDate } = req.query;
+    const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate ? new Date(endDate as string) : new Date();
+
+    // Public: basic analytics; for detailed governance we can restrict later
+    const daily = await getServiceAnalyticsByDateRange(serviceId, start, end);
+    const summary = await getServiceAnalytics(serviceId);
+    res.json({ summary, daily });
+  } catch (error) {
+    console.error('Get service analytics error:', error);
+    res.status(500).json({ message: 'Failed to get service analytics' });
+  }
+});
+
+// Submit a review for a service
+router.post('/:id/reviews', firebaseAuthenticate as any, validate([
+  body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be 1-5'),
+  body('comment').trim().isLength({ min: 5, max: 1000 }).withMessage('Comment must be 5-1000 characters')
+]), async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const serviceId = parseInt(req.params.id);
+    const { rating, comment } = req.body;
+
+    const service = await storage.getService(serviceId);
+    if (!service) return res.status(404).json({ message: 'Service not found' });
+
+    const review = await storage.createReview({
+      serviceId,
+      userId,
+      rating: rating.toString(),
+      comment,
+    } as any);
+
+    res.status(201).json({ message: 'Review submitted', review });
+  } catch (error) {
+    console.error('Submit review error:', error);
+    res.status(500).json({ message: 'Failed to submit review' });
+  }
+});
+
 // Update service (provider only)
-router.put('/:id', authenticate, authorize('provider'), validate([
+router.put('/:id', firebaseAuthenticate as any, authorize('provider'), validate([
   body('title').optional().trim().isLength({ min: 5, max: 100 }),
   body('description').optional().trim().isLength({ min: 20, max: 1000 }),
   body('price').optional().isDecimal({ decimal_digits: '0,2' }),
@@ -213,6 +271,9 @@ router.put('/:id', authenticate, authorize('provider'), validate([
       status: 'pending', // Requires re-approval after updates
       updatedAt: new Date()
     });
+
+    // Ensure analytics record exists for updated service
+    try { ensureServiceAnalytics(serviceId); } catch {}
 
     // Log service update
     await storage.createSystemLog({
@@ -238,7 +299,7 @@ router.put('/:id', authenticate, authorize('provider'), validate([
 });
 
 // Delete service (provider only)
-router.delete('/:id', authenticate, authorize('provider'), async (req: AuthRequest, res) => {
+router.delete('/:id', firebaseAuthenticate as any, authorize('provider'), async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const serviceId = parseInt(req.params.id);
@@ -299,7 +360,7 @@ router.delete('/:id', authenticate, authorize('provider'), async (req: AuthReque
 });
 
 // Add service image
-router.post('/:id/images', authenticate, authorize('provider'), validate([
+router.post('/:id/images', firebaseAuthenticate as any, authorize('provider'), validate([
   body('imageUrl').isURL().withMessage('Valid image URL required'),
   body('alt').optional().trim(),
   body('isPrimary').optional().isBoolean()

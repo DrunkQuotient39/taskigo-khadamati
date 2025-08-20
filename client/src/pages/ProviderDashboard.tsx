@@ -16,91 +16,32 @@ interface ProviderDashboardProps {
 export default function ProviderDashboard({ messages }: ProviderDashboardProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
-  // Mock data - in real app, this would come from API
-  const mockStats = {
-    totalBookings: 247,
-    totalEarnings: 8547,
-    averageRating: 4.8,
-    activeServices: 3,
-  };
-
-  const mockBookings = [
-    {
-      id: 1,
-      clientName: 'John Smith',
-      service: 'House Cleaning',
-      date: '2024-01-20',
-      status: 'completed',
-      amount: 75,
-      clientAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 2,
-      clientName: 'Emily Johnson',
-      service: 'Deep Cleaning',
-      date: '2024-01-18',
-      status: 'in_progress',
-      amount: 120,
-      clientAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 3,
-      clientName: 'Michael Brown',
-      service: 'Office Cleaning',
-      date: '2024-01-15',
-      status: 'pending',
-      amount: 90,
-      clientAvatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
-    },
-  ];
-
-  const mockServices = [
-    {
-      id: 1,
-      title: 'Premium House Cleaning',
-      description: 'Deep cleaning service for residential homes',
-      price: 35,
-      priceType: 'hourly',
-      status: 'active',
-      bookings: 24,
-      rating: 4.9,
-    },
-    {
-      id: 2,
-      title: 'Office Cleaning',
-      description: 'Commercial cleaning for offices and businesses',
-      price: 45,
-      priceType: 'hourly',
-      status: 'active',
-      bookings: 18,
-      rating: 4.8,
-    },
-    {
-      id: 3,
-      title: 'Move-in/Move-out Cleaning',
-      description: 'Comprehensive cleaning for relocations',
-      price: 120,
-      priceType: 'fixed',
-      status: 'inactive',
-      bookings: 12,
-      rating: 4.7,
-    },
-  ];
-
+  // Live data from API
   const { data: stats } = useQuery({
     queryKey: ['/api/provider/stats'],
-    queryFn: () => Promise.resolve(mockStats),
+    queryFn: async () => {
+      const res = await fetch('/api/provider/stats', { credentials: 'include' });
+      return res.json();
+    }
   });
 
   const { data: recentBookings } = useQuery({
     queryKey: ['/api/provider/bookings', selectedPeriod],
-    queryFn: () => Promise.resolve(mockBookings),
+    queryFn: async () => {
+      const res = await fetch(`/api/provider/bookings?period=${selectedPeriod}`, { credentials: 'include' });
+      return res.json();
+    }
   });
 
   const { data: services } = useQuery({
     queryKey: ['/api/provider/services'],
-    queryFn: () => Promise.resolve(mockServices),
+    queryFn: async () => {
+      const res = await fetch('/api/provider/services', { credentials: 'include' });
+      return res.json();
+    }
   });
+
+  
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Building2, 
   User, 
@@ -30,6 +32,7 @@ interface ProviderSignUpProps {
 
 export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     businessName: '',
     ownerName: '',
@@ -43,6 +46,9 @@ export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
     hasInsurance: false,
     agreedToTerms: false
   });
+
+  const [idCardPreview, setIdCardPreview] = useState<string>('');
+  const [certPreview, setCertPreview] = useState<string>('');
 
   const serviceCategories = [
     { id: 'cleaning', name: 'Cleaning Services', icon: '🧹' },
@@ -65,12 +71,51 @@ export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
       return;
     }
 
+    if (!formData.businessName || !formData.serviceCategory || !formData.businessAddress) {
+      toast({ title: 'Missing information', description: 'Please complete all required fields.' });
+      return;
+    }
+
+    if (!user) {
+      toast({ title: 'Login required', description: 'Please log in before submitting your application.' });
+      setLocation('/login');
+      return;
+    }
+
     try {
-      // Redirect to Replit Auth with provider role
-      const authUrl = `/api/login?role=provider&redirect=/provider-dashboard`;
-      window.location.href = authUrl;
-    } catch (error) {
+      const idToken = await (user as any).getIdToken?.();
+      const payload = {
+        businessName: formData.businessName,
+        city: formData.businessAddress,
+        businessType: formData.serviceCategory,
+        licenseNumber: formData.hasLicense ? 'DECLARED' : null,
+        insuranceInfo: formData.hasInsurance ? { declared: true } : {},
+        businessDocs: [
+          idCardPreview ? { type: 'id_card', dataUrl: idCardPreview } : null,
+          certPreview ? { type: 'certification', dataUrl: certPreview } : null,
+          formData.description ? { type: 'description', text: formData.description } : null,
+        ].filter(Boolean),
+      } as any;
+
+      const res = await fetch('/api/providers/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to submit application');
+      }
+
+      toast({ title: 'Application submitted', description: 'Your provider application has been sent for review.' });
+      setLocation('/provider-dashboard');
+    } catch (error: any) {
       console.error('Provider registration error:', error);
+      toast({ title: 'Submission failed', description: error.message || 'Please try again later.', variant: 'destructive' });
     }
   };
 
@@ -238,8 +283,46 @@ export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
 
                     {/* Certifications */}
                     <div className="space-y-4">
-                      <Label>Professional Credentials (Optional)</Label>
+                      <Label>Identity & Certifications</Label>
                       <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="idCard">Government ID Card (front or both sides)</Label>
+                          <Input id="idCard" type="file" accept="image/*,.pdf" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) { setIdCardPreview(''); return; }
+                            const reader = new FileReader();
+                            reader.onload = () => setIdCardPreview(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }} />
+                          {idCardPreview && (
+                            <div className="mt-2">
+                              {idCardPreview.startsWith('data:image') ? (
+                                <img src={idCardPreview} alt="ID preview" className="max-h-40 rounded border" />
+                              ) : (
+                                <Badge variant="secondary">File attached</Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="cert">Certification (Tarkhis)</Label>
+                          <Input id="cert" type="file" accept="image/*,.pdf" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) { setCertPreview(''); return; }
+                            const reader = new FileReader();
+                            reader.onload = () => setCertPreview(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }} />
+                          {certPreview && (
+                            <div className="mt-2">
+                              {certPreview.startsWith('data:image') ? (
+                                <img src={certPreview} alt="Certification preview" className="max-h-40 rounded border" />
+                              ) : (
+                                <Badge variant="secondary">File attached</Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="hasLicense"

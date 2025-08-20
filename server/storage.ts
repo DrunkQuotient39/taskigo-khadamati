@@ -1849,4 +1849,7 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage: IStorage = new DatabaseStorage();
+// Use database storage when DATABASE_URL is provided; otherwise fall back to in-memory storage for local/dev
+export const storage: IStorage = process.env.DATABASE_URL
+  ? new DatabaseStorage()
+  : new MemStorage();

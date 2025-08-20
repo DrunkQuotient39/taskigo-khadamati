@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { aiService } from '../ai';
-import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth';
+import { optionalAuth, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, aiLimiter } from '../middleware/security';
 import { body } from 'express-validator';
 
@@ -10,7 +11,7 @@ const router = Router();
 // Apply AI rate limiting to all routes
 router.use(aiLimiter);
 
-// AI Chat endpoint - bilingual assistant
+// AI Chat endpoint - bilingual, website-only assistant
 router.post('/chat', optionalAuth, validate([
   body('message').trim().isLength({ min: 1, max: 1000 }).withMessage('Message must be 1-1000 characters'),
   body('language').optional().isIn(['en', 'ar']).withMessage('Language must be en or ar'),
@@ -38,22 +39,20 @@ router.post('/chat', optionalAuth, validate([
       userContext
     });
 
-    // Log AI interaction
+    // Log AI interaction (store plain text for now)
     await storage.createAiLog({
       userId: req.user?.id,
       query: message,
-      response: response.text,
-      intent: response.intent || 'chat',
+      response: response,
+      intent: 'chat',
       language,
-      processingTime: response.processingTime,
-      model: response.model || 'gpt-4'
+      model: 'gpt-4o-mini'
     });
 
     res.json({
-      response: response.text,
-      intent: response.intent,
+      response,
+      intent: 'chat',
       language,
-      suggestions: response.suggestions || [],
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -65,7 +64,7 @@ router.post('/chat', optionalAuth, validate([
   }
 });
 
-// Smart service recommendations
+// Smart service recommendations (price/location aware)
 router.post('/recommend', optionalAuth, validate([
   body('query').optional().trim().isLength({ max: 500 }),
   body('location').optional().trim().isLength({ max: 100 }),
@@ -107,27 +106,24 @@ router.post('/recommend', optionalAuth, validate([
       model: 'gpt-4'
     });
 
-    // If query provided, use AI to match services
-    let aiMatches = [];
+    // Optional AI matching from description
     if (query) {
       const matchResult = await aiService.matchServicesByDescription(query, services, categories);
-      aiMatches = matchResult.matches;
-      
-      res.json({
+      return res.json({
         recommendations,
-        aiMatches,
+        aiMatches: matchResult.matches,
         confidence: matchResult.confidence,
         suggestions: matchResult.suggestions,
         totalAvailable: services.length,
         filters: { location, budget, category }
       });
-    } else {
-      res.json({
-        recommendations,
-        totalAvailable: services.length,
-        filters: { location, budget, category }
-      });
     }
+
+    res.json({
+      recommendations,
+      totalAvailable: services.length,
+      filters: { location, budget, category }
+    });
   } catch (error) {
     console.error('AI recommendations error:', error);
     res.status(500).json({ error: "AI recommendation service unavailable" });
@@ -135,7 +131,7 @@ router.post('/recommend', optionalAuth, validate([
 });
 
 // Sentiment analysis for reviews and feedback
-router.post('/sentiment', authenticate, validate([
+router.post('/sentiment', firebaseAuthenticate as any, validate([
   body('text').trim().isLength({ min: 5, max: 2000 }).withMessage('Text must be 5-2000 characters'),
   body('referenceType').optional().isIn(['review', 'message', 'feedback']),
   body('referenceId').optional().isInt({ min: 1 })
@@ -179,7 +175,7 @@ router.post('/sentiment', authenticate, validate([
 });
 
 // AI pricing suggestions for providers
-router.post('/price-suggest', authenticate, validate([
+router.post('/price-suggest', firebaseAuthenticate as any, validate([
   body('serviceType').trim().notEmpty().withMessage('Service type is required'),
   body('location').trim().notEmpty().withMessage('Location is required'),
   body('duration').isInt({ min: 15, max: 480 }).withMessage('Duration must be 15-480 minutes'),
@@ -239,27 +235,97 @@ router.post('/price-suggest', authenticate, validate([
 });
 
 // AI-powered booking assistant
-router.post('/action', authenticate, validate([
-  body('intent').isIn(['book', 'search', 'compare', 'schedule']).withMessage('Valid intent required'),
-  body('query').trim().isLength({ min: 5, max: 500 }).withMessage('Query must be 5-500 characters'),
-  body('context').optional().isObject()
+router.post('/action', firebaseAuthenticate as any, validate([
+  body('intent').isIn(['book', 'search', 'compare', 'schedule', 'cancel']).withMessage('Valid intent required'),
+  body('query').trim().isLength({ min: 3, max: 500 }).withMessage('Query must be 3-500 characters'),
+  body('context').optional().isObject(),
+  body('confirm').optional().isBoolean(),
+  body('bookingId').optional().isInt({ min: 1 })
 ]), async (req: AuthRequest, res) => {
   try {
-    const { intent, query, context = {} } = req.body;
+    const { intent, query, context = {}, confirm = false, bookingId } = req.body;
     const userId = req.user!.id;
 
     let result: any = {};
 
     switch (intent) {
-      case 'book':
+      case 'book': {
         // Parse booking intent from natural language
-        const bookingContext = await aiService.parseBookingIntent(query, context);
+        const parsed = await aiService.parseBookingIntent(query, context);
+
+        // Try to find a candidate service if not provided
+        let chosenServiceId = context.serviceId as number | undefined;
+        if (!chosenServiceId && parsed.serviceType) {
+          const svc = (await storage.getServices({ category: parsed.serviceType }))
+            .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))[0];
+          if (svc) chosenServiceId = svc.id;
+        }
+
+        // If not confirmed, return proposal
+        if (!confirm) {
+          result = {
+            intent: 'book',
+            proposal: {
+              serviceId: chosenServiceId || null,
+              serviceType: parsed.serviceType || null,
+              date: parsed.date || null,
+              time: parsed.time || null,
+              location: parsed.location || context.location || null,
+              phone: context.phone || null,
+              details: parsed.details || null,
+            },
+            requires: [
+              !(chosenServiceId || parsed.serviceType) && 'serviceType',
+              !parsed.date && 'date',
+              !parsed.time && 'time',
+              !(parsed.location || context.location) && 'location',
+              !context.phone && 'phone'
+            ].filter(Boolean),
+            message: 'Please confirm to create the booking.'
+          };
+          break;
+        }
+
+        // Confirmed: require minimal fields
+        const serviceId = chosenServiceId;
+        if (!serviceId || !parsed.date || !parsed.time || !(parsed.location || context.location) || !context.phone) {
+          return res.status(400).json({
+            error: 'Missing required fields to create booking',
+            required: ['serviceId/serviceType', 'date', 'time', 'location', 'phone']
+          });
+        }
+
+        const service = await storage.getService(serviceId);
+        if (!service) return res.status(404).json({ message: 'Service not found' });
+
+        const booking = await storage.createBooking({
+          clientId: userId,
+          serviceId,
+          providerId: service.providerId,
+          scheduledDate: new Date(parsed.date),
+          scheduledTime: parsed.time,
+          duration: service.duration || 60,
+          totalAmount: service.price,
+          clientAddress: parsed.location || (context.location as string),
+          clientPhone: context.phone as string,
+          specialInstructions: parsed.details || '',
+          status: 'pending',
+          paymentStatus: 'pending'
+        } as any);
+
         result = {
           intent: 'book',
-          parsed: bookingContext,
-          nextSteps: ['Select service', 'Choose date/time', 'Confirm booking']
+          status: 'created',
+          bookingId: booking.id,
+          summary: {
+            serviceTitle: service.title,
+            date: parsed.date,
+            time: parsed.time,
+            amount: booking.totalAmount
+          }
         };
         break;
+      }
 
       case 'search':
         // Use AI to enhance search
@@ -300,6 +366,36 @@ router.post('/action', authenticate, validate([
         };
         break;
 
+      case 'cancel': {
+        const id = bookingId || parseInt((query.match(/#?(\d{1,10})/) || [])[1] || '0');
+        if (!id) {
+          result = { error: 'bookingId is required to cancel' };
+          break;
+        }
+        const booking = await storage.getBooking(id);
+        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        if (booking.clientId !== userId && req.user!.role !== 'admin') {
+          return res.status(403).json({ message: 'Not authorized to cancel this booking' });
+        }
+        if (!confirm) {
+          result = {
+            intent: 'cancel',
+            proposal: { bookingId: id },
+            message: 'Do you want to cancel this booking?'
+          };
+          break;
+        }
+        const updated = await storage.updateBooking(id, { status: 'cancelled' });
+        result = {
+          intent: 'cancel',
+          status: 'cancelled',
+          bookingId: id,
+          previousStatus: booking.status,
+          updated
+        };
+        break;
+      }
+
       default:
         result = { error: 'Unknown intent' };
     }
@@ -322,7 +418,7 @@ router.post('/action', authenticate, validate([
 });
 
 // Get AI interaction history
-router.get('/history', authenticate, async (req: AuthRequest, res) => {
+router.get('/history', firebaseAuthenticate as any, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { intent, limit = 20, offset = 0 } = req.query;
@@ -351,7 +447,7 @@ router.get('/history', authenticate, async (req: AuthRequest, res) => {
 });
 
 // AI analytics for admin
-router.get('/analytics', authenticate, async (req: AuthRequest, res) => {
+router.get('/analytics', firebaseAuthenticate as any, async (req: AuthRequest, res) => {
   try {
     // Only admins can access AI analytics
     if (req.user?.role !== 'admin') {

@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskego - Khadamati | Professional Local Services Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'khadamati-blue': '#1E40AF',
+                        'khadamati-yellow': '#F59E0B',
+                        'khadamati-success': '#10B981',
+                        'khadamati-error': '#EF4444',
+                        'khadamati-info': '#3B82F6',
+                        'khadamati-light': '#F8FAFC',
+                        'khadamati-gray': '#64748B',
+                        'khadamati-dark': '#1E293B'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'arabic': ['Noto Sans Arabic', 'Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'scale-in': 'scaleIn 0.4s ease-out'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #1E40AF 0%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #F59E0B 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .floating-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .page-transition {
+            opacity: 0;
+            animation: fade-in 0.6s ease-out forwards;
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .rtl-support {
+            direction: rtl;
+        }
+        
+        .rtl-support .text-left {
+            text-align: right;
+        }
+        
+        .rtl-support .text-right {
+            text-align: left;
+        }
+        
+        .parallax-container {
+            transform: translateZ(0);
+        }
+        
+        .nav-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-mobile.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="font-inter bg-khadamati-light text-khadamati-dark">
+    <!-- Language & RTL State -->
+    <div class="hidden" id="language-state" data-lang="en" data-rtl="false"></div>
+    
+    <!-- @COMPONENT: Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-xl flex items-center justify-center">
+                            <i class="fas fa-tasks text-white text-lg"></i>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-gradient">Taskego</span>
+                        <span class="ml-2 text-sm text-khadamati-gray hidden sm:inline">Khadamati</span>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="text-khadamati-blue font-medium hover:text-khadamati-yellow transition-colors">Home</a>
+                        <a href="#services" class="text-khadamati-gray hover:text-khadamati-blue transition-colors">Services</a>
+                        <a href="#about" class="text-khadamati-gray hover:text-khadamati-blue transition-colors">About</a>
+                        <a href="#booking" class="text-khadamati-gray hover:text-khadamati-blue transition-colors">Booking</a>
+                        <a href="#contact" class="text-khadamati-gray hover:text-khadamati-blue transition-colors">Contact</a>
+                    </div>
+                </div>
+                
+                <!-- Right Side Controls -->
+                <div class="flex items-center space-x-4">
+                    <!-- Language Switcher -->
+                    <div class="relative">
+                        <button id="language-toggle" class="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-globe text-khadamati-gray"></i>
+                            <span class="text-sm font-medium" data-lang-text="EN">EN</span>
+                            <i class="fas fa-chevron-down text-xs text-khadamati-gray"></i>
+                        </button>
+                        <div id="language-dropdown" class="absolute right-0 mt-2 w-24 bg-white rounded-lg shadow-lg border hidden">
+                            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors" data-lang="en">English</button>
+                            <button class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors" data-lang="ar">العربية</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Auth Buttons -->
+                    <div class="hidden md:flex items-center space-x-3">
+                        <button class="px-4 py-2 text-khadamati-blue border border-khadamati-blue rounded-lg hover:bg-khadamati-blue hover:text-white transition-colors">
+                            <span data-key="login">Login</span>
+                        </button>
+                        <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <span data-key="signup">Sign Up</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-khadamati-gray hover:text-khadamati-blue transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-nav" class="md:hidden nav-mobile bg-white shadow-lg">
+            <div class="px-4 py-4 space-y-4">
+                <a href="#home" class="block py-2 text-khadamati-blue font-medium">Home</a>
+                <a href="#services" class="block py-2 text-khadamati-gray hover:text-khadamati-blue transition-colors">Services</a>
+                <a href="#about" class="block py-2 text-khadamati-gray hover:text-khadamati-blue transition-colors">About</a>
+                <a href="#booking" class="block py-2 text-khadamati-gray hover:text-khadamati-blue transition-colors">Booking</a>
+                <a href="#contact" class="block py-2 text-khadamati-gray hover:text-khadamati-blue transition-colors">Contact</a>
+                <div class="border-t pt-4">
+                    <button class="w-full py-2 text-khadamati-blue border border-khadamati-blue rounded-lg mb-3 hover:bg-khadamati-blue hover:text-white transition-colors">
+                        <span data-key="login">Login</span>
+                    </button>
+                    <button class="w-full py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <span data-key="signup">Sign Up</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- @END_COMPONENT: Navigation -->
+    
+    <!-- @COMPONENT: HomePage -->
+    <div id="home" class="page-transition">
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white py-20 relative overflow-hidden">
+            <div class="parallax-container absolute inset-0">
+                <!-- Professional service workers working together -->
+                <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+                <div class="absolute inset-0" style="background-image: url('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2126&q=80'); background-size: cover; background-position: center;"></div>
+            </div>
+            
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-slide-up">
+                        <span data-key="hero.title">Professional Services</span><br>
+                        <span class="text-khadamati-yellow" data-key="hero.subtitle">At Your Fingertips</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto animate-slide-up animation-delay-200">
+                        <span data-key="hero.description">Connect with trusted local service providers for all your home and business needs. From cleaning to repairs, we've got you covered.</span>
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up animation-delay-400">
+                        <button class="px-8 py-4 bg-khadamati-yellow text-khadamati-dark font-semibold rounded-xl hover:bg-yellow-500 transition-colors transform hover:scale-105">
+                            <span data-key="hero.cta.book">Book a Service</span>
+                        </button>
+                        <button class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-khadamati-blue transition-colors">
+                            <span data-key="hero.cta.provider">Become a Provider</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Stats Section -->
+        <section class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="text-center scroll-reveal">
+                        <div class="text-4xl font-bold text-khadamati-blue mb-2" data-counter="1200">1200+</div>
+                        <div class="text-khadamati-gray" data-key="stats.providers">Service Providers</div>
+                    </div>
+                    <div class="text-center scroll-reveal">
+                        <div class="text-4xl font-bold text-khadamati-blue mb-2" data-counter="15000">15,000+</div>
+                        <div class="text-khadamati-gray" data-key="stats.bookings">Completed Bookings</div>
+                    </div>
+                    <div class="text-center scroll-reveal">
+                        <div class="text-4xl font-bold text-khadamati-blue mb-2" data-counter="4.9">4.9</div>
+                        <div class="text-khadamati-gray" data-key="stats.rating">Average Rating</div>
+                    </div>
+                    <div class="text-center scroll-reveal">
+                        <div class="text-4xl font-bold text-khadamati-blue mb-2" data-counter="25">25+</div>
+                        <div class="text-khadamati-gray" data-key="stats.cities">Cities Covered</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Services Categories -->
+        <section class="py-20 bg-khadamati-light">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="services.title">Our Services</h2>
+                    <p class="text-xl text-khadamati-gray max-w-2xl mx-auto" data-key="services.description">
+                        Explore our wide range of professional services designed to make your life easier.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Cleaning Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional house cleaning service -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-broom text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.cleaning.title">Cleaning</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.cleaning.description">Professional house and office cleaning services</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $25</div>
+                    </div>
+                    
+                    <!-- Plumbing Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional plumber fixing pipes -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-wrench text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.plumbing.title">Plumbing</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.plumbing.description">Expert plumbing repairs and installations</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $40</div>
+                    </div>
+                    
+                    <!-- Electrical Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional electrician working on electrical panel -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-bolt text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.electrical.title">Electrical</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.electrical.description">Licensed electrical services and repairs</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $50</div>
+                    </div>
+                    
+                    <!-- Delivery Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional delivery person with packages -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-truck text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.delivery.title">Delivery</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.delivery.description">Fast and reliable delivery services</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $15</div>
+                    </div>
+                    
+                    <!-- Maintenance Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional maintenance worker with tools -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-tools text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.maintenance.title">Maintenance</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.maintenance.description">General maintenance and handyman services</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $30</div>
+                    </div>
+                    
+                    <!-- Painting Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional painter working on interior walls -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-paint-roller text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.painting.title">Painting</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.painting.description">Professional interior and exterior painting</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $35</div>
+                    </div>
+                    
+                    <!-- Gardening Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional gardener working in a beautiful garden -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-lime-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-seedling text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.gardening.title">Gardening</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.gardening.description">Garden maintenance and landscaping services</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $28</div>
+                    </div>
+                    
+                    <!-- Tutoring Service -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional tutor teaching students -->
+                        <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="services.tutoring.title">Tutoring</h3>
+                        <p class="text-khadamati-gray mb-4" data-key="services.tutoring.description">Expert tutoring and educational support</p>
+                        <div class="text-khadamati-blue font-semibold">Starting from $20</div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <button class="px-8 py-4 bg-khadamati-blue text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors transform hover:scale-105">
+                        <span data-key="services.view_all">View All Services</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- How It Works -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="how_it_works.title">How It Works</h2>
+                    <p class="text-xl text-khadamati-gray max-w-2xl mx-auto" data-key="how_it_works.description">
+                        Get your service in just a few simple steps.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="text-center scroll-reveal">
+                        <div class="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span class="text-white text-2xl font-bold">1</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="how_it_works.step1.title">Choose Service</h3>
+                        <p class="text-khadamati-gray" data-key="how_it_works.step1.description">Browse our categories and select the service you need</p>
+                    </div>
+                    
+                    <div class="text-center scroll-reveal">
+                        <div class="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span class="text-white text-2xl font-bold">2</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="how_it_works.step2.title">Book & Pay</h3>
+                        <p class="text-khadamati-gray" data-key="how_it_works.step2.description">Select your preferred time and complete the booking</p>
+                    </div>
+                    
+                    <div class="text-center scroll-reveal">
+                        <div class="w-20 h-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span class="text-white text-2xl font-bold">3</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-3" data-key="how_it_works.step3.title">Get Service</h3>
+                        <p class="text-khadamati-gray" data-key="how_it_works.step3.description">Professional service provider arrives at your location</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Featured Providers -->
+        <section class="py-20 bg-khadamati-light">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="featured_providers.title">Top Rated Providers</h2>
+                    <p class="text-xl text-khadamati-gray max-w-2xl mx-auto" data-key="featured_providers.description">
+                        Meet our highly-rated service providers who deliver excellence every time.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Provider 1 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional female cleaner in uniform -->
+                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                             alt="Professional female cleaner" 
+                             class="w-24 h-24 rounded-full mx-auto mb-6 object-cover">
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-2" data-mock="true">Sarah Johnson</h3>
+                        <p class="text-khadamati-gray mb-4" data-mock="true">Professional Cleaner</p>
+                        <div class="flex justify-center items-center mb-4">
+                            <div class="flex text-khadamati-yellow">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="ml-2 text-khadamati-gray text-sm" data-mock="true">4.9 (127 reviews)</span>
+                        </div>
+                        <div class="text-khadamati-blue font-semibold mb-4" data-mock="true">$25/hour</div>
+                        <button class="w-full py-3 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors" data-event="click:bookProvider">
+                            <span data-key="featured_providers.book_now">Book Now</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Provider 2 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional male plumber with tools -->
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                             alt="Professional male plumber" 
+                             class="w-24 h-24 rounded-full mx-auto mb-6 object-cover">
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-2" data-mock="true">Ahmed Hassan</h3>
+                        <p class="text-khadamati-gray mb-4" data-mock="true">Expert Plumber</p>
+                        <div class="flex justify-center items-center mb-4">
+                            <div class="flex text-khadamati-yellow">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="ml-2 text-khadamati-gray text-sm" data-mock="true">4.8 (89 reviews)</span>
+                        </div>
+                        <div class="text-khadamati-blue font-semibold mb-4" data-mock="true">$40/hour</div>
+                        <button class="w-full py-3 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors" data-event="click:bookProvider">
+                            <span data-key="featured_providers.book_now">Book Now</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Provider 3 -->
+                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                        <!-- Professional female electrician in safety gear -->
+                        <img src="https://pixabay.com/get/g354c216477f925f5965a77906b7ac7d5e1ba775c905606bcb5b5233b9a314e3044c38c748453ea0fd5501edee0d1b2bf2352e34eacca8276bc56574dd44d66d0_1280.jpg" 
+                             alt="Professional female electrician" 
+                             class="w-24 h-24 rounded-full mx-auto mb-6 object-cover">
+                        <h3 class="text-xl font-semibold text-khadamati-dark mb-2" data-mock="true">Maria Rodriguez</h3>
+                        <p class="text-khadamati-gray mb-4" data-mock="true">Licensed Electrician</p>
+                        <div class="flex justify-center items-center mb-4">
+                            <div class="flex text-khadamati-yellow">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="ml-2 text-khadamati-gray text-sm" data-mock="true">4.9 (156 reviews)</span>
+                        </div>
+                        <div class="text-khadamati-blue font-semibold mb-4" data-mock="true">$50/hour</div>
+                        <button class="w-full py-3 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors" data-event="click:bookProvider">
+                            <span data-key="featured_providers.book_now">Book Now</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="py-20 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl font-bold mb-4" data-key="cta.title">Ready to Get Started?</h2>
+                <p class="text-xl mb-8 max-w-2xl mx-auto" data-key="cta.description">
+                    Join thousands of satisfied customers who trust Taskego for their service needs.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="px-8 py-4 bg-white text-khadamati-blue font-semibold rounded-xl hover:bg-gray-100 transition-colors transform hover:scale-105">
+                        <span data-key="cta.download_app">Download App</span>
+                    </button>
+                    <button class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-khadamati-blue transition-colors">
+                        <span data-key="cta.learn_more">Learn More</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- @END_COMPONENT: HomePage -->
+    
+    <!-- @COMPONENT: ServicesPage -->
+    <div id="services" class="page-transition hidden">
+        <div class="pt-20 pb-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="services_page.title">All Services</h1>
+                    <p class="text-xl text-khadamati-gray max-w-2xl mx-auto" data-key="services_page.description">
+                        Find the perfect service provider for your needs.
+                    </p>
+                </div>
+                
+                <!-- Search and Filters -->
+                <div class="bg-khadamati-light rounded-2xl p-6 mb-12">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" placeholder="Search services..." 
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <select class="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                <option data-key="services_page.filter.category">Category</option>
+                                <option data-key="services.cleaning.title">Cleaning</option>
+                                <option data-key="services.plumbing.title">Plumbing</option>
+                                <option data-key="services.electrical.title">Electrical</option>
+                                <option data-key="services.delivery.title">Delivery</option>
+                            </select>
+                            <select class="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                <option data-key="services_page.filter.price">Price Range</option>
+                                <option data-mock="true">$0 - $25</option>
+                                <option data-mock="true">$25 - $50</option>
+                                <option data-mock="true">$50 - $100</option>
+                                <option data-mock="true">$100+</option>
+                            </select>
+                            <button class="px-6 py-3 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <span data-key="services_page.filter.search">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service Listings -->
+                <!-- @MAP: services.map(service => ( -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service Item 1 -->
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Professional cleaning service in action -->
+                        <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=300" 
+                             alt="Professional cleaning service" 
+                             class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-semibold text-khadamati-dark" data-mock="true">Premium House Cleaning</h3>
+                                <span class="text-khadamati-blue font-bold" data-mock="true">$35/hr</span>
+                            </div>
+                            <p class="text-khadamati-gray mb-4" data-mock="true">Deep cleaning service for your home with eco-friendly products</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                         alt="Sarah Johnson" 
+                                         class="w-10 h-10 rounded-full mr-3 object-cover">
+                                    <div>
+                                        <div class="font-medium text-khadamati-dark" data-mock="true">Sarah J.</div>
+                                        <div class="text-sm text-khadamati-gray flex items-center">
+                                            <i class="fas fa-star text-khadamati-yellow mr-1"></i>
+                                            <span data-mock="true">4.9</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <span data-key="services_page.book">Book</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Item 2 -->
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Professional plumbing repair work -->
+                        <img src="https://pixabay.com/get/g781c78f1dc93ab7f0baa474c3c2a311f1f75e04900717231e5d0030568761345198e8bd8be2d27a967085ae4c8369a151e4b89842a891b3f78c21f1f538df4e8_1280.jpg" 
+                             alt="Professional plumbing repair" 
+                             class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-semibold text-khadamati-dark" data-mock="true">Emergency Plumbing</h3>
+                                <span class="text-khadamati-blue font-bold" data-mock="true">$45/hr</span>
+                            </div>
+                            <p class="text-khadamati-gray mb-4" data-mock="true">24/7 emergency plumbing services for urgent repairs</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                         alt="Ahmed Hassan" 
+                                         class="w-10 h-10 rounded-full mr-3 object-cover">
+                                    <div>
+                                        <div class="font-medium text-khadamati-dark" data-mock="true">Ahmed H.</div>
+                                        <div class="text-sm text-khadamati-gray flex items-center">
+                                            <i class="fas fa-star text-khadamati-yellow mr-1"></i>
+                                            <span data-mock="true">4.8</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <span data-key="services_page.book">Book</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Item 3 -->
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Professional electrical installation work -->
+                        <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=300" 
+                             alt="Professional electrical work" 
+                             class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-semibold text-khadamati-dark" data-mock="true">Electrical Installation</h3>
+                                <span class="text-khadamati-blue font-bold" data-mock="true">$55/hr</span>
+                            </div>
+                            <p class="text-khadamati-gray mb-4" data-mock="true">Licensed electrical installations and safety inspections</p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <img src="https://pixabay.com/get/g606c3e6314255b689c661298871a076f3ec2c33b3b346cc78e6f62290271d26c9259c002dd3ecccd14fdaa3e9cacfcbfe7153046c96bec285a40014c93de1e55_1280.jpg" 
+                                         alt="Maria Rodriguez" 
+                                         class="w-10 h-10 rounded-full mr-3 object-cover">
+                                    <div>
+                                        <div class="font-medium text-khadamati-dark" data-mock="true">Maria R.</div>
+                                        <div class="text-sm text-khadamati-gray flex items-center">
+                                            <i class="fas fa-star text-khadamati-yellow mr-1"></i>
+                                            <span data-mock="true">4.9</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <span data-key="services_page.book">Book</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ServicesPage -->
+    
+    <!-- @COMPONENT: BookingPage -->
+    <div id="booking" class="page-transition hidden">
+        <div class="pt-20 pb-12 bg-khadamati-light">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="booking_page.title">Book a Service</h1>
+                    <p class="text-xl text-khadamati-gray" data-key="booking_page.description">
+                        Schedule your service in just a few clicks.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <form class="space-y-6">
+                        <!-- Service Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.service_type">Service Type</label>
+                            <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                <option data-key="booking_page.select_service">Select a service...</option>
+                                <option data-key="services.cleaning.title">Cleaning</option>
+                                <option data-key="services.plumbing.title">Plumbing</option>
+                                <option data-key="services.electrical.title">Electrical</option>
+                                <option data-key="services.delivery.title">Delivery</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date & Time -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.date">Date</label>
+                                <input type="date" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.time">Time</label>
+                                <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                    <option data-key="booking_page.select_time">Select time...</option>
+                                    <option data-mock="true">09:00 AM</option>
+                                    <option data-mock="true">10:00 AM</option>
+                                    <option data-mock="true">11:00 AM</option>
+                                    <option data-mock="true">02:00 PM</option>
+                                    <option data-mock="true">03:00 PM</option>
+                                    <option data-mock="true">04:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Location -->
+                        <div>
+                            <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.location">Location</label>
+                            <input type="text" placeholder="Enter your address..." 
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                        </div>
+                        
+                        <!-- Additional Details -->
+                        <div>
+                            <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.details">Additional Details</label>
+                            <textarea placeholder="Describe your service requirements..." 
+                                      class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue h-32"></textarea>
+                        </div>
+                        
+                        <!-- Contact Information -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.phone">Phone Number</label>
+                                <input type="tel" placeholder="Your phone number..." 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="booking_page.email">Email Address</label>
+                                <input type="email" placeholder="Your email..." 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="pt-6">
+                            <button type="submit" class="w-full py-4 bg-khadamati-blue text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                <span data-key="booking_page.submit">Book Service</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: BookingPage -->
+    
+    <!-- @COMPONENT: ProviderDashboard -->
+    <div id="provider-dashboard" class="page-transition hidden">
+        <div class="pt-20 pb-12 bg-khadamati-light">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h1 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="provider_dashboard.title">Provider Dashboard</h1>
+                    <p class="text-xl text-khadamati-gray" data-key="provider_dashboard.description">
+                        Manage your services and bookings.
+                    </p>
+                </div>
+                
+                <!-- Dashboard Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="provider_dashboard.stats.total_bookings">Total Bookings</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">247</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="provider_dashboard.stats.earnings">Total Earnings</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">$8,547</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-success rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="provider_dashboard.stats.rating">Average Rating</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">4.8</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-yellow rounded-lg flex items-center justify-center">
+                                <i class="fas fa-star text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="provider_dashboard.stats.active_services">Active Services</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">3</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-info rounded-lg flex items-center justify-center">
+                                <i class="fas fa-briefcase text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Bookings -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-12">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-khadamati-dark" data-key="provider_dashboard.recent_bookings">Recent Bookings</h2>
+                        <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <span data-key="provider_dashboard.view_all">View All</span>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="provider_dashboard.table.client">Client</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="provider_dashboard.table.service">Service</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="provider_dashboard.table.date">Date</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="provider_dashboard.table.status">Status</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="provider_dashboard.table.amount">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4" data-mock="true">John Smith</td>
+                                    <td class="py-4 px-4" data-mock="true">House Cleaning</td>
+                                    <td class="py-4 px-4" data-mock="true">Dec 20, 2023</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-3 py-1 bg-khadamati-success text-white rounded-full text-sm" data-mock="true">Completed</span>
+                                    </td>
+                                    <td class="py-4 px-4 font-semibold text-khadamati-dark" data-mock="true">$75</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4" data-mock="true">Emily Johnson</td>
+                                    <td class="py-4 px-4" data-mock="true">Deep Cleaning</td>
+                                    <td class="py-4 px-4" data-mock="true">Dec 18, 2023</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-3 py-1 bg-khadamati-info text-white rounded-full text-sm" data-mock="true">In Progress</span>
+                                    </td>
+                                    <td class="py-4 px-4 font-semibold text-khadamati-dark" data-mock="true">$120</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4" data-mock="true">Michael Brown</td>
+                                    <td class="py-4 px-4" data-mock="true">Office Cleaning</td>
+                                    <td class="py-4 px-4" data-mock="true">Dec 15, 2023</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-3 py-1 bg-khadamati-yellow text-white rounded-full text-sm" data-mock="true">Pending</span>
+                                    </td>
+                                    <td class="py-4 px-4 font-semibold text-khadamati-dark" data-mock="true">$90</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Service Management -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-khadamati-dark" data-key="provider_dashboard.services">My Services</h2>
+                        <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <span data-key="provider_dashboard.add_service">Add Service</span>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-khadamati-dark" data-mock="true">Premium House Cleaning</h3>
+                                    <p class="text-khadamati-gray" data-mock="true">Deep cleaning service for residential homes</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="p-2 text-khadamati-blue hover:bg-khadamati-light rounded-lg">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="p-2 text-khadamati-error hover:bg-red-50 rounded-lg">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-khadamati-blue font-bold" data-mock="true">$35/hour</span>
+                                <span class="px-3 py-1 bg-khadamati-success text-white rounded-full text-sm" data-mock="true">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-khadamati-dark" data-mock="true">Office Cleaning</h3>
+                                    <p class="text-khadamati-gray" data-mock="true">Commercial cleaning for offices and businesses</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="p-2 text-khadamati-blue hover:bg-khadamati-light rounded-lg">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="p-2 text-khadamati-error hover:bg-red-50 rounded-lg">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-khadamati-blue font-bold" data-mock="true">$45/hour</span>
+                                <span class="px-3 py-1 bg-khadamati-success text-white rounded-full text-sm" data-mock="true">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ProviderDashboard -->
+    
+    <!-- @COMPONENT: AdminPanel -->
+    <div id="admin-panel" class="page-transition hidden">
+        <div class="pt-20 pb-12 bg-khadamati-light">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h1 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="admin_panel.title">Admin Panel</h1>
+                    <p class="text-xl text-khadamati-gray" data-key="admin_panel.description">
+                        Platform management and analytics.
+                    </p>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="admin_panel.stats.total_users">Total Users</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">2,547</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="admin_panel.stats.active_providers">Active Providers</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">1,247</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-success rounded-lg flex items-center justify-center">
+                                <i class="fas fa-briefcase text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="admin_panel.stats.monthly_bookings">Monthly Bookings</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">15,842</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-yellow rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-khadamati-gray text-sm" data-key="admin_panel.stats.revenue">Monthly Revenue</p>
+                                <p class="text-3xl font-bold text-khadamati-dark" data-mock="true">$124,578</p>
+                            </div>
+                            <div class="w-12 h-12 bg-khadamati-info rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pending Approvals -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-12">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-khadamati-dark" data-key="admin_panel.pending_approvals">Pending Approvals</h2>
+                        <span class="px-3 py-1 bg-khadamati-error text-white rounded-full text-sm" data-mock="true">5 pending</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                     alt="New provider" 
+                                     class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-semibold text-khadamati-dark" data-mock="true">David Wilson</h3>
+                                    <p class="text-khadamati-gray text-sm" data-mock="true">New Provider - Electrical Services</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-khadamati-success text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <span data-key="admin_panel.approve">Approve</span>
+                                </button>
+                                <button class="px-4 py-2 bg-khadamati-error text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    <span data-key="admin_panel.reject">Reject</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                     alt="New provider" 
+                                     class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h3 class="font-semibold text-khadamati-dark" data-mock="true">Lisa Anderson</h3>
+                                    <p class="text-khadamati-gray text-sm" data-mock="true">New Service - Pet Grooming</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-khadamati-success text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <span data-key="admin_panel.approve">Approve</span>
+                                </button>
+                                <button class="px-4 py-2 bg-khadamati-error text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    <span data-key="admin_panel.reject">Reject</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Management -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-khadamati-dark" data-key="admin_panel.user_management">User Management</h2>
+                        <div class="flex space-x-4">
+                            <input type="text" placeholder="Search users..." 
+                                   class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                            <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <span data-key="admin_panel.search">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="admin_panel.table.user">User</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="admin_panel.table.type">Type</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="admin_panel.table.joined">Joined</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="admin_panel.table.status">Status</th>
+                                    <th class="text-left py-3 px-4 font-medium text-khadamati-gray" data-key="admin_panel.table.actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                                 alt="User avatar" 
+                                                 class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <div class="font-medium text-khadamati-dark" data-mock="true">John Doe</div>
+                                                <div class="text-sm text-khadamati-gray" data-mock="true">john.doe@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm" data-mock="true">Client</span>
+                                    </td>
+                                    <td class="py-4 px-4" data-mock="true">Nov 15, 2023</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm" data-mock="true">Active</span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2">
+                                            <button class="p-2 text-khadamati-blue hover:bg-khadamati-light rounded-lg">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="p-2 text-khadamati-error hover:bg-red-50 rounded-lg">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100" 
+                                                 alt="User avatar" 
+                                                 class="w-10 h-10 rounded-full object-cover">
+                                            <div>
+                                                <div class="font-medium text-khadamati-dark" data-mock="true">Sarah Johnson</div>
+                                                <div class="text-sm text-khadamati-gray" data-mock="true">sarah.j@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm" data-mock="true">Provider</span>
+                                    </td>
+                                    <td class="py-4 px-4" data-mock="true">Oct 22, 2023</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm" data-mock="true">Active</span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2">
+                                            <button class="p-2 text-khadamati-blue hover:bg-khadamati-light rounded-lg">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="p-2 text-khadamati-error hover:bg-red-50 rounded-lg">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AdminPanel -->
+    
+    <!-- @COMPONENT: ContactPage -->
+    <div id="contact" class="page-transition hidden">
+        <div class="pt-20 pb-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold text-khadamati-dark mb-4" data-key="contact_page.title">Contact Us</h1>
+                    <p class="text-xl text-khadamati-gray max-w-2xl mx-auto" data-key="contact_page.description">
+                        We're here to help. Get in touch with us for any questions or support.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Contact Information -->
+                    <div class="space-y-8">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-khadamati-dark mb-2" data-key="contact_page.address.title">Address</h3>
+                                <p class="text-khadamati-gray" data-mock="true">123 Business Street, Tech City, TC 12345</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-khadamati-dark mb-2" data-key="contact_page.phone.title">Phone</h3>
+                                <p class="text-khadamati-gray" data-mock="true">+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-khadamati-dark mb-2" data-key="contact_page.email.title">Email</h3>
+                                <p class="text-khadamati-gray" data-mock="true">support@taskego.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-khadamati-blue rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-khadamati-dark mb-2" data-key="contact_page.hours.title">Business Hours</h3>
+                                <p class="text-khadamati-gray" data-mock="true">Mon - Fri: 9:00 AM - 6:00 PM</p>
+                                <p class="text-khadamati-gray" data-mock="true">Sat - Sun: 10:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Form -->
+                    <div class="bg-khadamati-light rounded-2xl p-8">
+                        <h2 class="text-2xl font-bold text-khadamati-dark mb-6" data-key="contact_page.form.title">Send us a message</h2>
+                        
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="contact_page.form.name">Name</label>
+                                    <input type="text" placeholder="Your name..." 
+                                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="contact_page.form.email">Email</label>
+                                    <input type="email" placeholder="Your email..." 
+                                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="contact_page.form.subject">Subject</label>
+                                <input type="text" placeholder="Message subject..." 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-khadamati-dark mb-2" data-key="contact_page.form.message">Message</label>
+                                <textarea placeholder="Your message..." rows="5"
+                                          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-khadamati-blue"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full py-4 bg-khadamati-blue text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                <span data-key="contact_page.form.submit">Send Message</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ContactPage -->
+    
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-khadamati-dark text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-xl flex items-center justify-center mr-3">
+                            <i class="fas fa-tasks text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gradient">Taskego</span>
+                    </div>
+                    <p class="text-gray-400" data-key="footer.description">
+                        Your trusted platform for professional local services. Connect with skilled providers and get the job done right.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-khadamati-blue transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-khadamati-blue transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-khadamati-blue transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-khadamati-blue transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-key="footer.quick_links">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors" data-key="footer.home">Home</a></li>
+                        <li><a href="#services" class="text-gray-400 hover:text-white transition-colors" data-key="footer.services">Services</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors" data-key="footer.about">About</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors" data-key="footer.contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Services -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-key="footer.services_title">Services</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="services.cleaning.title">Cleaning</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="services.plumbing.title">Plumbing</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="services.electrical.title">Electrical</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="services.delivery.title">Delivery</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-key="footer.support">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.help_center">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.privacy">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.terms">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.faq">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-8 mt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400" data-key="footer.copyright">
+                        © 2023 Taskego. All rights reserved.
+                    </p>
+                    <div class="flex space-x-6 mt-4 md:mt-0">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.privacy">Privacy</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.terms">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-key="footer.cookies">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+    
+    <!-- @COMPONENT: FloatingChat -->
+    <div class="floating-chat">
+        <button id="chat-toggle" class="w-16 h-16 bg-gradient-to-br from-khadamati-blue to-khadamati-yellow rounded-full shadow-lg flex items-center justify-center text-white hover:shadow-xl transition-shadow">
+            <i class="fas fa-comments text-xl"></i>
+        </button>
+        
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-2xl shadow-2xl border overflow-hidden">
+            <div class="bg-gradient-to-r from-khadamati-blue to-khadamati-yellow p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold" data-key="chat.title">Taskego Assistant</h3>
+                            <p class="text-sm opacity-90" data-key="chat.status">Online</p>
+                        </div>
+                    </div>
+                    <button id="chat-close" class="text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4 h-64 overflow-y-auto bg-khadamati-light">
+                <div class="space-y-4">
+                    <!-- AI Message -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-khadamati-blue rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-xs"></i>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 max-w-xs">
+                            <p class="text-sm" data-key="chat.welcome">Hello! I'm here to help you find the perfect service. What can I help you with today?</p>
+                        </div>
+                    </div>
+                    
+                    <!-- User Message Example -->
+                    <div class="flex items-start space-x-2 justify-end">
+                        <div class="bg-khadamati-blue text-white rounded-lg p-3 max-w-xs">
+                            <p class="text-sm" data-mock="true">I need a cleaner for tomorrow</p>
+                        </div>
+                        <div class="w-8 h-8 bg-khadamati-yellow rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Response -->
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-khadamati-blue rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-xs"></i>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 max-w-xs">
+                            <p class="text-sm" data-key="chat.response">I found several available cleaners for tomorrow. What's your location and preferred time?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t">
+                <div class="flex space-x-2">
+                    <input type="text" placeholder="Type your message..." 
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-khadamati-blue text-sm">
+                    <button class="px-4 py-2 bg-khadamati-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: FloatingChat -->
+    
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Navigation functionality
+            const navToggle = document.getElementById('mobile-menu-toggle');
+            const mobileNav = document.getElementById('mobile-nav');
+            const navLinks = document.querySelectorAll('nav a[href^="#"]');
+            
+            navToggle.addEventListener('click', function() {
+                mobileNav.classList.toggle('open');
+            });
+            
+            // Page navigation
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    showPage(targetId);
+                    mobileNav.classList.remove('open');
+                });
+            });
+            
+            function showPage(pageId) {
+                // Hide all pages
+                const pages = document.querySelectorAll('.page-transition');
+                pages.forEach(page => {
+                    page.classList.add('hidden');
+                });
+                
+                // Show target page
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                }
+            }
+            
+            // Language switching
+            const languageToggle = document.getElementById('language-toggle');
+            const languageDropdown = document.getElementById('language-dropdown');
+            const languageButtons = document.querySelectorAll('[data-lang]');
+            const languageState = document.getElementById('language-state');
+            
+            languageToggle.addEventListener('click', function() {
+                languageDropdown.classList.toggle('hidden');
+            });
+            
+            languageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    if (lang) {
+                        switchLanguage(lang);
+                        languageDropdown.classList.add('hidden');
+                    }
+                });
+            });
+            
+            function switchLanguage(lang) {
+                languageState.setAttribute('data-lang', lang);
+                const isRTL = lang === 'ar';
+                languageState.setAttribute('data-rtl', isRTL);
+                
+                // Update HTML attributes
+                document.documentElement.lang = lang;
+                document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+                
+                // Update language display
+                const langText = document.querySelector('[data-lang-text]');
+                if (langText) {
+                    langText.textContent = lang === 'ar' ? 'ع' : 'EN';
+                }
+                
+                // Apply RTL styles
+                document.body.classList.toggle('rtl-support', isRTL);
+                
+                // TODO: Load actual translation strings from /messages/[lang].json
+                console.log(`Language switched to: ${lang}`);
+            }
+            
+            // Chat functionality
+            const chatToggle = document.getElementById('chat-toggle');
+            const chatWindow = document.getElementById('chat-window');
+            const chatClose = document.getElementById('chat-close');
+            
+            chatToggle.addEventListener('click', function() {
+                chatWindow.classList.toggle('hidden');
+            });
+            
+            chatClose.addEventListener('click', function() {
+                chatWindow.classList.add('hidden');
+            });
+            
+            // Scroll reveal animations
+            const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+            
+            function revealOnScroll() {
+                scrollRevealElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.classList.add('revealed');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', revealOnScroll);
+            
+            // Counter animations
+            const counterElements = document.querySelectorAll('[data-counter]');
+            
+            function animateCounters() {
+                counterElements.forEach(element => {
+                    const target = parseInt(element.getAttribute('data-counter'));
+                    const current = parseInt(element.textContent) || 0;
+                    
+                    if (current < target) {
+                        const increment = target / 100;
+                        element.textContent = Math.ceil(current + increment);
+                        
+                        setTimeout(() => {
+                            if (parseInt(element.textContent) < target) {
+                                animateCounters();
+                            }
+                        }, 50);
+                    }
+                });
+            }
+            
+            // Initialize animations when page loads
+            window.addEventListener('load', function() {
+                revealOnScroll();
+                setTimeout(animateCounters, 1000);
+            });
+            
+            // Click outside to close dropdowns
+            document.addEventListener('click', function(e) {
+                if (!languageToggle.contains(e.target) && !languageDropdown.contains(e.target)) {
+                    languageDropdown.classList.add('hidden');
+                }
+            });
+            
+            // Form validation helpers
+            window.validateForm = function(formElement) {
+                const requiredFields = formElement.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                    }
+                });
+                
+                return isValid;
+            };
+            
+            // Initialize page
+            showPage('home');
+        })();
+    </script>
+</body>
+</html>

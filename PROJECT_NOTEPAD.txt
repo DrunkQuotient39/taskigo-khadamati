@@ -1,0 +1,264 @@
+Project Notepad (Taskego/Khadamati) — Architecture, Setup, Deployment, and Operations
+
+Goals and What’s Included
+- Build a bilingual service marketplace with:
+  - Website-only AI assistant (free-first, Ollama ready) for Q&A, guidance, and actions (book/cancel with confirmation)
+  - Providers can apply with documents, admin can approve and manage
+  - Services, bookings, payments (Stripe; Apple Pay mocked), reviews
+  - Analytics for service views (summary + per-day)
+  - Firebase Authentication across the app
+  - Production-ready security and validation defaults, relaxed in dev
+
+High-Level Architecture
+- Frontend: React 18 + Vite + Tailwind + Wouter, in client/
+- Backend: Express + TypeScript in server/
+- Database: PostgreSQL (Neon), Drizzle ORM, schema in shared/schema.ts
+- Auth: Firebase Authentication (client SDK) + Firebase Admin on server
+- AI: Ollama self-hosted (preferred free), OpenAI optional, rule-based fallback
+- Payments: Stripe (cards), Apple Pay endpoints mocked for dev
+- Storage: Firebase Storage for provider documents (or fallback echo in dev)
+- Analytics: Service view tracking in DB (daily + totals)
+
+Repository Layout
+- client/ — Frontend SPA (Vite root is set to this directory)
+- server/ — Express API, middleware, feature routes
+  - middleware/ — firebaseAuth.ts, security.ts, auth.ts (roles)
+  - routes/ — providers.ts, services.ts, bookings.ts, payments.ts, admin.ts, ai.ts, uploads.ts
+  - lib/ — utilities (e.g., uploads.ts for Firebase Storage)
+  - analytics.ts — in-memory + DB-backed service analytics manager
+  - ai.ts — AI service logic (Ollama/OpenAI/fallback)
+  - vite.ts — dev middleware to serve the frontend via Vite
+  - index.ts — server bootstrap, attaches routes
+- shared/ — Drizzle schema and types used by server
+- vite.config.ts — points Vite root to client/, output to dist/public
+
+Frontend (client)
+- Routing: Wouter in client/src/App.tsx
+- Auth: client/src/lib/firebase.ts provides auth using VITE_ envs
+- AI Assistant:
+  - client/src/pages/Chat.tsx calls /api/ai/chat for Q&A
+  - Detects “book”/“cancel” and calls /api/ai/action with confirm flow
+  - Shows confirm/cancel buttons for proposals
+- Provider Sign-up:
+  - client/src/pages/ProviderSignUp.tsx collects business info and documents
+  - Sends businessDocs as objects ({ type: 'id_card' | 'certification', dataUrl }) and optional text description
+  - Server uploads to Firebase Storage if configured; otherwise dev fallback
+
+Backend (server)
+Middleware & Security
+- server/middleware/firebaseAuth.ts:
+  - Expects FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY, FIREBASE_STORAGE_BUCKET (optional)
+  - Verifies Firebase ID token, upserts user into DB, attaches req.user = { id, email, role }
+- server/middleware/security.ts:
+  - Helmet, CORS, rate limiting, input validation, sanitization, logging
+- server/middleware/auth.ts:
+  - Role-based authorize('admin'|'provider'|'client')
+  - Legacy JWT helpers remain (only if you want to use them in dev)
+
+Core Routes (canonical)
+- Providers: server/routes/providers.ts
+  - POST /api/providers/apply (Firebase auth required)
+  - Validates fields; uploads provider docs if Firebase Storage configured
+- Services: server/routes/services.ts
+  - GET /api/services (public; optional auth for personalization)
+  - GET /api/services/:id returns service + provider + images + reviews + analytics
+  - GET /api/services/:id/analytics?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD returns { summary, daily }
+  - POST /api/services/create (provider only, Firebase auth + authorize)
+  - PUT /api/services/:id (provider only)
+  - DELETE /api/services/:id (provider only; soft delete)
+  - POST /api/services/:id/images (provider only)
+  - POST /api/services/:id/reviews (Firebase auth required)
+- Bookings: server/routes/bookings.ts (Firebase auth required)
+- Payments: server/routes/payments.ts (Firebase auth required)
+  - Apple Pay endpoints are mocked for dev; full production needs Apple merchant validation
+- Admin: server/routes/admin.ts (Firebase auth + authorize('admin'))
+  - GET /api/admin/stats, /users, /logs, /analytics, /analytics/services?start&end[&serviceId]
+  - POST /api/admin/approve-provider, DELETE /api/admin/delete-service/:id, PUT /ban-user
+- AI: server/routes/ai.ts
+  - POST /api/ai/chat — website-only assistant (Ollama/OpenAI/fallback)
+  - POST /api/ai/action — intents: book, cancel, search, compare, schedule (Firebase auth)
+- Uploads: server/routes/uploads.ts
+  - POST /api/uploads/data-url — accepts { dataUrl, filename?, contentType? }
+  - If Firebase Storage configured, returns a public/signed URL; otherwise echoes back data URL (dev)
+
+Database and Schema
+- Drizzle ORM with Neon PostgreSQL; schema in shared/schema.ts
+- Key tables:
+  - users, providers (with businessDocs: jsonb, description, approvalStatus)
+  - services, service_images, bookings, reviews, payments, notifications
+  - service_analytics (totals), service_analytics_daily (per-day), service_view_uniques (unique viewer tracking)
+- Analytics flow:
+  - On GET /api/services/:id, we record a view via recordServiceView(...)
+  - Totals and daily rollups tracked; endpoint returns a summary and daily series
+
+AI Assistant
+- Provider selection:
+  - If OLLAMA_BASE_URL is set, we call Ollama’s /api/chat with OLLAMA_MODEL
+  - If OpenAI configured (OPENAI_API_KEY), uses GPT-4o-mini
+  - Otherwise returns a rule-based “website-only” fallback
+- Strict website-only system prompt and bilingual knowledge base (server/knowledge/websiteContent.ts)
+- Action endpoint (/api/ai/action) uses intents:
+  - book — returns proposal; confirm to create booking
+  - cancel — can accept bookingId directly
+  - search, compare, schedule — guidance utilities
+
+Storage
+- Default: Firebase Storage (if FIREBASE_STORAGE_BUCKET is set)
+  - Provider docs (id_card, certification) uploaded via /api/uploads/data-url or directly during /api/providers/apply
+- Dev fallback: echoes back the dataUrl (no external dependency)
+- Alternative (if Cloudinary unavailable): Supabase Storage
+  - If preferred, switch backend uploader to Supabase with minimal changes
+
+Environment Variables
+Backend (.env)
+- DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DBNAME
+- JWT_SECRET=replace-with-strong-secret
+- OPENAI_API_KEY=sk-... (optional)
+- OLLAMA_BASE_URL=https://your-ollama-host (or http://localhost:11434)
+- OLLAMA_MODEL=llama3.2:3b-instruct
+- FIREBASE_PROJECT_ID=your-project-id
+- FIREBASE_CLIENT_EMAIL=service-account@your-project.iam.gserviceaccount.com
+- FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+- FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+- STRIPE_SECRET_KEY=sk_test_... (optional)
+
+Frontend (.env)
+- VITE_FIREBASE_API_KEY=...
+- VITE_FIREBASE_AUTH_DOMAIN=...
+- VITE_FIREBASE_PROJECT_ID=...
+- VITE_FIREBASE_APP_ID=...
+
+Notes
+- Private key newlines must be escaped as literal \n in .env
+- On Windows, cross-env is already used in scripts
+
+Local Development
+- Prereqs: Node 18+, PostgreSQL (Neon URL), Firebase credentials
+- Install: npm install
+- DB schema: npm run db:push
+- Run dev server: npm run dev (backend + Vite middleware serve client/)
+- Visit: http://localhost:5000/
+- If DATABASE_URL missing, server uses in-memory fallback (limited features)
+
+Deployment
+- Frontend
+  - Build: vite build (configured to build from client/ into dist/public)
+  - Static hosting: Vercel/Netlify/Cloudflare Pages or behind your Node server
+- Backend
+  - Deploy Node app; point to dist/index.js after npm run build
+  - Provide all backend .env values
+  - Expose HTTPS; set CORS origin if you lock down origin
+- Ollama (separate)
+  - VM without GPU works for small models (3B) but slower
+  - Steps:
+    - Install: curl -fsSL https://ollama.com/install.sh | sh
+    - Pull model: ollama pull llama3.2:3b-instruct
+    - Run: ollama serve (port 11434)
+    - Put HTTPS in front (Caddy/NGINX or Cloudflare Tunnel)
+    - Set backend env: OLLAMA_BASE_URL, OLLAMA_MODEL
+  - Render has no GPUs; small models CPU-only will work but not free and slower
+  - VPS (Hetzner/DO/Vultr) or RunPod GPU for performance
+
+Payments
+- Stripe
+  - Real card payments via STRIPE_SECRET_KEY
+  - Apple Pay requires Apple Merchant validation in production; current endpoints are dev mocks
+- If Stripe not configured, payments responses are mocked for dev only
+
+Admin Panel Workflows
+- Auth: Sign in as an admin (user must have role='admin')
+- Approvals: /api/admin/pending-approvals to fetch, /api/admin/approve-provider to approve/reject
+- Analytics:
+  - Services per-day analytics: /api/admin/analytics/services?start=YYYY-MM-DD&end=YYYY-MM-DD[&serviceId=ID]
+- Moderation:
+  - Ban/unban users: PUT /api/admin/ban-user
+  - Delete service: DELETE /api/admin/delete-service/:id
+
+Service Analytics
+- Recording:
+  - Every GET /api/services/:id records a view (unique per user/IP per day)
+- Data:
+  - Totals: service_analytics (views, uniqueViews)
+  - Daily: service_analytics_daily (dateKey, views, uniqueViews)
+- Endpoints:
+  - Per-service: /api/services/:id/analytics?startDate&endDate
+  - Admin range: /api/admin/analytics/services?start&end[&serviceId]
+
+Provider Applications
+- Frontend:
+  - Submit form with docs; UI shows previews; requires sign-in
+- Backend:
+  - Validates and stores documents into Firebase Storage when available
+  - Creates a providers row with businessDocs JSONB that holds file URLs and description text
+- Admin:
+  - Approve provider to allow service creation
+
+Remaining and Optional Tasks
+- Production Apple Pay (merchant validation)
+- Receipts downloads (PDF) and “My Bookings” polish
+- Provider payouts UI
+- Notifications UI wiring (list/bell)
+- Admin provider docs preview UI
+- Admin charts for analytics
+
+Security and Ops
+- Rate limiting active; stricter in production
+- Helmet CSP enabled in production; relaxed in dev
+- Input validation and sanitization on all key routes
+- Logging for requests and errors; system logs stored in DB tables
+- Secrets must be set via environment variables; never commit them
+
+Costs (Typical)
+- Frontend hosting: $0–$10
+- Backend Node on small VPS: $5–$10+/mo
+- Neon free tier often sufficient to start
+- Ollama on VPS: $5–$20/mo CPU; GPU hourly if needed
+- Stripe: pay-as-you-go; Apple Pay has no extra cost via Stripe
+
+Quick How-To Switch to Supabase Storage (if preferred)
+- Create Supabase project; get service role key and bucket
+- Add envs: SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_BUCKET
+- Replace server/lib/uploads.ts to use Supabase client to store dataUrl buffers and return public/signed URLs
+- Minimal change in server/routes/uploads.ts and server/routes/providers.ts to call the Supabase uploader instead of Firebase
+
+What I Need From You
+- Provide all envs listed above (backend + frontend), especially:
+  - Firebase (client + admin)
+  - DB DATABASE_URL (Neon)
+  - Ollama URL and model (if you want free LLM responses)
+  - Stripe key (if you want live payments)
+- Tell me if you prefer Firebase Storage or Supabase for provider docs
+- Share your target deployment platform (so I can add deploy configs if needed)
+
+Once you give me the envs (and optionally the Ollama URL), everything is ready to run and deploy.
+
+
+PRIORITIZED TODO (Deployment-Ready)
+1) Secrets & Config
+- Backend .env: DATABASE_URL, JWT_SECRET, FIREBASE_* (project, client email, private key, storage bucket), OLLAMA_* (URL+MODEL), STRIPE_SECRET_KEY (optional)
+- Frontend .env: VITE_FIREBASE_* (apiKey, authDomain, projectId, appId)
+
+2) Database
+- Run: npm run db:push (ensure DATABASE_URL points to Neon)
+
+3) AI
+- Stand up Ollama (VM or local) and provide OLLAMA_BASE_URL; confirm model (e.g., llama3.2:3b-instruct)
+
+4) Storage (Provider Docs)
+- If using Firebase Storage: confirm FIREBASE_STORAGE_BUCKET is set; test /api/uploads/data-url
+- If switching to Supabase: tell me to swap uploader implementation
+
+5) Payments
+- Provide STRIPE_SECRET_KEY if real payments needed; otherwise keep dev mocks for Apple Pay
+
+6) Admin Panel
+- Ensure at least one admin user exists (set role='admin' in DB or via script); verify endpoints
+
+7) Frontend
+- Build and deploy client separately if desired; otherwise serve via Node in production
+
+8) Monitoring & Security
+- Set production Helmet CSP as needed; pin CORS origins; review rate limits
+
+9) Nice-to-Haves
+- Receipts PDF, My Bookings polish, Provider payouts UI, Notifications UI, Admin analytics charts

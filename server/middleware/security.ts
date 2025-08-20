@@ -2,12 +2,12 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
-import { storage } from '../storage-simple';
+import { storage } from '../storage';
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'development' ? 10000 : 100,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -33,19 +33,24 @@ export const paymentLimiter = rateLimit({
 });
 
 // Security headers configuration
-export const securityHeaders = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      scriptSrc: ["'self'", "'unsafe-eval'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      fontSrc: ["'self'", "https:"],
-      connectSrc: ["'self'", "https:", "wss:"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-});
+export const securityHeaders = process.env.NODE_ENV === 'development'
+  ? helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  : helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+          scriptSrc: ["'self'", "'unsafe-eval'"],
+          imgSrc: ["'self'", "data:", "https:"],
+          fontSrc: ["'self'", "https:"],
+          connectSrc: ["'self'", "https:", "wss:", "ws:", "blob:"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    });
 
 // CORS configuration
 export const corsOptions = {

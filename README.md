@@ -81,21 +81,30 @@ npm install
 ```
 
 3. **Set up environment variables:**
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
+Create a `.env` file in the project root with at least:
 ```env
-DATABASE_URL=your_postgresql_connection_string
-JWT_SECRET=your_jwt_secret_key
-OPENAI_API_KEY=your_openai_api_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
+# Required
+DATABASE_URL=postgresql://user:password@host:5432/taskego
+JWT_SECRET=replace-with-a-strong-secret
+
+# AI (optional but recommended)
+OPENAI_API_KEY=sk-...
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2:3b-instruct
+
+# Firebase Admin
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=service-account@your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+
+# Payments (optional)
+STRIPE_SECRET_KEY=sk_test_...
+
+# Replit OIDC (optional)
+# REPL_ID=your-replit-app-id
+# ISSUER_URL=https://replit.com/oidc
+# REPLIT_DOMAINS=localhost:5000
 ```
 
 4. **Initialize the database:**

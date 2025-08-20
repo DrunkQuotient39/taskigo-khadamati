@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import { Anthropic } from '@anthropic-ai/sdk';
 import natural from 'natural';
 import { Service, ServiceCategory, User } from '../shared/schema';
+import { WEBSITE_KNOWLEDGE_EN, WEBSITE_KNOWLEDGE_AR } from './knowledge/websiteContent';
+import fetch from 'node-fetch';
 
 // Initialize OpenAI
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -16,6 +18,26 @@ const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
 // NLP Tokenizer for text analysis
 const tokenizer = new natural.WordTokenizer();
 const stemmer = natural.PorterStemmer;
+
+// Ollama local LLM config (free provider)
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:3b-instruct';
+
+async function chatViaOllama(messages: Array<{ role: string; content: string }>): Promise<string> {
+  try {
+    const res = await (fetch as any)(`${OLLAMA_BASE_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: OLLAMA_MODEL, messages, stream: false })
+    });
+    if (!res.ok) throw new Error(`Ollama HTTP ${res.status}`);
+    const data = await res.json();
+    return data?.message?.content || '';
+  } catch (err) {
+    console.warn('Ollama unavailable:', err);
+    return '';
+  }
+}
 
 export class AIService {
   // Generate service recommendations based on user preferences and history
@@ -90,40 +112,49 @@ export class AIService {
       userId?: string;
       language: string;
       conversationHistory?: Array<{ role: string; content: string }>;
+      userContext?: Record<string, any>;
     }
   ): Promise<string> {
     try {
-      if (!openai) {
-        return this.generateFallbackResponse(message, context.language);
-      }
+      // Strict website-only assistant: use an instruction plus embedded knowledge base.
 
-      const systemPrompt = `You are Taskego AI Assistant, a helpful customer service chatbot for a bilingual service marketplace platform. 
+      const knowledge = context.language === 'ar' ? WEBSITE_KNOWLEDGE_AR : WEBSITE_KNOWLEDGE_EN;
+      const systemPrompt = `You are Taskego (Khadamati) Website Assistant.
+Rules:
+- Only answer questions about the Taskego website, its features, policies, pages, roles, bookings, payments, and usage.
+- If the question is unrelated to the website, politely refuse and steer back to website topics.
+- Keep responses concise, accurate, and helpful.
+- Answer in the user's language (en/ar) when possible.
+- If information is not in the provided knowledge, say you don’t have that info and suggest relevant sections.
 
-      Your capabilities:
-      - Help users find services
-      - Assist with booking processes
-      - Answer questions about pricing and availability
-      - Provide support in both English and Arabic
-      - Handle complaints and feedback professionally
-      
-      Current language: ${context.language}
-      
-      Always respond in a friendly, professional manner and provide accurate information about our platform.`;
+Knowledge (authoritative and exhaustive for your responses):
+"""
+${knowledge}
+"""`;
 
       const messages = [
-        { role: "system", content: systemPrompt },
+        { role: 'system', content: systemPrompt },
         ...(context.conversationHistory || []),
-        { role: "user", content: message }
+        { role: 'user', content: message },
       ];
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: messages as any,
-        temperature: 0.8,
-        max_tokens: 500,
-      });
+      // Prefer OpenAI if configured; else try local Ollama; else fallback
+      if (openai) {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: messages as any,
+          temperature: 0.4,
+          max_tokens: 400,
+        });
+        return (
+          response.choices[0].message.content ||
+          this.generateFallbackResponse(message, context.language)
+        );
+      }
 
-      return response.choices[0].message.content || "I apologize, but I'm having trouble processing your request right now. Please try again.";
+      const ollamaText = await chatViaOllama(messages as any);
+      if (ollamaText) return ollamaText;
+      return this.generateFallbackResponse(message, context.language);
     } catch (error) {
       console.error('Chatbot error:', error);
       return this.generateFallbackResponse(message, context.language);
@@ -132,25 +163,83 @@ export class AIService {
 
   // Fallback responses when AI is not available
   private generateFallbackResponse(message: string, language: string = 'en'): string {
-    const lowerMessage = message.toLowerCase();
-    
+    const lower = message.toLowerCase();
+
+    // Simple extractors
+    const detectService = () => {
+      if (/clean|maid/.test(lower)) return 'cleaning';
+      if (/plumb|leak/.test(lower)) return 'plumbing';
+      if (/electri/.test(lower)) return 'electrical';
+      if (/deliver|courier/.test(lower)) return 'delivery';
+      if (/mainten/.test(lower)) return 'maintenance';
+      if (/paint/.test(lower)) return 'painting';
+      if (/garden|lawn/.test(lower)) return 'gardening';
+      if (/tutor|lesson/.test(lower)) return 'tutoring';
+      return '';
+    };
+    const detectDate = () => {
+      const explicit = lower.match(/(\d{4}-\d{2}-\d{2})/);
+      if (explicit) return explicit[1];
+      if (/today/.test(lower)) return new Date().toISOString().split('T')[0];
+      if (/tomorrow/.test(lower)) {
+        const d = new Date(); d.setDate(d.getDate() + 1);
+        return d.toISOString().split('T')[0];
+      }
+      return '';
+    };
+    const detectTime = () => {
+      const t = lower.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+      if (t) return `${t[1].padStart(2,'0')}:${t[2]}`;
+      if (/morning/.test(lower)) return '09:00';
+      if (/afternoon/.test(lower)) return '14:00';
+      if (/evening/.test(lower)) return '17:00';
+      return '';
+    };
+
+    const serviceType = detectService();
+    const date = detectDate();
+    const time = detectTime();
+    const bookingParams = new URLSearchParams();
+    if (serviceType) bookingParams.set('serviceType', serviceType);
+    if (date) bookingParams.set('date', date);
+    if (time) bookingParams.set('time', time);
+
+    // Arabic responses
     if (language === 'ar') {
-      if (lowerMessage.includes('booking') || lowerMessage.includes('حجز')) {
-        return 'مرحباً! يمكنك حجز الخدمات من خلال تصفح فئات الخدمات واختيار مقدم الخدمة المناسب. هل تحتاج مساعدة في العثور على خدمة معينة؟';
+      if (/(book|booking|احجز|حجز)/.test(lower)) {
+        const link = `/booking${bookingParams.toString() ? `?${bookingParams.toString()}` : ''}`;
+        return `يمكنني مساعدتك بالحجز. افتح الرابط التالي لإكمال التفاصيل: ${link}`;
       }
-      if (lowerMessage.includes('price') || lowerMessage.includes('سعر')) {
-        return 'الأسعار تختلف حسب نوع الخدمة ومقدم الخدمة. يمكنك مراجعة الأسعار في صفحة كل خدمة. هل تبحث عن خدمة محددة؟';
+      if (/(pay|payment|apple pay|stripe|دفع|ابل باي)/.test(lower)) {
+        return 'طرق الدفع: البطاقات عبر سترايب (Apple Pay لاحقًا). يمكنك الدفع بعد تأكيد مزود الخدمة إذا كانت خاصية الدفع غير مفعلة.';
       }
-      return 'مرحباً! أنا مساعد تاسكيجو الذكي. كيف يمكنني مساعدتك اليوم؟ يمكنني مساعدتك في العثور على الخدمات وإجراء الحجوزات.';
+      if (/(recommend|اقتراح|اقتراحات|أفضل خدمة)/.test(lower)) {
+        return 'أخبرني بنوع الخدمة وميزانيتك وموقعك لأقترح لك أفضل الخيارات. مثال: تنظيف في وسط المدينة بميزانية 50.';
+      }
+      if (/(how to buy|كيف|طريقة|استخدام|حساب|تسجيل)/.test(lower)) {
+        return 'يمكنك تصفح الخدمات، اختيار الخدمة، ثم الحجز من صفحة الحجز. أنشئ حسابًا أو سجّل الدخول لمتابعة حجوزاتك.';
+      }
+      return 'مرحباً! أنا مساعد تاسكيجو. اسألني عن الخدمات، الأسعار، أو احجز موعدًا وسأرشدك.';
     }
-    
-    if (lowerMessage.includes('booking')) {
-      return 'Hello! You can book services by browsing our service categories and selecting the right provider. Do you need help finding a specific service?';
+
+    // English responses
+    if (/(book|booking)/.test(lower)) {
+      const link = `/booking${bookingParams.toString() ? `?${bookingParams.toString()}` : ''}`;
+      return `I can help you book. Open this link to prefill the form and complete details: ${link}`;
     }
-    if (lowerMessage.includes('price')) {
-      return 'Prices vary by service type and provider. You can check pricing on each service page. Are you looking for a specific service?';
+    if (/(price|cost|how much)/.test(lower)) {
+      return 'Prices vary by service and provider. Check the service page or tell me your budget and I’ll suggest options.';
     }
-    return 'Hello! I\'m Taskego AI Assistant. How can I help you today? I can assist you with finding services and making bookings.';
+    if (/(pay|payment|apple pay|stripe|card)/.test(lower)) {
+      return 'Payments are via cards (Stripe). Apple Pay can be enabled later. You can also book first and pay after provider confirmation.';
+    }
+    if (/(recommend|suggest)/.test(lower)) {
+      return 'Tell me the service type, your location, and budget, and I’ll recommend the best options.';
+    }
+    if (/(how to buy|how to use|account|sign in|sign up|help)/.test(lower)) {
+      return 'Browse services, open a service page, and click Book. Create an account or sign in to track your bookings.';
+    }
+    return "Hello! I'm the Taskego assistant. Ask me about services, prices, or booking and I’ll guide you.";
   }
 
   // Smart service matching based on natural language descriptions
@@ -165,6 +254,26 @@ export class AIService {
   }> {
     try {
       if (!openai) {
+        // Try Ollama for semantic matching; else basic
+        const prompt = `Match this request to services by ID.
+Request: "${description}"
+Services: ${JSON.stringify(availableServices.map(s => ({ id: s.id, title: s.title, description: s.description, category: s.categoryId })))}
+Categories: ${JSON.stringify(categories)}
+Return JSON: {"matchedServiceIds": number[], "confidence": number (0-1), "suggestions": string[]}`;
+        const content = await chatViaOllama([
+          { role: 'system', content: 'You return strictly JSON and nothing else.' },
+          { role: 'user', content: prompt }
+        ]);
+        if (content) {
+          try {
+            const result = JSON.parse(content);
+            return {
+              matches: availableServices.filter(s => result.matchedServiceIds?.includes(s.id)),
+              confidence: result.confidence || 0.5,
+              suggestions: result.suggestions || []
+            };
+          } catch {}
+        }
         return this.generateBasicMatches(description, availableServices);
       }
 
@@ -294,6 +403,34 @@ export class AIService {
     }
   }
 
+  // Added: parse booking intent from natural language (basic heuristic)
+  async parseBookingIntent(query: string, context: any = {}): Promise<any> {
+    const lower = query.toLowerCase();
+    const intent = {
+      serviceType: (/clean|maid/.test(lower) && 'cleaning') || (/plumb|leak/.test(lower) && 'plumbing') || (/electric/.test(lower) && 'electrical') || null,
+      date: null as string | null,
+      time: null as string | null,
+      location: context.location || null,
+      details: query,
+    };
+    return intent;
+  }
+
+  // Added: compare services (simple score)
+  async compareServices(services: Partial<Service>[]): Promise<{ comparison: any[]; recommendation: any | null }> {
+    const scored = services
+      .filter(Boolean)
+      .map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        price: parseFloat(s.price || '0'),
+        rating: parseFloat(s.rating || '0'),
+        score: (parseFloat(s.rating || '0') || 0) * 10 - (parseFloat(s.price || '0') || 0) * 0.2,
+      }))
+      .sort((a, b) => b.score - a.score);
+    return { comparison: scored, recommendation: scored[0] || null };
+  }
+
   // Sentiment analysis for reviews and feedback
   async analyzeSentiment(text: string): Promise<{
     sentiment: 'positive' | 'negative' | 'neutral';
@@ -356,26 +493,23 @@ export class AIService {
     context: any = {}
   ): Promise<string> {
     try {
-      const systemPrompts = {
-        booking: "You are helping users with booking-related questions. Be specific about the booking process.",
-        pricing: "You are answering pricing questions. Always be transparent about costs and any additional fees.",
-        availability: "You are helping users check service availability. Provide clear scheduling information.",
-        support: "You are providing customer support. Be empathetic and solution-focused.",
-        general: "You are a general assistant for the Taskego platform. Be helpful and informative."
-      };
+      const kbEnforcedPrompt = `You are Taskego Website Assistant. Only answer website-related questions and use the knowledge below. If out-of-scope, politely refuse and redirect to website topics.
+
+Knowledge:
+${WEBSITE_KNOWLEDGE_EN}`;
 
       if (!openai) {
         throw new Error('OpenAI not configured');
       }
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: systemPrompts[queryType] },
+          { role: "system", content: kbEnforcedPrompt },
           { role: "user", content: query }
         ],
-        temperature: 0.7,
-        max_tokens: 300,
+        temperature: 0.3,
+        max_tokens: 250,
       });
 
       return response.choices[0].message.content || "I'd be happy to help you with that. Could you provide more details?";

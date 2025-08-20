@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { authenticate, authorize, AuthRequest } from '../middleware/auth';
+import { authorize, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, bookingValidation } from '../middleware/security';
 import { body } from 'express-validator';
 
 const router = Router();
 
-// All booking routes require authentication
-router.use(authenticate);
+// All booking routes require Firebase authentication
+router.use(firebaseAuthenticate as any);
 
 // Create new booking (clients only)
 router.post('/create', authorize('client'), validate([

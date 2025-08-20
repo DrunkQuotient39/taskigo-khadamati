@@ -7,6 +7,7 @@ import {
   authenticate,
   AuthRequest 
 } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { 
   validate, 
   userValidation, 
@@ -178,6 +179,38 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
     });
   } catch (error) {
     console.error('Get user error:', error);
+    res.status(500).json({ message: 'Failed to get user data' });
+  }
+});
+
+// Firebase-authenticated current user (alternative)
+router.get('/me-firebase', firebaseAuthenticate, async (req: any, res) => {
+  try {
+    const firebaseUser = req.firebaseUser;
+    if (!firebaseUser?.uid) return res.status(401).json({ message: 'Unauthorized' });
+    // Upsert into our users table for profile/roles
+    const user = await storage.upsertUser({
+      id: firebaseUser.uid,
+      email: firebaseUser.email || null,
+      firstName: firebaseUser.name?.split(' ')[0] || null,
+      lastName: firebaseUser.name?.split(' ').slice(1).join(' ') || null,
+      profileImageUrl: firebaseUser.picture || null,
+      role: 'client',
+      isVerified: true,
+      isActive: true,
+    });
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      language: user.language,
+      isVerified: user.isVerified,
+      profileImageUrl: user.profileImageUrl,
+    });
+  } catch (error) {
+    console.error('Get firebase user error:', error);
     res.status(500).json({ message: 'Failed to get user data' });
   }
 });

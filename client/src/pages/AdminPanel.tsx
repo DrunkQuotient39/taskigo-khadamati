@@ -17,88 +17,32 @@ interface AdminPanelProps {
 export default function AdminPanel({ messages }: AdminPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data - in real app, this would come from API
-  const mockStats = {
-    totalUsers: 2547,
-    activeProviders: 1247,
-    monthlyBookings: 15842,
-    monthlyRevenue: 124578,
-  };
-
-  const mockPendingApprovals = [
-    {
-      id: 1,
-      name: 'David Wilson',
-      type: 'provider',
-      service: 'Electrical Services',
-      date: '2024-01-20',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 2,
-      name: 'Lisa Anderson',
-      type: 'service',
-      service: 'Pet Grooming',
-      date: '2024-01-18',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 3,
-      name: 'Robert Johnson',
-      type: 'provider',
-      service: 'Landscaping',
-      date: '2024-01-15',
-      avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
-    },
-  ];
-
-  const mockUsers = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@email.com',
-      type: 'client',
-      joinDate: '2023-11-15',
-      status: 'active',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      type: 'provider',
-      joinDate: '2023-10-22',
-      status: 'active',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 3,
-      name: 'Michael Brown',
-      email: 'michael.b@email.com',
-      type: 'client',
-      joinDate: '2023-12-01',
-      status: 'inactive',
-      avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
-    },
-  ];
-
+  // Live data from API
   const { data: stats } = useQuery({
     queryKey: ['/api/admin/stats'],
-    queryFn: () => Promise.resolve(mockStats),
+    queryFn: async () => {
+      const res = await fetch('/api/admin/stats', { credentials: 'include' });
+      return res.json();
+    }
   });
 
-  const { data: pendingApprovals } = useQuery({
+  const { data: pendingApprovals = [] } = useQuery({
     queryKey: ['/api/admin/pending-approvals'],
-    queryFn: () => Promise.resolve(mockPendingApprovals),
+    queryFn: async () => {
+      const res = await fetch('/api/admin/pending-approvals', { credentials: 'include' });
+      return res.json();
+    }
   });
 
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery({
     queryKey: ['/api/admin/users', searchTerm],
-    queryFn: () => Promise.resolve(mockUsers.filter(user => 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )),
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(searchTerm)}`, { credentials: 'include' });
+      return res.json();
+    }
   });
+
+  
 
   const handleApprove = (id: number) => {
     console.log('Approving item:', id);

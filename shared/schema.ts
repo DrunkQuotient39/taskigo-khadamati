@@ -217,6 +217,35 @@ export const serviceImages = pgTable("service_images", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Service analytics tables (production persistence)
+export const serviceAnalytics = pgTable("service_analytics", {
+  id: serial("id").primaryKey(),
+  serviceId: integer("service_id").references(() => services.id).notNull(),
+  views: integer("views").default(0),
+  uniqueViews: integer("unique_views").default(0),
+  lastViewedAt: timestamp("last_viewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const serviceAnalyticsDaily = pgTable("service_analytics_daily", {
+  id: serial("id").primaryKey(),
+  serviceId: integer("service_id").references(() => services.id).notNull(),
+  dateKey: varchar("date_key", { length: 10 }).notNull(), // YYYY-MM-DD
+  views: integer("views").default(0),
+  uniqueViews: integer("unique_views").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const serviceViewUniques = pgTable("service_view_uniques", {
+  id: serial("id").primaryKey(),
+  serviceId: integer("service_id").references(() => services.id).notNull(),
+  dateKey: varchar("date_key", { length: 10 }).notNull(),
+  viewerKey: text("viewer_key").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Enhanced tables with additional fields
 export const subcategories = pgTable("subcategories", {
   id: serial("id").primaryKey(),
@@ -435,3 +464,7 @@ export type SystemLog = typeof systemLogs.$inferSelect;
 export type InsertSystemLog = z.infer<typeof insertSystemLogSchema>;
 export type ServiceImage = typeof serviceImages.$inferSelect;
 export type InsertServiceImage = z.infer<typeof insertServiceImageSchema>;
+
+// Analytics types
+export type ServiceAnalytics = typeof serviceAnalytics.$inferSelect;
+export type ServiceAnalyticsDaily = typeof serviceAnalyticsDaily.$inferSelect;
