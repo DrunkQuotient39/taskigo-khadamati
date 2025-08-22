@@ -323,45 +323,7 @@ export default function Home({ messages }: HomeProps) {
               </Link>
             ))}
           </div>
-
           <div className="mt-16">
-            <div className="bg-gradient-to-br from-blue-600 to-slate-600 p-8 rounded-3xl text-white text-center mb-8">
-              <h3 className="text-3xl font-black mb-4">EXCLUSIVE SERVICE PACKAGES</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
-                  <h4 className="text-xl font-black mb-3">BASIC BUNDLE</h4>
-                  <div className="text-2xl font-black mb-2">$199/month</div>
-                  <ul className="space-y-2 text-sm font-bold">
-                    <li>✓ 10 HOURS OF CLEANING</li>
-                    <li>✓ 5 HOURS OF MAINTENANCE</li>
-                    <li>✓ PRIORITY BOOKING</li>
-                    <li>✓ 24/7 SUPPORT</li>
-                  </ul>
-                </div>
-                <div className="bg-white/30 backdrop-blur-lg p-6 rounded-xl border-2 border-blue-400">
-                  <div className="bg-blue-400 text-white px-3 py-1 rounded-full text-xs font-black mb-3 inline-block">MOST POPULAR</div>
-                  <h4 className="text-xl font-black mb-3">PREMIUM BUNDLE</h4>
-                  <div className="text-2xl font-black mb-2">$399/month</div>
-                  <ul className="space-y-2 text-sm font-bold">
-                    <li>✓ 20 HOURS OF ANY SERVICE</li>
-                    <li>✓ UNLIMITED DELIVERY</li>
-                    <li>✓ VIP SUPPORT</li>
-                    <li>✓ SAME-DAY BOOKING</li>
-                  </ul>
-                </div>
-                <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl">
-                  <h4 className="text-xl font-black mb-3">ENTERPRISE</h4>
-                  <div className="text-2xl font-black mb-2">CUSTOM</div>
-                  <ul className="space-y-2 text-sm font-bold">
-                    <li>✓ UNLIMITED SERVICES</li>
-                    <li>✓ DEDICATED MANAGER</li>
-                    <li>✓ CUSTOM INTEGRATIONS</li>
-                    <li>✓ SLA GUARANTEES</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="text-center bg-blue-50 p-4 rounded-lg">
                 <div className="text-2xl font-black text-blue-600 mb-1">INSTANT</div>

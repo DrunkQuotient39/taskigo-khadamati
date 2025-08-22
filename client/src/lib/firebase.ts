@@ -9,10 +9,13 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig: FirebaseOptions = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'REPLACE_ME',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'REPLACE_ME',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'REPLACE_ME',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || 'REPLACE_ME',
+  apiKey: "AIzaSyADQtywHCVJSa4wyT9-2MLK-AMNeiiDTfA",
+  authDomain: "taskigo-5e30d.firebaseapp.com",
+  projectId: "taskigo-5e30d",
+  storageBucket: "taskigo-5e30d.firebasestorage.app",
+  messagingSenderId: "711846238759",
+  appId: "1:711846238759:web:6c4b77a8d3e0f199740c02",
+  measurementId: "G-S7LL0VP0CY"
 };
 
 const app = initializeApp(firebaseConfig);

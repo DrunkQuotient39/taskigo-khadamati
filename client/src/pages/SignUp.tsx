@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, ArrowRight, Shield, Users, CheckCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, Shield, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/firebase';
@@ -13,6 +13,7 @@ interface SignUpProps {
 export default function SignUp({ messages }: SignUpProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -36,10 +37,47 @@ export default function SignUp({ messages }: SignUpProps) {
             </CardHeader>
             
             <CardContent className="space-y-6">
+              {/* Disclaimer Section */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-amber-800 mb-2">Important Legal Disclaimer</h4>
+                    <div className="text-sm text-amber-700 space-y-2">
+                      <p>By using Taskego, you acknowledge and agree that:</p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li>Taskego acts as a platform connecting service providers and clients</li>
+                        <li>We are not responsible for the quality, safety, or outcome of services provided by third-party providers</li>
+                        <li>We do not guarantee the accuracy of provider information, reviews, or service descriptions</li>
+                        <li>All transactions and agreements are between you and the service provider directly</li>
+                        <li>We are not liable for any damages, losses, or disputes arising from service provision</li>
+                        <li>Service providers are independent contractors, not our employees or agents</li>
+                        <li>We reserve the right to modify, suspend, or terminate services at any time</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex items-start space-x-2">
+                  <input
+                    type="checkbox"
+                    id="disclaimer-signup"
+                    checked={disclaimerAccepted}
+                    onChange={(e) => setDisclaimerAccepted(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    required
+                  />
+                  <label htmlFor="disclaimer-signup" className="text-sm text-amber-800">
+                    I have read, understood, and agree to the above disclaimer and terms of service. I acknowledge that Taskego is not responsible for any services provided by third-party providers.
+                  </label>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={async () => { await signInWithGoogle(); }}
+                  disabled={!disclaimerAccepted}
                 >
                   {messages.signup?.button || 'Sign Up with Google'}
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -50,8 +88,9 @@ export default function SignUp({ messages }: SignUpProps) {
                 </div>
                 <Button
                   variant="outline"
-                  className="w-full py-3 text-lg font-medium"
+                  className="w-full py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={async () => { await signUpWithEmail(email, password); }}
+                  disabled={!disclaimerAccepted}
                 >
                   Create Account with Email
                   <ArrowRight className="ml-2 w-5 h-5" />
