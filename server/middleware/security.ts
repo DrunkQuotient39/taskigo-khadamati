@@ -70,8 +70,10 @@ export const corsOptions = {
       'https://localhost:5000',
       /\.replit\.app$/,
       /\.repl\.co$/,
-      /\.replit\.dev$/
-    ];
+      /\.replit\.dev$/,
+      /\.onrender\.com$/,
+      process.env.RENDER_EXTERNAL_URL,
+    ].filter(Boolean as any);
     
     const isAllowed = allowedOrigins.some(allowed => {
       if (typeof allowed === 'string') {

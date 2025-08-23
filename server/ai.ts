@@ -4,6 +4,7 @@ import natural from 'natural';
 import { Service, ServiceCategory, User } from '../shared/schema';
 import { WEBSITE_KNOWLEDGE_EN, WEBSITE_KNOWLEDGE_AR } from './knowledge/websiteContent';
 import fetch from 'node-fetch';
+import { OLLAMA_BASE_URL, OLLAMA_MODEL } from './config';
 
 // Initialize OpenAI
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -19,9 +20,7 @@ const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
 const tokenizer = new natural.WordTokenizer();
 const stemmer = natural.PorterStemmer;
 
-// Ollama local LLM config (free provider)
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:3b-instruct';
+// Ollama local LLM config (free provider) comes from central config with sane defaults
 
 async function chatViaOllama(messages: Array<{ role: string; content: string }>): Promise<string> {
   try {
