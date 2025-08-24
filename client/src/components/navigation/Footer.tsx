@@ -18,7 +18,7 @@ export default function Footer({ messages }: FooterProps) {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
-              <span className="text-xl font-bold text-gradient">Taskego</span>
+              <span className="text-xl font-bold text-gradient">Taskigo</span>
             </div>
             <p className="text-gray-400 text-sm">
               {messages.footer?.description || 'Your trusted platform for professional local services. Connect with skilled providers and get the job done right.'}
@@ -130,7 +130,7 @@ export default function Footer({ messages }: FooterProps) {
         <div className="border-t border-gray-700 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              {messages.footer?.copyright || '© 2023 Taskego. All rights reserved.'}
+              {messages.footer?.copyright || '© 2025 Taskigo. All rights reserved.'}
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors text-sm">

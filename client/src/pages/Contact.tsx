@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import type { Messages } from '@/lib/i18n';
 
-export default function Contact() {
+export default function Contact({ messages }: { messages: Messages }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -123,10 +124,9 @@ export default function Contact() {
       <section className="py-20 bg-gradient-to-br from-blue-600 to-orange-500 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-6xl font-black mb-6">Get in Touch</h1>
+            <h1 className="text-4xl md:text-6xl font-black mb-6">{(messages as any)?.contact_page?.title || 'Get in Touch'}</h1>
             <p className="text-xl md:text-2xl font-bold max-w-3xl mx-auto mb-8">
-              We're here to help 24/7. Whether you need support, have questions, 
-              or want to partner with us - we'd love to hear from you.
+              {(messages as any)?.contact_page?.description || "We're here to help 24/7. Whether you need support, have questions, or want to partner with us - we'd love to hear from you."}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Badge className="bg-white text-blue-600 px-4 py-2 text-lg font-bold">
@@ -180,25 +180,25 @@ export default function Contact() {
             <ScrollReveal>
               <Card className="bg-white shadow-xl border-0">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-black text-gray-900">Send Us a Message</CardTitle>
-                  <p className="text-gray-700 font-medium">We'll respond within 2 hours during business hours</p>
+                  <CardTitle className="text-3xl font-black text-gray-900">{(messages as any)?.contact_page?.form?.title || 'Send Us a Message'}</CardTitle>
+                  <p className="text-gray-700 font-medium">{(messages as any)?.contact_page?.form?.subtitle || "We'll respond within 2 hours during business hours"}</p>
                 </CardHeader>
                 <CardContent className="p-8">
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">Full Name *</label>
+                        <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.form?.name || 'Full Name *'}</label>
                         <Input
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
                           required
                           className="w-full"
-                          placeholder="Your full name"
+                          placeholder={(messages as any)?.contact_page?.form?.name || 'Your full name'}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-gray-900 mb-2">Phone Number</label>
+                        <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.phone?.title || 'Phone Number'}</label>
                         <Input
                           name="phone"
                           value={formData.phone}
@@ -210,7 +210,7 @@ export default function Contact() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Email Address *</label>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.form?.email || 'Email Address *'}</label>
                       <Input
                         type="email"
                         name="email"
@@ -223,36 +223,36 @@ export default function Contact() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Inquiry Type</label>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.form?.type || 'Inquiry Type'}</label>
                       <select
                         name="type"
                         value={formData.type}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="general">General Inquiry</option>
-                        <option value="support">Customer Support</option>
-                        <option value="provider">Become a Provider</option>
-                        <option value="business">Business Partnership</option>
-                        <option value="technical">Technical Issue</option>
-                        <option value="feedback">Feedback & Suggestions</option>
+                        <option value="general">{(messages as any)?.contact_page?.form?.general || 'General Inquiry'}</option>
+                        <option value="support">{(messages as any)?.contact_page?.form?.support || 'Customer Support'}</option>
+                        <option value="provider">{(messages as any)?.contact_page?.form?.provider || 'Become a Provider'}</option>
+                        <option value="business">{(messages as any)?.contact_page?.form?.business || 'Business Partnership'}</option>
+                        <option value="technical">{(messages as any)?.contact_page?.form?.technical || 'Technical Issue'}</option>
+                        <option value="feedback">{(messages as any)?.contact_page?.form?.feedback || 'Feedback & Suggestions'}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Subject *</label>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.form?.subject || 'Subject *'}</label>
                       <Input
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
                         required
                         className="w-full"
-                        placeholder="Brief description of your inquiry"
+                        placeholder={(messages as any)?.contact_page?.form?.subject || 'Brief description of your inquiry'}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Message *</label>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">{(messages as any)?.contact_page?.form?.message || 'Message *'}</label>
                       <Textarea
                         name="message"
                         value={formData.message}
@@ -260,7 +260,7 @@ export default function Contact() {
                         required
                         rows={5}
                         className="w-full"
-                        placeholder="Please provide details about your inquiry..."
+                        placeholder={(messages as any)?.contact_page?.form?.message || 'Please provide details about your inquiry...'}
                       />
                     </div>
 
@@ -268,7 +268,7 @@ export default function Contact() {
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black text-lg py-3 shadow-lg"
                     >
-                      Send Message
+                      {(messages as any)?.contact_page?.form?.submit || 'Send Message'}
                     </Button>
                   </form>
                 </CardContent>
@@ -278,7 +278,7 @@ export default function Contact() {
             {/* Office Locations */}
             <div className="space-y-8">
               <ScrollReveal delay={200}>
-                <h3 className="text-3xl font-black text-gray-900 mb-8">Our Office Locations</h3>
+                <h3 className="text-3xl font-black text-gray-900 mb-8">{(messages as any)?.contact_page?.offices_title || 'Our Office Locations'}</h3>
               </ScrollReveal>
               
               {offices.map((office, index) => (

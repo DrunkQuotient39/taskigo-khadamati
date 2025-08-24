@@ -52,8 +52,8 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
           <Route path="/services" component={() => <Services messages={messages} />} />
           <Route path="/service/:slug" component={() => <ServiceDetail messages={messages} />} />
           <Route path="/booking" component={() => <Booking messages={messages} />} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
+          <Route path="/about" component={() => <About messages={messages} />} />
+          <Route path="/contact" component={() => <Contact messages={messages} />} />
           <Route path="/chat" component={() => <Chat messages={messages} />} />
           <Route path="/terms" component={() => <Terms messages={messages} />} />
           <Route path="/providers/dashboard" component={() => <ProviderDashboard messages={messages} />} />
@@ -131,7 +131,7 @@ function App() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <div className="text-2xl font-bold text-gradient">Taskego</div>
+          <div className="text-2xl font-bold text-gradient">Taskigo</div>
           <div className="text-khadamati-gray mt-2">Loading...</div>
         </div>
       </div>

@@ -630,11 +630,19 @@ export class MemStorage implements IStorage {
     );
 
     if (filters?.category) {
-      const category = Array.from(this.serviceCategories.values()).find(cat => 
-        cat.name.toLowerCase() === filters.category?.toLowerCase()
-      );
-      if (category) {
-        services = services.filter(service => service.categoryId === category.id);
+      // Accept category as name or numeric id
+      const maybeId = Number(filters.category);
+      let categoryId: number | undefined;
+      if (!Number.isNaN(maybeId)) {
+        categoryId = maybeId;
+      } else {
+        const category = Array.from(this.serviceCategories.values()).find(cat => 
+          cat.name.toLowerCase() === filters.category?.toLowerCase()
+        );
+        if (category) categoryId = category.id;
+      }
+      if (categoryId) {
+        services = services.filter(service => service.categoryId === categoryId);
       }
     }
 

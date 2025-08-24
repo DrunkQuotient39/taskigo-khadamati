@@ -8,7 +8,8 @@ function initFirebase() {
   if (initialized) return;
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\n/g, '\n');
+  // Render/Firebase keys often use literal \n sequences; convert them to real newlines
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
   const storageBucket = process.env.FIREBASE_STORAGE_BUCKET; // e.g. your-project.appspot.com
 
   if (!projectId || !clientEmail || !privateKey) {

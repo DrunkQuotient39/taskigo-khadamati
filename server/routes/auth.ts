@@ -13,6 +13,7 @@ import {
   userValidation, 
   authLimiter 
 } from '../middleware/security';
+import { FirebaseAuthRequest, firebaseAuthenticate } from '../middleware/firebaseAuth';
 
 const router = Router();
 
@@ -179,6 +180,31 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
     });
   } catch (error) {
     console.error('Get user error:', error);
+    res.status(500).json({ message: 'Failed to get user data' });
+  }
+});
+
+// Firebase-backed: current user profile
+router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await storage.getUser(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      language: user.language,
+      isVerified: user.isVerified,
+      profileImageUrl: user.profileImageUrl
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Failed to get user data' });
   }
 });

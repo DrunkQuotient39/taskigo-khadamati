@@ -4,7 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import AnimatedCounter from '@/components/common/AnimatedCounter';
 
-export default function About() {
+import type { Messages } from '@/lib/i18n';
+
+export default function About({ messages }: { messages: Messages }) {
   const teamMembers = [
     {
       name: 'Sarah Al-Rashid',
@@ -74,11 +76,10 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              About Taskego
+              {(messages as any)?.about_page?.title || 'About Taskigo'}
             </h1>
             <p className="text-xl md:text-2xl font-bold max-w-3xl mx-auto mb-8">
-              We're revolutionizing how people connect with trusted local service providers. 
-              From home cleaning to tech support, we make quality services accessible to everyone.
+              {(messages as any)?.about_page?.description || "We're revolutionizing how people connect with trusted local service providers. From home cleaning to tech support, we make quality services accessible to everyone."}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               <div className="text-center">
@@ -113,10 +114,9 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <ScrollReveal>
-              <h2 className="text-4xl font-black text-gray-900 mb-6">Our Mission</h2>
+              <h2 className="text-4xl font-black text-gray-900 mb-6">{(messages as any)?.about_page?.mission?.title || 'Our Mission'}</h2>
               <p className="text-xl text-gray-800 font-bold mb-6">
-                To create the most trusted and comprehensive service marketplace that empowers local professionals 
-                and provides exceptional experiences for customers across the Middle East and beyond.
+                {(messages as any)?.about_page?.mission?.description || 'To create the most trusted and comprehensive service marketplace that empowers local professionals and provides exceptional experiences for customers across the Middle East and beyond.'}
               </p>
               <p className="text-lg text-gray-700 font-medium mb-8">
                 We started Taskego because we believe everyone deserves access to reliable, high-quality services. 
@@ -157,7 +157,7 @@ export default function About() {
       <section className="py-20 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">Our Core Values</h2>
+            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">{(messages as any)?.about_page?.values?.title || 'Our Core Values'}</h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
@@ -181,7 +181,7 @@ export default function About() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">Meet Our Leadership Team</h2>
+            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">{(messages as any)?.about_page?.team_title || 'Meet Our Leadership Team'}</h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {teamMembers.map((member, index) => (
@@ -209,7 +209,7 @@ export default function About() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">Our Journey</h2>
+            <h2 className="text-4xl font-black text-gray-900 text-center mb-12">{(messages as any)?.about_page?.journey_title || 'Our Journey'}</h2>
           </ScrollReveal>
           <div className="space-y-8">
             {milestones.map((milestone, index) => (
@@ -232,7 +232,7 @@ export default function About() {
       <section className="py-20 bg-gradient-to-br from-orange-500 to-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
-            <h2 className="text-4xl font-black mb-6">Join the Taskego Community</h2>
+            <h2 className="text-4xl font-black mb-6">{(messages as any)?.about_page?.cta_title || 'Join the Taskigo Community'}</h2>
             <p className="text-xl font-bold mb-8">
               Whether you're looking for services or want to offer your skills, 
               we're here to help you succeed.
@@ -242,13 +242,13 @@ export default function About() {
                 href="/services" 
                 className="bg-white text-blue-600 px-8 py-4 rounded-lg font-black text-lg hover:bg-gray-100 transition-colors shadow-lg"
               >
-                Find Services
+                {(messages as any)?.about_page?.cta_services || 'Find Services'}
               </a>
               <a 
                 href="/providers/dashboard" 
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-black text-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
-                Become a Provider
+                {(messages as any)?.about_page?.cta_provider || 'Become a Provider'}
               </a>
             </div>
           </ScrollReveal>

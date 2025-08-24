@@ -45,7 +45,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-gradient">Taskego</span>
+              <span className="text-xl font-bold text-gradient">Taskigo</span>
               <span className="text-xs text-khadamati-gray hidden sm:inline">Khadamati</span>
             </div>
           </Link>
@@ -120,13 +120,13 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                 <Button 
                   variant="outline" 
                   className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white"
-                  onClick={() => window.location.href = '/api/login'}
+                  onClick={() => window.location.href = '/login'}
                 >
                   {messages.nav?.login || 'Login'}
                 </Button>
                 <Button 
                   className="bg-khadamati-blue hover:bg-blue-700"
-                  onClick={() => window.location.href = '/api/login'}
+                  onClick={() => window.location.href = '/signup'}
                 >
                   {messages.nav?.signup || 'Sign Up'}
                 </Button>

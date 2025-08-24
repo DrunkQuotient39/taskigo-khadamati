@@ -46,8 +46,13 @@ export default function Services({ messages }: ServicesProps) {
     }
   });
 
+  // Normalize services list from API (supports { services: [...] } or [...])
+  const servicesList = Array.isArray(servicesData)
+    ? servicesData
+    : (servicesData && Array.isArray(servicesData.services) ? servicesData.services : []);
+
   // Group services by category
-  const servicesByCategory = servicesData.reduce((acc: any, service: any) => {
+  const servicesByCategory = servicesList.reduce((acc: any, service: any) => {
     const category = categories.find((cat: any) => cat.id === service.categoryId);
     if (!category) return acc;
     
@@ -228,9 +233,10 @@ export default function Services({ messages }: ServicesProps) {
             ))}
           </div>
         ) : (
-          // List View - Traditional Grid
+          // List View - Traditional Grid (from live services)
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockServices.map((service: any) => {
+            {servicesList.map((service: any) => {
+              const categoryForService = categories.find((cat: any) => cat.id === service.categoryId);
               const transformedService = {
                 ...service,
                 provider: {
@@ -242,10 +248,10 @@ export default function Services({ messages }: ServicesProps) {
                   verified: service.provider?.verified || true
                 },
                 category: {
-                  name: mockCategories.find(cat => cat.id === service.categoryId)?.name || 'Service',
-                  nameAr: '',
-                  icon: mockCategories.find(cat => cat.id === service.categoryId)?.icon || '🔧',
-                  color: mockCategories.find(cat => cat.id === service.categoryId)?.color || '#3B82F6'
+                  name: categoryForService?.name || 'Service',
+                  nameAr: categoryForService?.nameAr || '',
+                  icon: categoryForService?.icon || '🔧',
+                  color: categoryForService?.color || '#3B82F6'
                 },
                 rating: service.rating || 4.8,
                 location: service.location || 'Your area',
