@@ -5,6 +5,8 @@ import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle } from 'lucide
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
 import { signInWithGoogle, signInWithEmail } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import { useState } from 'react';
 
 interface LoginProps {
@@ -15,6 +17,8 @@ export default function Login({ messages }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -33,7 +37,7 @@ export default function Login({ messages }: LoginProps) {
                 {messages.login?.title || 'Welcome Back'}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {messages.login?.subtitle || 'Sign in to access your Taskego account'}
+                {messages.login?.subtitle || 'Sign in to access your Taskigo account'}
               </CardDescription>
             </CardHeader>
             
@@ -45,9 +49,9 @@ export default function Login({ messages }: LoginProps) {
                   <div className="flex-1">
                     <h4 className="font-semibold text-amber-800 mb-2">Important Legal Disclaimer</h4>
                     <div className="text-sm text-amber-700 space-y-2">
-                      <p>By using Taskego, you acknowledge and agree that:</p>
+                      <p>By using Taskigo, you acknowledge and agree that:</p>
                       <ul className="list-disc list-inside space-y-1 ml-2">
-                        <li>Taskego acts as a platform connecting service providers and clients</li>
+                        <li>Taskigo acts as a platform connecting service providers and clients</li>
                         <li>We are not responsible for the quality, safety, or outcome of services provided by third-party providers</li>
                         <li>We do not guarantee the accuracy of provider information, reviews, or service descriptions</li>
                         <li>All transactions and agreements are between you and the service provider directly</li>
@@ -77,7 +81,17 @@ export default function Login({ messages }: LoginProps) {
               <div className="space-y-3">
                 <Button
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={async () => { await signInWithGoogle(); }}
+                  onClick={async () => {
+                    try {
+                      await signInWithGoogle();
+                      toast({ title: 'Welcome back', description: 'Signed in successfully' });
+                      setLocation('/');
+                    } catch (err: any) {
+                      const code = err?.code || '';
+                      const message = code === 'auth/popup-closed-by-user' ? 'Sign-in popup closed' : 'Failed to sign in';
+                      toast({ title: 'Sign-in error', description: message });
+                    }
+                  }}
                   disabled={!disclaimerAccepted}
                 >
                   {messages.login?.button || 'Continue with Google'}
@@ -92,7 +106,19 @@ export default function Login({ messages }: LoginProps) {
                   <Button
                     variant="outline"
                     className="w-full py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={async () => { await signInWithEmail(email, password); }}
+                    onClick={async () => {
+                      try {
+                        await signInWithEmail(email, password);
+                        toast({ title: 'Welcome back', description: 'Signed in successfully' });
+                        setLocation('/');
+                      } catch (err: any) {
+                        const code = err?.code || '';
+                        let friendly = 'Failed to sign in';
+                        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') friendly = 'Invalid email or password';
+                        if (code === 'auth/user-not-found') friendly = 'Account not found. Please sign up.';
+                        toast({ title: 'Sign-in error', description: friendly });
+                      }
+                    }}
                     disabled={!disclaimerAccepted}
                   >
                     <Mail className="mr-2 w-5 h-5" /> Sign in with Email
@@ -101,7 +127,7 @@ export default function Login({ messages }: LoginProps) {
               </div>
               
               <div className="text-center text-sm text-gray-500">
-                {messages.login?.secure || 'Secure authentication powered by Replit'}
+                {messages.login?.secure || 'Secure authentication'}
               </div>
               
               <div className="grid grid-cols-2 gap-4 pt-4">

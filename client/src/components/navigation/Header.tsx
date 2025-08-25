@@ -76,7 +76,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
 
             {/* Notifications */}
             {user && (
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative" onClick={() => {}} aria-label="Notifications">
                 <Bell className="h-5 w-5" />
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-khadamati-error text-white">
                   3
@@ -88,8 +88,9 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" className="flex items-center gap-2">
                     <User className="h-5 w-5" />
+                    <span className="hidden sm:inline text-sm text-khadamati-gray max-w-[160px] truncate">{user.email || 'Account'}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

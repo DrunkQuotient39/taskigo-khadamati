@@ -12,7 +12,7 @@ const firebaseConfig: FirebaseOptions = {
   apiKey: "AIzaSyADQtywHCVJSa4wyT9-2MLK-AMNeiiDTfA",
   authDomain: "taskigo-5e30d.firebaseapp.com",
   projectId: "taskigo-5e30d",
-  storageBucket: "taskigo-5e30d.firebasestorage.app",
+  storageBucket: "taskigo-5e30d.appspot.com",
   messagingSenderId: "711846238759",
   appId: "1:711846238759:web:6c4b77a8d3e0f199740c02",
   measurementId: "G-S7LL0VP0CY"

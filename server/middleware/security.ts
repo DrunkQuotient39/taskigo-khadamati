@@ -73,6 +73,14 @@ export const corsOptions = {
       /\.replit\.dev$/,
       /\.onrender\.com$/,
       process.env.RENDER_EXTERNAL_URL,
+      // Custom domain(s)
+      'https://taskigo.net',
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+      // Comma-separated list of extra origins
+      ...((process.env.ALLOWED_ORIGINS || '')
+        .split(',')
+        .map(o => o.trim())
+        .filter(Boolean)),
     ].filter(Boolean as any);
     
     const isAllowed = allowedOrigins.some(allowed => {
