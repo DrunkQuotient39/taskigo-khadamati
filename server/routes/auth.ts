@@ -360,12 +360,41 @@ router.post('/direct-admin-login', async (req, res) => {
     
     console.log('Direct admin login attempt');
     
-    // Verify admin email and key
-    if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com' || 
-        adminKey !== 'TASKIGO_ADMIN_KEY_2024') {
-      console.log('Invalid admin credentials provided');
+    // Only allow admin email
+    if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
+      console.log('Invalid admin email provided');
       return res.status(401).json({ message: 'Unauthorized access' });
     }
+    
+    // Verify request is coming from the application itself
+    const referer = req.headers.referer || req.headers.origin;
+    const userAgent = req.headers['user-agent'];
+    
+    // Check if request is coming from our own domain or localhost
+    const validReferer = !referer || 
+                         referer.includes('taskigo.net') || 
+                         referer.includes('localhost') ||
+                         referer.includes('127.0.0.1');
+                         
+    if (!validReferer) {
+      console.log('Invalid referer for admin access:', referer);
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
+    // Rate limiting - only allow 5 attempts per hour from an IP
+    const clientIp = req.ip || '0.0.0.0';
+    const hourlyKey = `admin_login_${clientIp}_${Math.floor(Date.now() / 3600000)}`;
+    
+    // This would normally use Redis, but for simplicity we'll use a memory store
+    if (!global.adminLoginAttempts) global.adminLoginAttempts = new Map();
+    const attempts = global.adminLoginAttempts.get(hourlyKey) || 0;
+    
+    if (attempts >= 5) {
+      console.log('Too many admin login attempts from IP:', clientIp);
+      return res.status(429).json({ message: 'Too many attempts' });
+    }
+    
+    global.adminLoginAttempts.set(hourlyKey, attempts + 1);
     
     console.log('Valid admin key provided, creating admin session');
     

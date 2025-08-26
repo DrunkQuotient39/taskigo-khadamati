@@ -34,10 +34,10 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
   const y3Spring = useSpring(y3, springConfig);
 
   const stats = [
-    { icon: Users, label: 'Active Users', value: '50K+', color: 'text-khadamati-blue' },
-    { icon: CheckCircle, label: 'Services Completed', value: '125K+', color: 'text-khadamati-success' },
-    { icon: Star, label: 'Average Rating', value: '4.9/5', color: 'text-khadamati-yellow' },
-    { icon: TrendingUp, label: 'Growth Rate', value: '+120%', color: 'text-khadamati-blue' }
+    { icon: Users, label: messages.stats?.providers || 'Active Users', value: '50K+', color: 'text-khadamati-blue' },
+    { icon: CheckCircle, label: messages.stats?.bookings || 'Services Completed', value: '125K+', color: 'text-khadamati-success' },
+    { icon: Star, label: messages.stats?.rating || 'Average Rating', value: '4.9/5', color: 'text-khadamati-yellow' },
+    { icon: TrendingUp, label: messages.stats?.cities || 'Growth Rate', value: '+120%', color: 'text-khadamati-blue' }
   ];
 
   const containerVariants = {
@@ -147,19 +147,15 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
               <span className="text-blue-800 drop-shadow-lg">Taskego</span>
               <br />
               <span className="text-gray-900 font-black">
-                Your Trusted Service
+                {messages.hero?.title || 'Your Trusted Service'}
               </span>
               <br />
-              <span className="text-blue-800 font-black">Marketplace</span>
+              <span className="text-blue-800 font-black">{messages.hero?.subtitle || 'Marketplace'}</span>
             </motion.h1>
 
             {/* Subheading */}
             <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-800 mb-8 leading-relaxed max-w-2xl font-bold">
-              Connect with verified professionals for 
-              <span className="text-blue-700 font-black"> cleaning</span>,
-              <span className="text-slate-600 font-black"> repairs</span>, and
-              <span className="text-blue-700 font-black"> maintenance</span> services. 
-              Available in English and Arabic.
+              {messages.hero?.description || 'Connect with verified professionals for cleaning, repairs, and maintenance services. Available in English and Arabic.'}
             </motion.p>
 
             {/* CTA Buttons */}
@@ -169,7 +165,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-xl font-bold shadow-xl border-2 border-blue-700 hover:scale-105 transition-all duration-300"
               >
-                Get Started Free
+                {messages.hero?.cta?.book || 'Get Started Free'}
                 <ArrowDown className="w-5 h-5 ml-2" />
               </Button>
               
@@ -180,7 +176,7 @@ export default function ParallaxHero({ messages, onGetStarted, onWatchDemo }: Pa
                 className="border-3 border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white px-8 py-4 text-xl font-bold shadow-lg transition-all duration-300"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Watch Demo
+                {messages.cta?.learn_more || 'Watch Demo'}
               </Button>
             </motion.div>
 

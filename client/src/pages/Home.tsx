@@ -171,9 +171,9 @@ export default function Home({ messages }: HomeProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <h2 className="text-5xl font-black mb-4">TASKEGO BY THE NUMBERS</h2>
+              <h2 className="text-5xl font-black mb-4">{messages.stats?.title || 'TASKEGO BY THE NUMBERS'}</h2>
               <p className="text-2xl font-bold max-w-4xl mx-auto">
-                THE LARGEST SERVICE PLATFORM IN THE MIDDLE EAST WITH UNMATCHED REACH AND QUALITY
+                {messages.stats?.description || 'THE LARGEST SERVICE PLATFORM IN THE MIDDLE EAST WITH UNMATCHED REACH AND QUALITY'}
               </p>
             </ScrollReveal>
           </div>
@@ -183,26 +183,26 @@ export default function Home({ messages }: HomeProps) {
               <div className="text-3xl font-black text-blue-300 mb-1">
                 <AnimatedCounter end={1200} suffix="+" />
               </div>
-              <div className="text-white font-bold text-xs">SERVICE PROVIDERS</div>
+              <div className="text-white font-bold text-xs">{messages.stats?.providers || 'SERVICE PROVIDERS'}</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl" data-testid="stat-customers">
               <div className="text-3xl font-black text-slate-300 mb-1">
                 <AnimatedCounter end={50000} suffix="+" />
               </div>
-              <div className="text-white font-bold text-xs">HAPPY CUSTOMERS</div>
+              <div className="text-white font-bold text-xs">{messages.stats?.customers || 'HAPPY CUSTOMERS'}</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl" data-testid="stat-services">
               <div className="text-3xl font-black text-blue-200 mb-1">
                 <AnimatedCounter end={125000} suffix="+" />
               </div>
-              <div className="text-white font-bold text-xs">SERVICES COMPLETED</div>
+              <div className="text-white font-bold text-xs">{messages.stats?.bookings || 'SERVICES COMPLETED'}</div>
             </div>
             
             <div className="text-center bg-white/10 backdrop-blur-lg p-4 rounded-xl" data-testid="stat-satisfaction">
               <div className="text-3xl font-black text-yellow-300 mb-1">98%</div>
-              <div className="text-white font-bold text-xs">SATISFACTION RATE</div>
+              <div className="text-white font-bold text-xs">{messages.stats?.satisfaction || 'SATISFACTION RATE'}</div>
             </div>
           </div>
 

@@ -42,10 +42,14 @@
     }
   },
   "stats": {
+    "title": "TASKEGO BY THE NUMBERS",
+    "description": "THE LARGEST SERVICE PLATFORM IN THE MIDDLE EAST WITH UNMATCHED REACH AND QUALITY",
     "providers": "Service Providers",
     "bookings": "Completed Bookings",
     "rating": "Average Rating",
-    "cities": "Cities Covered"
+    "cities": "Cities Covered",
+    "customers": "Happy Customers",
+    "satisfaction": "Satisfaction Rate"
   },
   "services": {
     "title": "Our Services",

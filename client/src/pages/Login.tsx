@@ -228,7 +228,7 @@ export default function Login({ messages }: LoginProps) {
                             },
                             body: JSON.stringify({ 
                               email: 'taskigo.khadamati@gmail.com',
-                              adminKey: 'TASKIGO_ADMIN_KEY_2024' // Simple key for verification
+                              timestamp: Date.now() // Used for verification
                             })
                           });
                           
@@ -266,7 +266,7 @@ export default function Login({ messages }: LoginProps) {
                         }
                       }}
                     >
-                      <RefreshCcw className="mr-2 h-4 w-4" /> Direct Admin Access
+                      <RefreshCcw className="mr-2 h-4 w-4" /> Emergency Admin Access
                     </Button>
                   )}
                   

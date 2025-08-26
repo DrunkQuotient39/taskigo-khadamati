@@ -42,10 +42,14 @@
     }
   },
   "stats": {
+    "title": "تاسكيجو بالأرقام",
+    "description": "أكبر منصة خدمات في الشرق الأوسط بنطاق وجودة لا مثيل لهما",
     "providers": "مقدمي الخدمات",
     "bookings": "الحجوزات المكتملة",
     "rating": "متوسط التقييم",
-    "cities": "المدن المغطاة"
+    "cities": "المدن المغطاة",
+    "customers": "عملاء سعداء",
+    "satisfaction": "نسبة الرضا"
   },
   "services": {
     "title": "خدماتنا",
@@ -295,6 +299,10 @@
     "new_message_desc": "لقد تلقيت رسالة جديدة من مزود خدمة إصلاح التكييف",
     "service_reminder": "تذكير بالخدمة",
     "service_reminder_desc": "خدمة التنظيف الخاصة بك مجدولة ليوم غد",
+    "provider_approved": "تمت الموافقة على طلب مقدم الخدمة",
+    "provider_approved_desc": "تمت الموافقة على طلبك لتصبح مقدم خدمة",
+    "provider_rejected": "تم رفض طلب مقدم الخدمة",
+    "provider_rejected_desc": "تم رفض طلبك لتصبح مقدم خدمة",
     "time_ago": {
       "just_now": "الآن",
       "minute_ago": "منذ دقيقة",

@@ -4,10 +4,17 @@ interface AnimatedCounterProps {
   end: number;
   duration?: number;
   suffix?: string;
+  prefix?: string;
   className?: string;
 }
 
-export default function AnimatedCounter({ end, duration = 2000, suffix = '', className = '' }: AnimatedCounterProps) {
+export default function AnimatedCounter({ 
+  end, 
+  duration = 2000, 
+  suffix = '', 
+  prefix = '',
+  className = '' 
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLSpanElement>(null);
@@ -56,7 +63,7 @@ export default function AnimatedCounter({ end, duration = 2000, suffix = '', cla
 
   return (
     <span ref={elementRef} className={className}>
-      {count.toLocaleString()}{suffix}
+      {prefix}{count.toLocaleString()}{suffix}
     </span>
   );
 }
