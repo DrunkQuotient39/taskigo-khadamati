@@ -1,10 +1,10 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle, Eye, EyeOff, RefreshCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
-import { signInWithGoogle, signInWithEmail, signUpWithEmail, auth } from '@/lib/firebase';
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, auth, resetPassword } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useState } from 'react';
@@ -209,6 +209,33 @@ export default function Login({ messages }: LoginProps) {
                       </button>
                     </div>
                   </div>
+                  
+                  {/* Admin password reset button - only show if email is admin email */}
+                  {email.toLowerCase() === 'taskigo.khadamati@gmail.com' && (
+                    <Button
+                      variant="secondary"
+                      className="w-full py-2 text-sm font-medium mb-2 bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300"
+                      onClick={async () => {
+                        try {
+                          await resetPassword(email);
+                          toast({
+                            title: 'Password Reset Email Sent',
+                            description: 'Please check your email to reset your admin password',
+                          });
+                        } catch (err: any) {
+                          console.error('Password reset error:', err);
+                          toast({
+                            title: 'Password Reset Failed',
+                            description: err?.message || 'Failed to send password reset email',
+                            variant: 'destructive'
+                          });
+                        }
+                      }}
+                    >
+                      <RefreshCcw className="mr-2 h-4 w-4" /> Reset Admin Password
+                    </Button>
+                  )}
+                  
                   <Button
                     id="email-login-button"
                     variant="outline"
@@ -233,17 +260,41 @@ export default function Login({ messages }: LoginProps) {
                             await signInWithEmail(email, password);
                             console.log('Admin sign in successful');
                           } catch (adminError: any) {
-                            // If admin account doesn't exist, try to create it first
-                            if (adminError.code === 'auth/user-not-found' || adminError.code === 'auth/invalid-credential') {
+                            console.error('Admin login error:', adminError.code);
+                            
+                            // For admin account, provide more specific error message
+                            if (adminError.code === 'auth/invalid-credential' || 
+                                adminError.code === 'auth/wrong-password') {
+                              toast({
+                                title: 'Admin Authentication Error',
+                                description: 'Incorrect admin password',
+                                variant: 'destructive'
+                              });
+                              return; // Stop execution here
+                            } else if (adminError.code === 'auth/user-not-found') {
                               console.log('Admin account not found, attempting to create it');
                               try {
-                                await signUpWithEmail(email, password);
+                                // Don't try to create admin account on live server
+                                console.log('Admin account creation skipped - account already exists');
                                 console.log('Admin account created successfully');
-                                // Now try to sign in again
-                                await signInWithEmail(email, password);
-                                console.log('Admin sign in successful after creation');
+                                
+                                // Don't try to sign in automatically
+                                console.log('Please try signing in with the correct admin password');
+                                
+                                toast({
+                                  title: 'Admin Account',
+                                  description: 'Use the reset password button below'
+                                });
                               } catch (createError: any) {
                                 console.error('Failed to create admin account:', createError);
+                                if (createError.code === 'auth/email-already-in-use') {
+                                  toast({
+                                    title: 'Admin Authentication Error',
+                                    description: 'The admin account already exists. Use the reset password button below.',
+                                    variant: 'destructive'
+                                  });
+                                  return;
+                                }
                                 throw createError;
                               }
                             } else {

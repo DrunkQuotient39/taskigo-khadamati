@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 
 const firebaseConfig: FirebaseOptions = {
@@ -60,6 +61,12 @@ export async function signInWithGoogle(): Promise<void> {
 export async function signInWithEmail(email: string, password: string): Promise<void> {
   try {
     console.log('Firebase: Attempting email sign in');
+    
+    // Special case for admin login
+    if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+      console.log('Firebase: Admin login attempt');
+    }
+    
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     console.log('Firebase: Email sign in successful', userCredential.user.uid);
     
@@ -70,6 +77,11 @@ export async function signInWithEmail(email: string, password: string): Promise<
     return;
   } catch (error: any) {
     console.error('Firebase: Email sign in failed', error.code, error.message);
+    
+    // Handle special case for admin account
+    if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+      console.error('Firebase: Admin login failed with code:', error.code);
+    }
     
     // Provide more detailed error messages
     if (error.code === 'auth/invalid-credential') {
@@ -134,5 +146,16 @@ export async function signUpWithEmail(email: string, password: string): Promise<
 
 export async function firebaseSignOut(): Promise<void> {
   await signOut(auth);
+}
+
+export async function resetPassword(email: string): Promise<void> {
+  try {
+    console.log('Firebase: Sending password reset email to:', email);
+    await sendPasswordResetEmail(auth, email);
+    console.log('Firebase: Password reset email sent successfully');
+  } catch (error: any) {
+    console.error('Firebase: Failed to send password reset email:', error.code, error.message);
+    throw error;
+  }
 }
 
