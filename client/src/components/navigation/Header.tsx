@@ -23,6 +23,14 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   // Get user via Firebase-backed auth hook
   const { user } = useAuth();
   
+  // Check for direct admin access
+  const [hasDirectAdminAccess, setHasDirectAdminAccess] = useState(false);
+  
+  useEffect(() => {
+    const directAccess = localStorage.getItem('adminDirectAccess') === 'true';
+    setHasDirectAdminAccess(directAccess);
+  }, []);
+  
   // Fetch notifications
   const { data: notificationsData } = useQuery({
     queryKey: ['/api/notifications', user?.id],
@@ -199,10 +207,10 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
             )}
 
             {/* User Menu */}
-            {user ? (
+            {user || hasDirectAdminAccess ? (
               <div className="flex items-center space-x-2">
                 {/* Become a Provider button for regular users */}
-                {user.role !== 'provider' && user.role !== 'admin' && (
+                {user && user.role !== 'provider' && user.role !== 'admin' && !hasDirectAdminAccess && (
                   <Link href="/provider-signup">
                     <Button 
                       variant="outline" 
@@ -220,31 +228,34 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     <Button variant="ghost" className="flex items-center gap-2">
                       <User className="h-5 w-5" />
                       <span className="hidden sm:inline text-sm text-khadamati-gray max-w-[160px] truncate">
-                        {user.role === 'admin' ? 'Admin' : (user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.email || 'Account')}
+                        {(user?.role === 'admin' || hasDirectAdminAccess) ? 'Admin' : (user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email || 'Account')}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">Profile</Link>
-                    </DropdownMenuItem>
+                    {/* Only show profile for regular users */}
+                    {user && !hasDirectAdminAccess && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                    )}
                     
                     {/* Show Provider Dashboard for providers */}
-                    {user.role === 'provider' && (
+                    {user && user.role === 'provider' && !hasDirectAdminAccess && (
                       <DropdownMenuItem asChild>
                         <Link href="/provider-dashboard">Provider Dashboard</Link>
                       </DropdownMenuItem>
                     )}
                     
-                    {/* Show Admin Panel for admins */}
-                    {user.role === 'admin' && (
+                    {/* Show Admin Panel for admins or direct admin access */}
+                    {(user?.role === 'admin' || hasDirectAdminAccess) && (
                       <DropdownMenuItem asChild>
                         <Link href="/admin">Admin Panel</Link>
                       </DropdownMenuItem>
                     )}
                     
                     {/* Become a Provider menu item for mobile */}
-                    {user.role !== 'provider' && user.role !== 'admin' && (
+                    {user && user.role !== 'provider' && user.role !== 'admin' && !hasDirectAdminAccess && (
                       <DropdownMenuItem asChild>
                         <Link href="/provider-signup">
                           {messages.nav?.become_provider || 'Become a Provider'}
@@ -252,14 +263,24 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                       </DropdownMenuItem>
                     )}
                     
-                    <DropdownMenuItem asChild>
-                      <Link href="/my-bookings">My Bookings</Link>
-                    </DropdownMenuItem>
+                    {/* Only show bookings for regular users */}
+                    {user && !hasDirectAdminAccess && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/my-bookings">My Bookings</Link>
+                      </DropdownMenuItem>
+                    )}
                     
                     <DropdownMenuItem>
                       <button onClick={async () => {
                         try {
-                          // Sign out from Firebase
+                          // Handle direct admin access logout
+                          if (hasDirectAdminAccess) {
+                            localStorage.removeItem('adminDirectAccess');
+                            window.location.href = '/';
+                            return;
+                          }
+                          
+                          // Sign out from Firebase for regular users
                           await auth.signOut();
                           // Redirect to home page
                           window.location.href = '/';

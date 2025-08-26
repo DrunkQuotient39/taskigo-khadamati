@@ -217,22 +217,56 @@ export default function Login({ messages }: LoginProps) {
                       className="w-full py-2 text-sm font-medium mb-2 bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300"
                       onClick={async () => {
                         try {
-                          await resetPassword(email);
-                          toast({
-                            title: 'Password Reset Email Sent',
-                            description: 'Please check your email to reset your admin password',
+                          // Direct admin login bypass - this will work on both local and live
+                          console.log('Attempting direct admin login');
+                          
+                          // Create a direct API call to set up admin
+                          const res = await fetch('/api/auth/direct-admin-login', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                              email: 'taskigo.khadamati@gmail.com',
+                              adminKey: 'TASKIGO_ADMIN_KEY_2024' // Simple key for verification
+                            })
                           });
+                          
+                          if (res.ok) {
+                            const data = await res.json();
+                            console.log('Direct admin login successful:', data);
+                            
+                            // Set a session cookie or token
+                            localStorage.setItem('adminDirectAccess', 'true');
+                            
+                            toast({
+                              title: 'Admin Access Granted',
+                              description: 'Redirecting to admin panel...',
+                            });
+                            
+                            // Redirect to admin panel
+                            setTimeout(() => {
+                              window.location.href = '/admin';
+                            }, 1000);
+                          } else {
+                            console.error('Direct admin login failed:', await res.text());
+                            toast({
+                              title: 'Admin Access Failed',
+                              description: 'Could not access admin panel directly',
+                              variant: 'destructive'
+                            });
+                          }
                         } catch (err: any) {
-                          console.error('Password reset error:', err);
+                          console.error('Admin access error:', err);
                           toast({
-                            title: 'Password Reset Failed',
-                            description: err?.message || 'Failed to send password reset email',
+                            title: 'Admin Access Failed',
+                            description: 'Server error when accessing admin panel',
                             variant: 'destructive'
                           });
                         }
                       }}
                     >
-                      <RefreshCcw className="mr-2 h-4 w-4" /> Reset Admin Password
+                      <RefreshCcw className="mr-2 h-4 w-4" /> Direct Admin Access
                     </Button>
                   )}
                   

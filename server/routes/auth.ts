@@ -353,4 +353,93 @@ router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAut
   }
 });
 
+// Direct admin login - bypass Firebase for emergency access
+router.post('/direct-admin-login', async (req, res) => {
+  try {
+    const { email, adminKey } = req.body;
+    
+    console.log('Direct admin login attempt');
+    
+    // Verify admin email and key
+    if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com' || 
+        adminKey !== 'TASKIGO_ADMIN_KEY_2024') {
+      console.log('Invalid admin credentials provided');
+      return res.status(401).json({ message: 'Unauthorized access' });
+    }
+    
+    console.log('Valid admin key provided, creating admin session');
+    
+    // Generate a random user ID if needed
+    const adminUserId = 'admin-' + Math.random().toString(36).substring(2, 15);
+    
+    // Check if admin user exists in database
+    let adminUser = await storage.getUserByEmail(email);
+    
+    if (!adminUser) {
+      // Create admin user if not exists
+      adminUser = await storage.createUser({
+        id: adminUserId,
+        email: email,
+        firstName: 'Taskigo',
+        lastName: 'Admin',
+        role: 'admin',
+        language: 'en',
+        isVerified: true,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      console.log('Created new admin user via direct login:', adminUser.id);
+    } else {
+      // Ensure user has admin role
+      if (adminUser.role !== 'admin') {
+        adminUser = await storage.updateUser(adminUser.id, { 
+          role: 'admin',
+          isActive: true
+        });
+        console.log('Updated user to admin role:', adminUser.id);
+      }
+    }
+    
+    // Generate admin token
+    const token = generateToken({
+      id: adminUser.id,
+      email: adminUser.email || '',
+      role: 'admin'
+    });
+    
+    // Log admin access
+    await storage.createSystemLog?.({
+      level: 'warn',
+      category: 'auth',
+      message: `Admin direct login used: ${email}`,
+      userId: adminUser.id,
+      metadata: { action: 'direct_admin_login', ip: req.ip }
+    });
+    
+    // Set cookie for authentication
+    res.cookie('admin_auth', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+    
+    return res.json({
+      message: 'Admin access granted',
+      user: {
+        id: adminUser.id,
+        email: adminUser.email,
+        firstName: adminUser.firstName || 'Taskigo',
+        lastName: adminUser.lastName || 'Admin',
+        role: 'admin'
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Direct admin login error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;

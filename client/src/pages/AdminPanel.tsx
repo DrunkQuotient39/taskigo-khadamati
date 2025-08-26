@@ -56,6 +56,16 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   
   // Get current user
   useEffect(() => {
+    // Check for direct admin access first
+    const hasDirectAccess = localStorage.getItem('adminDirectAccess') === 'true';
+    
+    if (hasDirectAccess) {
+      console.log('Using direct admin access');
+      setCurrentUser({ email: 'taskigo.khadamati@gmail.com' });
+      return;
+    }
+    
+    // Otherwise use Firebase auth
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setCurrentUser(user);
