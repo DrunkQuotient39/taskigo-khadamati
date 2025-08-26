@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
 import ScrollReveal from '@/components/common/ScrollReveal';
 
 interface BookingProps {
@@ -64,13 +65,53 @@ export default function Booking({ messages }: BookingProps) {
   const onSubmit = async (data: BookingForm) => {
     setIsSubmitting(true);
     try {
-      // In a real app, this would make an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: 'Booking Confirmed!',
-        description: 'Your service has been booked successfully. You will receive a confirmation email shortly.',
+      // 1) Find a service to book from selected category (serviceType)
+      const params = new URLSearchParams({ category: data.serviceType, limit: '1' });
+      const svcRes = await fetch(`/api/services?${params.toString()}`, { credentials: 'include' });
+      const svcJson = await svcRes.json();
+      const services = Array.isArray(svcJson) ? svcJson : (svcJson.services || []);
+      if (!services?.length) {
+        toast({ title: 'No services available', description: 'Please pick another category' });
+        setIsSubmitting(false);
+        return;
+      }
+      const serviceId = services[0].id;
+
+      // 2) Create booking via API
+      const fbUser = auth.currentUser;
+      if (!fbUser) {
+        toast({ title: 'Please sign in', description: 'You must sign in to book', variant: 'destructive' });
+        setIsSubmitting(false);
+        return;
+      }
+      const idToken = await fbUser.getIdToken(true);
+      const resp = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          serviceId,
+          scheduledDate: data.date,
+          scheduledTime: data.time,
+          duration: 60,
+          clientAddress: data.location,
+          clientPhone: data.phone,
+          specialInstructions: data.details || ''
+        })
       });
+      if (!resp.ok) throw new Error('Booking failed');
+      const json = await resp.json();
+
+      toast({
+        title: messages.booking_page?.success || 'Booking Confirmed!',
+        description: messages.booking_page?.success_desc || 'Your service has been booked successfully.',
+      });
+      
+      // Redirect to payment page
+      window.location.href = `/payment?booking_id=${json.booking.id}&amount=${json.booking.totalAmount}&service=${encodeURIComponent(json.booking.serviceTitle || 'Service')}`;
       
       form.reset();
     } catch (error) {

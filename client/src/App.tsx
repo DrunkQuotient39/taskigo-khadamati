@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Switch, Route } from 'wouter';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/queryClient';
+import { TranslationProvider } from './lib/i18nHelpers';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { loadMessages, defaultLanguage, getDirection, type Language } from './lib/i18n';
 import type { Messages } from './lib/i18n';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'wouter';
 
 // Components
 import Header from '@/components/navigation/Header';
@@ -27,7 +27,11 @@ import Chat from '@/pages/Chat';
 import Terms from '@/pages/Terms';
 import ProviderDashboard from '@/pages/ProviderDashboard';
 import ProviderSignUp from '@/pages/ProviderSignUp';
+import PendingApproval from '@/pages/PendingApproval';
 import AdminPanel from '@/pages/AdminPanel';
+import MyBookings from '@/pages/MyBookings';
+import BookingDetail from '@/pages/BookingDetail';
+import Payment from '@/pages/Payment';
 import NotFound from '@/pages/not-found';
 
 function Router({ messages, currentLanguage, onLanguageChange }: { 
@@ -60,8 +64,13 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
           <Route path="/provider-dashboard" component={() => <ProviderDashboard messages={messages} />} />
           <Route path="/provider-signup" component={() => <ProviderSignUp messages={messages} />} />
           <Route path="/become-provider" component={() => <ProviderSignUp messages={messages} />} />
+          <Route path="/pending-approval" component={() => <PendingApproval messages={messages} />} />
           <Route path="/admin" component={() => <AdminPanel messages={messages} />} />
           <Route path="/admin-panel" component={() => <AdminPanel messages={messages} />} />
+          <Route path="/my-bookings" component={() => <MyBookings messages={messages} />} />
+          <Route path="/my-bookings/:id" component={() => <BookingDetail messages={messages} />} />
+          <Route path="/bookings" component={() => <MyBookings messages={messages} />} />
+          <Route path="/payment" component={() => <Payment messages={messages} />} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -77,6 +86,19 @@ function App() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(defaultLanguage);
   const [messages, setMessages] = useState<Messages>({});
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const [location, setLocation] = useLocation();
+  
+  // Debug auth state
+  useEffect(() => {
+    console.log('Auth state in App:', { 
+      user, 
+      authLoading, 
+      isAuthenticated,
+      userEmail: user?.email,
+      userRole: user?.role
+    });
+  }, [user, authLoading, isAuthenticated]);
 
   useEffect(() => {
     const loadLanguageMessages = async () => {
@@ -93,6 +115,21 @@ function App() {
 
     loadLanguageMessages();
   }, [currentLanguage]);
+
+  // Redirect admin to admin panel or provider to provider dashboard after login
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      if (!location.startsWith('/admin')) {
+        setLocation('/admin');
+      }
+    } else if (user?.role === 'provider') {
+      if (!location.startsWith('/provider') && 
+          !location.startsWith('/chat') && 
+          !location.startsWith('/my-bookings')) {
+        setLocation('/provider-dashboard');
+      }
+    }
+  }, [user, location, setLocation]);
 
   useEffect(() => {
     // Update document attributes for RTL/LTR and language
@@ -139,16 +176,16 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+    <TooltipProvider>
+      <TranslationProvider messages={messages}>
         <Router 
           messages={messages} 
           currentLanguage={currentLanguage}
           onLanguageChange={handleLanguageChange}
         />
         <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+      </TranslationProvider>
+    </TooltipProvider>
   );
 }
 

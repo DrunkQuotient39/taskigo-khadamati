@@ -7,12 +7,17 @@ import { serviceAnalyticsDaily, services as servicesTable } from '../../shared/s
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { validate } from '../middleware/security';
 import { body } from 'express-validator';
+// Import seed route
+import seedRouter from './admin/seed';
 
 const router = Router();
 
 // All admin routes require authentication and admin role
 router.use(firebaseAuthenticate as any);
 router.use(authorize('admin'));
+
+// Mount the seed route
+router.use(seedRouter);
 
 // Get admin dashboard stats
 router.get('/stats', async (req: AuthRequest, res) => {
@@ -229,13 +234,11 @@ router.post('/approve-provider', validate([
     const { providerId, approved, notes } = req.body;
     const adminUserId = req.user!.id;
 
-    const provider = await storage.getProvider(''); // We need to modify this to get by ID
-    const providers = await storage.getProviders();
-    const targetProvider = providers.find(p => p.id === providerId);
-    
-    if (!targetProvider) {
-      return res.status(404).json({ message: 'Provider not found' });
-    }
+      const targetProvider = await storage.getProviderById(providerId);
+  
+  if (!targetProvider) {
+    return res.status(404).json({ message: 'Provider not found' });
+  }
 
     const newStatus = approved ? 'approved' : 'rejected';
     const updatedProvider = await storage.updateProvider(providerId, {

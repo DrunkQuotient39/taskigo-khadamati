@@ -25,6 +25,7 @@ import bookingRoutes from "./routes/bookings";
 import paymentRoutes from "./routes/payments";
 import adminRoutes from "./routes/admin";
 import aiRoutes from "./routes/ai";
+import aiActionsRoutes from "./routes/ai-actions";
 import uploadRoutes from "./routes/uploads";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -241,6 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/payments", paymentRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/ai", aiRoutes);
+  app.use("/api/ai-actions", aiActionsRoutes);
   app.use("/api/uploads", uploadRoutes);
 
   app.get("/api/payments/methods/supported", async (req, res) => {
@@ -690,6 +692,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Recommendation feedback error:', error);
       res.status(500).json({ error: "Failed to record feedback" });
+    }
+  });
+  
+  // User notifications endpoint
+  app.get("/api/notifications", firebaseAuthenticate as any, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
+      const notifications = await storage.getNotifications(userId);
+      
+      // Mark all as read (optional - can be a separate endpoint)
+      // for (const notification of notifications) {
+      //   if (!notification.isRead) {
+      //     await storage.updateNotification(notification.id, { isRead: true });
+      //   }
+      // }
+      
+      res.json({ 
+        notifications,
+        unreadCount: notifications.filter(n => !n.isRead).length
+      });
+    } catch (error) {
+      console.error('Get notifications error:', error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+  
+  // Mark notification as read
+  app.post("/api/notifications/:id/read", firebaseAuthenticate as any, async (req, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
+      // In a real implementation, we would verify the notification belongs to this user
+      
+      // Mark as read - we'd need to add this method to storage
+      await storage.updateNotification(notificationId, { isRead: true });
+      
+      res.json({ success: true, message: "Notification marked as read" });
+    } catch (error) {
+      console.error('Mark notification read error:', error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
     }
   });
 

@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
 import { Calendar, DollarSign, Star, Briefcase, TrendingUp, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,21 @@ interface ProviderDashboardProps {
 
 export default function ProviderDashboard({ messages }: ProviderDashboardProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  
+  // Check if user is authenticated and is an approved provider
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        // Redirect to login if not authenticated
+        setLocation('/login?redirect=/provider-dashboard');
+      } else if (user.role !== 'provider') {
+        // If user is authenticated but not an approved provider, redirect to pending approval
+        setLocation('/pending-approval');
+      }
+    }
+  }, [user, isLoading, setLocation]);
 
   // Live data from API
   const { data: stats } = useQuery({
@@ -72,6 +89,18 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
         return status;
     }
   };
+
+  // Show loading state while authentication is being checked
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-khadamati-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-700">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-20 pb-12 bg-khadamati-light">

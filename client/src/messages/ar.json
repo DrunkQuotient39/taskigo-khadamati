@@ -133,7 +133,46 @@
     "details": "تفاصيل إضافية",
     "phone": "رقم الهاتف",
     "email": "عنوان البريد الإلكتروني",
-    "submit": "احجز الخدمة"
+    "submit": "احجز الخدمة",
+    "success": "تم تأكيد الحجز!",
+    "success_desc": "تم حجز خدمتك بنجاح."
+  },
+  "my_bookings": {
+    "title": "حجوزاتي",
+    "description": "إدارة جميع حجوزاتك في مكان واحد.",
+    "tabs": {
+      "upcoming": "القادمة",
+      "completed": "المكتملة",
+      "cancelled": "الملغاة"
+    },
+    "no_bookings": "لم يتم العثور على حجوزات.",
+    "booking_details": "تفاصيل الحجز",
+    "cancel_booking": "إلغاء الحجز",
+    "cancel_reason": "سبب الإلغاء",
+    "cancel_confirm": "تأكيد الإلغاء",
+    "cancel_success": "تم إلغاء الحجز بنجاح",
+    "status": {
+      "pending": "معلق",
+      "accepted": "مقبول",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "payment_status": {
+      "paid": "مدفوع",
+      "pending": "معلق",
+      "failed": "فشل",
+      "refunded": "مسترد"
+    },
+    "date_time": "التاريخ والوقت",
+    "duration": "المدة",
+    "location": "الموقع",
+    "phone": "الهاتف",
+    "provider": "مقدم الخدمة",
+    "special_instructions": "تعليمات خاصة",
+    "payment": "الدفع",
+    "total_amount": "المبلغ الإجمالي",
+    "payment_status_label": "حالة الدفع"
   },
   "provider_dashboard": {
     "title": "لوحة مقدم الخدمة",
@@ -155,6 +194,23 @@
     },
     "services": "خدماتي",
     "add_service": "إضافة خدمة"
+  },
+  "payment": {
+    "title": "الدفع",
+    "description": "أكمل الدفع بشكل آمن.",
+    "form_title": "تفاصيل الدفع",
+    "method": "طريقة الدفع",
+    "card_number": "رقم البطاقة",
+    "card_holder": "اسم حامل البطاقة",
+    "expiry": "تاريخ انتهاء الصلاحية",
+    "cvv": "رمز التحقق CVV",
+    "submit": "إتمام الدفع",
+    "summary": "ملخص الطلب",
+    "subtotal": "المجموع الفرعي",
+    "service_fee": "رسوم الخدمة",
+    "total": "المجموع",
+    "secure": "معالجة دفع آمنة",
+    "test_notice": "هذا نظام دفع اختباري. لن تتم معالجة أي مدفوعات حقيقية."
   },
   "admin_panel": {
     "title": "لوحة الإدارة",
@@ -228,6 +284,27 @@
     "response": "وجدت عدة مقدمي خدمات متاحين لطلبك. ما هو موقعك والوقت المفضل؟",
     "placeholder": "اكتب رسالتك..."
   },
+  "notifications": {
+    "title": "الإشعارات",
+    "view_all": "عرض جميع الإشعارات",
+    "no_notifications": "لا توجد إشعارات حتى الآن",
+    "mark_read": "تحديد الكل كمقروء",
+    "booking_confirmed": "تم تأكيد الحجز",
+    "booking_confirmed_desc": "تم تأكيد حجزك لخدمة إصلاح التكييف",
+    "new_message": "رسالة جديدة",
+    "new_message_desc": "لقد تلقيت رسالة جديدة من مزود خدمة إصلاح التكييف",
+    "service_reminder": "تذكير بالخدمة",
+    "service_reminder_desc": "خدمة التنظيف الخاصة بك مجدولة ليوم غد",
+    "time_ago": {
+      "just_now": "الآن",
+      "minute_ago": "منذ دقيقة",
+      "minutes_ago": "منذ {minutes} دقائق",
+      "hour_ago": "منذ ساعة",
+      "hours_ago": "منذ {hours} ساعات",
+      "yesterday": "الأمس",
+      "days_ago": "منذ {days} أيام"
+    }
+  },
   "footer": {
     "description": "منصتك الموثوقة للخدمات المحلية المهنية. تواصل مع مقدمي الخدمات المهرة وأنجز المهمة بشكل صحيح.",
     "quick_links": "روابط سريعة",
@@ -242,6 +319,6 @@
     "terms": "شروط الخدمة",
     "faq": "الأسئلة الشائعة",
     "cookies": "ملفات تعريف الارتباط",
-    "copyright": "© 2023 تاسكيجو. جميع الحقوق محفوظة."
+    "copyright": "© 2025 تاسكيجو. جميع الحقوق محفوظة."
   }
 }

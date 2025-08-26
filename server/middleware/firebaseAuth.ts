@@ -52,15 +52,30 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
     const name = decoded.name || '';
     const [firstName, ...rest] = name.split(' ');
     const lastName = rest.join(' ');
+    // Determine role: special admin email gets admin role
+    const isAdminEmail = email && email.toLowerCase() === 'taskigo.khadamati@gmail.com';
+    const desiredRole = isAdminEmail ? 'admin' : 'client';
+    
     const user = await storage.upsertUser({
       id: userId,
       email: email || undefined,
       firstName: firstName || undefined,
       lastName: lastName || undefined,
-      role: 'client',
+      role: desiredRole, // Set admin role for the special admin email
       isVerified: true,
       isActive: true,
     } as any);
+    
+    // Create a system log for admin login
+    if (isAdminEmail) {
+      await storage.createSystemLog?.({
+        level: 'info',
+        category: 'auth',
+        message: `Admin logged in: ${email}`,
+        userId: user.id,
+        metadata: { action: 'admin_login', ip: req.ip }
+      });
+    }
     req.user = { id: user.id, email: user.email || '', role: user.role };
     next();
   } catch (e) {

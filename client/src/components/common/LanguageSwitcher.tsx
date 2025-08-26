@@ -20,10 +20,10 @@ export default function LanguageSwitcher({ currentLanguage, onLanguageChange, me
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center space-x-2 px-3 py-2">
-          <Globe className="h-4 w-4 text-khadamati-gray" />
-          <span className="text-sm font-medium">{currentLang.code.toUpperCase()}</span>
-          <ChevronDown className="h-3 w-3 text-khadamati-gray" />
+        <Button variant="outline" className="flex items-center space-x-2 px-3 py-2 border-khadamati-blue text-khadamati-blue hover:bg-blue-50">
+          <Globe className="h-4 w-4" />
+          <span className="text-sm font-medium">{currentLang.nativeLabel}</span>
+          <ChevronDown className="h-3 w-3" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-32">

@@ -1,10 +1,10 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle } from 'lucide-react';
+import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
-import { signInWithGoogle, signInWithEmail } from '@/lib/firebase';
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { useState } from 'react';
@@ -16,6 +16,7 @@ interface LoginProps {
 export default function Login({ messages }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -73,50 +74,255 @@ export default function Login({ messages }: LoginProps) {
                     required
                   />
                   <label htmlFor="disclaimer" className="text-sm text-amber-800">
-                    I have read, understood, and agree to the above disclaimer and terms of service. I acknowledge that Taskego is not responsible for any services provided by third-party providers.
+                    I have read, understood, and agree to the above disclaimer and terms of service. I acknowledge that Taskigo is not responsible for any services provided by third-party providers.
                   </label>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={async () => {
-                    try {
-                      await signInWithGoogle();
-                      toast({ title: 'Welcome back', description: 'Signed in successfully' });
-                      setLocation('/');
-                    } catch (err: any) {
-                      const code = err?.code || '';
-                      const message = code === 'auth/popup-closed-by-user' ? 'Sign-in popup closed' : 'Failed to sign in';
-                      toast({ title: 'Sign-in error', description: message });
-                    }
-                  }}
-                  disabled={!disclaimerAccepted}
-                >
-                  {messages.login?.button || 'Continue with Google'}
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={async () => {
+                      try {
+                        console.log('Attempting to sign in with Google');
+                        await signInWithGoogle();
+                        console.log('Google sign in successful');
+                        
+                        toast({ 
+                          title: 'Welcome back', 
+                          description: 'Signed in successfully' 
+                        });
+                        
+                        // Get the current user
+                        const currentUser = auth.currentUser;
+                        console.log('Current user after Google sign-in:', currentUser?.email);
+                        
+                        // Use a more direct approach for redirection
+                        console.log('Sign in successful, getting user token');
+                        const idToken = await auth.currentUser?.getIdToken(true);
+                        console.log('Got ID token, length:', idToken?.length);
+                        
+                        // Make a direct API call to get user data
+                        try {
+                          const res = await fetch('/api/auth/me-firebase', {
+                            headers: { 
+                              Authorization: `Bearer ${idToken}`,
+                              'Cache-Control': 'no-cache'
+                            },
+                            credentials: 'include',
+                          });
+                          
+                          if (res.ok) {
+                            const userData = await res.json();
+                            console.log('User data from API:', userData);
+                            
+                            // Redirect based on role
+                            if (userData?.role === 'admin' || 
+                                auth.currentUser?.email?.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+                              console.log('Redirecting admin to admin panel');
+                              window.location.href = '/admin';
+                            } else {
+                              console.log('Redirecting user to home page');
+                              window.location.href = '/';
+                            }
+                          } else {
+                            console.log('API response not OK:', res.status);
+                            // Fallback to email check
+                            if (auth.currentUser?.email?.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+                              window.location.href = '/admin';
+                            } else {
+                              window.location.href = '/';
+                            }
+                          }
+                        } catch (apiError) {
+                          console.error('Error fetching user data after login:', apiError);
+                          // Fallback redirect
+                          window.location.href = '/';
+                        }
+                      } catch (err: any) {
+                        console.error('Google login error:', err);
+                        const code = err?.code || '';
+                        let message = 'Failed to sign in';
+                        
+                        if (code === 'auth/popup-closed-by-user') {
+                          message = 'Sign-in popup closed';
+                        } else if (code === 'auth/popup-blocked') {
+                          message = 'Sign-in popup was blocked. Please enable popups for this site.';
+                        } else if (code === 'auth/cancelled-popup-request') {
+                          message = 'Sign-in cancelled';
+                        } else if (code === 'auth/network-request-failed') {
+                          message = 'Network error. Please check your internet connection.';
+                        }
+                        
+                        toast({ 
+                          title: 'Sign-in error', 
+                          description: message,
+                          variant: 'destructive'
+                        });
+                      }
+                    }}
+                    disabled={!disclaimerAccepted}
+                  >
+                    {messages.login?.button || 'Continue with Google'}
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
 
                 <div className="grid grid-cols-1 gap-2">
                   <div className="grid grid-cols-1 gap-2">
-                    <input className="border rounded px-3 py-2" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <input className="border rounded px-3 py-2" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <input 
+                      className="border rounded px-3 py-2" 
+                      placeholder="Email" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && email && password && disclaimerAccepted) {
+                          e.preventDefault();
+                          document.getElementById('email-login-button')?.click();
+                        }
+                      }}
+                    />
+                    <div className="relative">
+                      <input 
+                        className="border rounded px-3 py-2 w-full" 
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && email && password && disclaimerAccepted) {
+                            e.preventDefault();
+                            document.getElementById('email-login-button')?.click();
+                          }
+                        }}
+                      />
+                      <button 
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-gray-500" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   <Button
+                    id="email-login-button"
                     variant="outline"
                     className="w-full py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={async () => {
+                      if (!email || !password) {
+                        toast({ 
+                          title: 'Missing information', 
+                          description: 'Please enter both email and password',
+                          variant: 'destructive'
+                        });
+                        return;
+                      }
+                      
                       try {
-                        await signInWithEmail(email, password);
-                        toast({ title: 'Welcome back', description: 'Signed in successfully' });
-                        setLocation('/');
+                        console.log('Attempting to sign in with email:', email);
+                        
+                        // Special handling for admin account
+                        if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+                          try {
+                            console.log('Attempting to sign in admin account');
+                            await signInWithEmail(email, password);
+                            console.log('Admin sign in successful');
+                          } catch (adminError: any) {
+                            // If admin account doesn't exist, try to create it first
+                            if (adminError.code === 'auth/user-not-found' || adminError.code === 'auth/invalid-credential') {
+                              console.log('Admin account not found, attempting to create it');
+                              try {
+                                await signUpWithEmail(email, password);
+                                console.log('Admin account created successfully');
+                                // Now try to sign in again
+                                await signInWithEmail(email, password);
+                                console.log('Admin sign in successful after creation');
+                              } catch (createError: any) {
+                                console.error('Failed to create admin account:', createError);
+                                throw createError;
+                              }
+                            } else {
+                              throw adminError;
+                            }
+                          }
+                        } else {
+                          // Normal sign in for non-admin users
+                          await signInWithEmail(email, password);
+                          console.log('Sign in successful');
+                        }
+                        
+                        toast({ 
+                          title: 'Welcome back', 
+                          description: 'Signed in successfully' 
+                        });
+                        
+                        // Use a more direct approach for redirection
+                        console.log('Email sign in successful, getting user token');
+                        const idToken = await auth.currentUser?.getIdToken(true);
+                        console.log('Got ID token, length:', idToken?.length);
+                        
+                        // Make a direct API call to get user data
+                        try {
+                          const res = await fetch('/api/auth/me-firebase', {
+                            headers: { 
+                              Authorization: `Bearer ${idToken}`,
+                              'Cache-Control': 'no-cache'
+                            },
+                            credentials: 'include',
+                          });
+                          
+                          if (res.ok) {
+                            const userData = await res.json();
+                            console.log('User data from API:', userData);
+                            
+                            // Redirect based on role
+                            if (userData?.role === 'admin' || 
+                                email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+                              console.log('Redirecting admin to admin panel');
+                              window.location.href = '/admin';
+                            } else {
+                              console.log('Redirecting user to home page');
+                              window.location.href = '/';
+                            }
+                          } else {
+                            console.log('API response not OK:', res.status);
+                            // Fallback to email check
+                            if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
+                              window.location.href = '/admin';
+                            } else {
+                              window.location.href = '/';
+                            }
+                          }
+                        } catch (apiError) {
+                          console.error('Error fetching user data after email login:', apiError);
+                          // Fallback redirect
+                          window.location.href = '/';
+                        }
                       } catch (err: any) {
+                        console.error('Login error:', err);
                         const code = err?.code || '';
                         let friendly = 'Failed to sign in';
-                        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') friendly = 'Invalid email or password';
-                        if (code === 'auth/user-not-found') friendly = 'Account not found. Please sign up.';
-                        toast({ title: 'Sign-in error', description: friendly });
+                        
+                        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+                          friendly = 'Invalid email or password';
+                        } else if (code === 'auth/user-not-found') {
+                          friendly = 'Account not found. Please sign up.';
+                        } else if (code === 'auth/invalid-email') {
+                          friendly = 'Invalid email format';
+                        } else if (code === 'auth/too-many-requests') {
+                          friendly = 'Too many failed login attempts. Please try again later.';
+                        }
+                        
+                        toast({ 
+                          title: 'Sign-in error', 
+                          description: friendly,
+                          variant: 'destructive'
+                        });
                       }
                     }}
                     disabled={!disclaimerAccepted}

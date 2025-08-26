@@ -107,7 +107,7 @@
   },
   "cta": {
     "title": "Ready to Get Started?",
-    "description": "Join thousands of satisfied customers who trust Taskego for their service needs.",
+    "description": "Join thousands of satisfied customers who trust Taskigo for their service needs.",
     "download_app": "Download App",
     "learn_more": "Learn More"
   },
@@ -133,7 +133,46 @@
     "details": "Additional Details",
     "phone": "Phone Number",
     "email": "Email Address",
-    "submit": "Book Service"
+    "submit": "Book Service",
+    "success": "Booking Confirmed!",
+    "success_desc": "Your service has been booked successfully."
+  },
+  "my_bookings": {
+    "title": "My Bookings",
+    "description": "Manage all your bookings in one place.",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "no_bookings": "No bookings found.",
+    "booking_details": "Booking Details",
+    "cancel_booking": "Cancel Booking",
+    "cancel_reason": "Cancellation Reason",
+    "cancel_confirm": "Confirm Cancellation",
+    "cancel_success": "Booking cancelled successfully",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "payment_status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "date_time": "Date & Time",
+    "duration": "Duration",
+    "location": "Location",
+    "phone": "Phone",
+    "provider": "Provider",
+    "special_instructions": "Special Instructions",
+    "payment": "Payment",
+    "total_amount": "Total Amount",
+    "payment_status_label": "Payment Status"
   },
   "provider_dashboard": {
     "title": "Provider Dashboard",
@@ -155,6 +194,23 @@
     },
     "services": "My Services",
     "add_service": "Add Service"
+  },
+  "payment": {
+    "title": "Payment",
+    "description": "Complete your payment securely.",
+    "form_title": "Payment Details",
+    "method": "Payment Method",
+    "card_number": "Card Number",
+    "card_holder": "Card Holder Name",
+    "expiry": "Expiry Date",
+    "cvv": "CVV",
+    "submit": "Complete Payment",
+    "summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "service_fee": "Service Fee",
+    "total": "Total",
+    "secure": "Secure payment processing",
+    "test_notice": "This is a test payment system. No real payments will be processed."
   },
   "admin_panel": {
     "title": "Admin Panel",
@@ -203,7 +259,7 @@
     }
   },
   "about_page": {
-    "title": "About Taskego",
+    "title": "About Taskigo",
     "description": "Learn more about our mission to connect people with trusted service providers.",
     "mission": {
       "title": "Our Mission",
@@ -222,11 +278,44 @@
     }
   },
   "chat": {
-    "title": "Taskego Assistant",
+    "title": "Taskigo Assistant",
     "status": "Online",
     "welcome": "Hello! I'm here to help you find the perfect service. What can I help you with today?",
     "response": "I found several available providers for your request. What's your location and preferred time?",
     "placeholder": "Type your message..."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "view_all": "View All Notifications",
+    "no_notifications": "No notifications yet",
+    "mark_read": "Mark all as read",
+    "booking_confirmed": "Booking Confirmed",
+    "booking_confirmed_desc": "Your booking for AC Repair has been confirmed",
+    "new_message": "New Message",
+    "new_message_desc": "You received a new message from AC Repair provider",
+    "service_reminder": "Service Reminder",
+    "service_reminder_desc": "Your cleaning service is scheduled for tomorrow",
+    "provider_approved": "Provider Application Approved",
+    "provider_approved_desc": "Your application to become a service provider has been approved",
+    "provider_rejected": "Provider Application Rejected",
+    "provider_rejected_desc": "Your application to become a service provider has been rejected",
+    "time_ago": {
+      "just_now": "Just now",
+      "minute_ago": "1 minute ago",
+      "minutes_ago": "{minutes} minutes ago",
+      "hour_ago": "1 hour ago",
+      "hours_ago": "{hours} hours ago",
+      "yesterday": "Yesterday",
+      "days_ago": "{days} days ago"
+    }
+  },
+  "pending_approval": {
+    "title": "Application Under Review",
+    "message": "Your provider application has been submitted and is currently under review by our team. This process typically takes 24-48 hours.",
+    "what_next": "What happens next?",
+    "status": "Application Status: Pending Review",
+    "return_home": "Return to Home",
+    "contact_support": "Contact Support"
   },
   "footer": {
     "description": "Your trusted platform for professional local services. Connect with skilled providers and get the job done right.",
@@ -242,6 +331,6 @@
     "terms": "Terms of Service",
     "faq": "FAQ",
     "cookies": "Cookies",
-    "copyright": "© 2023 Taskego. All rights reserved."
+    "copyright": "© 2025 Taskigo. All rights reserved."
   }
 }

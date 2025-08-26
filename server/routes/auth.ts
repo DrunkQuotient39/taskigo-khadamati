@@ -13,7 +13,7 @@ import {
   userValidation, 
   authLimiter 
 } from '../middleware/security';
-import { FirebaseAuthRequest, firebaseAuthenticate } from '../middleware/firebaseAuth';
+import { FirebaseAuthRequest } from '../middleware/firebaseAuth';
 
 const router = Router();
 
@@ -187,14 +187,35 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
 // Firebase-backed: current user profile
 router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
   try {
+    console.log('me-firebase endpoint called', { 
+      user: req.user?.id, 
+      firebaseUser: req.firebaseUser?.uid,
+      email: req.firebaseUser?.email || req.user?.email
+    });
+    
     if (!req.user?.id) {
+      console.log('No user ID found in request');
       return res.status(401).json({ message: 'Unauthorized' });
     }
+    
     const user = await storage.getUser(req.user.id);
+    console.log('User from storage:', user ? { id: user.id, email: user.email, role: user.role } : 'Not found');
+    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json({
+    
+    // Check if this is the admin user and ensure they have the admin role
+    if (user.email?.toLowerCase() === 'taskigo.khadamati@gmail.com' && user.role !== 'admin') {
+      console.log('Updating admin role for user:', user.id);
+      const updatedUser = await storage.updateUser(user.id, { role: 'admin' });
+      if (updatedUser) {
+        user.role = 'admin';
+      }
+    }
+    
+    // Return user data directly, not wrapped in a user object
+    const userData = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
@@ -203,38 +224,10 @@ router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuth
       language: user.language,
       isVerified: user.isVerified,
       profileImageUrl: user.profileImageUrl
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to get user data' });
-  }
-});
-
-// Firebase-authenticated current user (alternative)
-router.get('/me-firebase', firebaseAuthenticate, async (req: any, res) => {
-  try {
-    const firebaseUser = req.firebaseUser;
-    if (!firebaseUser?.uid) return res.status(401).json({ message: 'Unauthorized' });
-    // Upsert into our users table for profile/roles
-    const user = await storage.upsertUser({
-      id: firebaseUser.uid,
-      email: firebaseUser.email || null,
-      firstName: firebaseUser.name?.split(' ')[0] || null,
-      lastName: firebaseUser.name?.split(' ').slice(1).join(' ') || null,
-      profileImageUrl: firebaseUser.picture || null,
-      role: 'client',
-      isVerified: true,
-      isActive: true,
-    });
-    res.json({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      language: user.language,
-      isVerified: user.isVerified,
-      profileImageUrl: user.profileImageUrl,
-    });
+    };
+    
+    console.log('Returning user data:', userData);
+    res.json(userData);
   } catch (error) {
     console.error('Get firebase user error:', error);
     res.status(500).json({ message: 'Failed to get user data' });
@@ -303,6 +296,60 @@ router.post('/reset-password', async (req, res) => {
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ message: 'Failed to reset password' });
+  }
+});
+
+// Setup admin account
+router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    const { email } = req.body;
+    
+    console.log('Setup admin endpoint called', { userId, email });
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    
+    // Only allow setting admin role for the specific admin email
+    if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
+      return res.status(403).json({ message: 'Forbidden - cannot set admin role for this email' });
+    }
+    
+    // Get user from storage
+    let user = await storage.getUser(userId);
+    
+    if (!user) {
+      // Create user if they don't exist in our database
+      user = await storage.createUser({
+        id: userId,
+        email: email,
+        firstName: 'Taskigo',
+        lastName: 'Admin',
+        role: 'admin',
+        language: 'en',
+        isVerified: true,
+        passwordHash: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      console.log('Created new admin user:', user.id);
+    } else {
+      // Update to admin role
+      user = await storage.updateUser(userId, { 
+        role: 'admin',
+        firstName: user.firstName || 'Taskigo',
+        lastName: user.lastName || 'Admin'
+      });
+      
+      console.log('Updated existing user to admin:', user.id);
+    }
+    
+    return res.json({ message: 'Admin role set successfully', user });
+  } catch (error) {
+    console.error('Error setting admin role:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 

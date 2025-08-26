@@ -11,8 +11,14 @@ const router = Router();
 // All routes require Firebase authentication
 router.use(firebaseAuthenticate as any);
 
-// Provider application
-router.post('/apply', validate([
+// Provider application with increased payload limit
+router.post('/apply', 
+  // Add specific middleware for this route to handle large file uploads
+  (req, res, next) => {
+    const jsonParser = require('express').json({ limit: '50mb' });
+    jsonParser(req, res, next);
+  },
+  validate([
   body('businessName').trim().isLength({ min: 2, max: 100 }).withMessage('Business name must be 2-100 characters'),
   body('city').trim().isLength({ min: 2, max: 50 }).withMessage('City is required'),
   body('businessType').optional().trim(),
@@ -27,8 +33,48 @@ router.post('/apply', validate([
     
     // Check if user already has a provider profile
     const existingProvider = await storage.getProvider(userId);
+    
+    // For testing purposes in development, allow deleting existing provider profiles with a special flag
+    const forceReapply = req.query.force === 'true';
+    console.log('Force reapply requested:', forceReapply, 'Query params:', req.query);
+    
     if (existingProvider) {
-      return res.status(400).json({ message: 'Provider profile already exists' });
+      // Always allow reapplying with force=true
+      if (forceReapply) {
+        // Delete the existing provider profile to allow reapplying
+        console.log('Force reapply requested, deleting existing provider profile for user:', userId);
+        try {
+          await storage.deleteProvider(userId);
+          console.log('Successfully deleted existing provider profile');
+        } catch (deleteError) {
+          console.error('Error deleting provider profile:', deleteError);
+          // Continue anyway - we'll try to update if delete fails
+        }
+        // Continue with the application process
+      } else if (existingProvider.approvalStatus === 'rejected') {
+        console.log('Reapplying after rejection for user:', userId);
+        // Continue with the application process
+      } else if (existingProvider.approvalStatus === 'pending') {
+        // Already has a pending application
+        return res.status(400).json({ 
+          message: 'You already have a pending application. Please wait for admin review.',
+          provider: {
+            id: existingProvider.id,
+            businessName: existingProvider.businessName,
+            approvalStatus: existingProvider.approvalStatus
+          }
+        });
+      } else if (existingProvider.approvalStatus === 'approved') {
+        // Already an approved provider
+        return res.status(400).json({ 
+          message: 'You are already an approved provider',
+          provider: {
+            id: existingProvider.id,
+            businessName: existingProvider.businessName,
+            approvalStatus: existingProvider.approvalStatus
+          }
+        });
+      }
     }
 
     const {
@@ -64,18 +110,47 @@ router.post('/apply', validate([
       normalizedDocs = uploaded;
     }
 
-    const provider = await storage.createProvider({
-      userId,
-      businessName,
-      city,
-      businessType,
-      licenseNumber,
-      businessDocs: normalizedDocs || [],
-      insuranceInfo: insuranceInfo || {},
-      approvalStatus: 'pending',
-      ratings: "0.00",
-      serviceCount: 0
-    });
+    // Check if we're updating an existing provider or creating a new one
+    let provider;
+    if (existingProvider && existingProvider.approvalStatus === 'rejected') {
+      // Update the existing provider record with new information
+      provider = await storage.updateProvider(existingProvider.id, {
+        businessName,
+        city,
+        businessType,
+        licenseNumber,
+        businessDocs: normalizedDocs || [],
+        insuranceInfo: insuranceInfo || {},
+        approvalStatus: 'pending', // Reset to pending
+        updatedAt: new Date()
+      });
+      
+      console.log('Updated existing provider application after rejection:', provider?.id);
+    } else {
+      // Create a new provider record
+      provider = await storage.createProvider({
+        userId,
+        businessName,
+        city,
+        businessType,
+        licenseNumber,
+        businessDocs: normalizedDocs || [],
+        insuranceInfo: insuranceInfo || {},
+        approvalStatus: 'pending',
+        ratings: "0.00",
+        serviceCount: 0
+      });
+      
+      console.log('Created new provider application:', provider?.id);
+    }
+    // Notify admin(s)
+    await storage.createNotification({
+      userId: 'admin',
+      title: 'New Provider Application',
+      message: `${businessName} applied to become a provider`,
+      type: 'admin',
+      metadata: { applicantUserId: userId, city }
+    } as any);
 
     // Log provider application
     await storage.createSystemLog({

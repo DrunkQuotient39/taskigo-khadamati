@@ -5,7 +5,8 @@ import type {
   Booking, InsertBooking,
   Review, InsertReview,
   Notification, InsertNotification,
-  SystemLog, InsertSystemLog
+  SystemLog, InsertSystemLog,
+  Provider, InsertProvider
 } from "@shared/schema";
 
 // Simple in-memory storage interface
@@ -17,6 +18,13 @@ export interface IStorage {
   upsertUser(userData: UpsertUser): Promise<User>;
   updateUser(id: string, userData: Partial<User>): Promise<User | undefined>;
   getUsers(search?: string): Promise<User[]>;
+
+  // Providers
+  getProvider(userId: string): Promise<Provider | undefined>;
+  getProviderById(id: number): Promise<Provider | undefined>;
+  createProvider(provider: InsertProvider): Promise<Provider>;
+  updateProvider(id: number, provider: Partial<Provider>): Promise<Provider | undefined>;
+  getProviders(filters?: {status?: string}): Promise<Provider[]>;
 
   // Services
   getServices(filters?: any): Promise<Service[]>;
@@ -43,6 +51,7 @@ export interface IStorage {
   // Notifications
   getNotifications(userId: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
+  updateNotification(id: number, notification: Partial<Notification>): Promise<Notification | undefined>;
 
   // System Logs
   createSystemLog(log: InsertSystemLog): Promise<SystemLog>;
@@ -64,6 +73,7 @@ export class SimpleStorage implements IStorage {
   private reviews = new Map<number, Review>();
   private notifications = new Map<number, Notification>();
   private logs = new Map<number, SystemLog>();
+  private providers = new Map<number, Provider>();
 
   private currentServiceId = 1;
   private currentCategoryId = 1;
@@ -71,6 +81,7 @@ export class SimpleStorage implements IStorage {
   private currentReviewId = 1;
   private currentNotificationId = 1;
   private currentLogId = 1;
+  private currentProviderId = 1;
 
   constructor() {
     this.initializeData();
@@ -248,6 +259,65 @@ export class SimpleStorage implements IStorage {
     this.categories.set(id, newCategory);
     return newCategory;
   }
+  
+  // Provider methods
+  async getProvider(userId: string): Promise<Provider | undefined> {
+    // Find provider by userId
+    for (const provider of this.providers.values()) {
+      if (provider.userId === userId) return provider;
+    }
+    return undefined;
+  }
+  
+  async deleteProvider(userId: string): Promise<boolean> {
+    // Find provider by userId and delete it
+    for (const [id, provider] of this.providers.entries()) {
+      if (provider.userId === userId) {
+        this.providers.delete(id);
+        console.log(`Deleted provider profile for user ${userId}`);
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  async getProviderById(id: number): Promise<Provider | undefined> {
+    return this.providers.get(id);
+  }
+  
+  async createProvider(provider: InsertProvider): Promise<Provider> {
+    const id = this.currentProviderId++;
+    const newProvider: Provider = {
+      id,
+      ...provider,
+      ratings: provider.ratings || "0",
+      serviceCount: provider.serviceCount || 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.providers.set(id, newProvider);
+    return newProvider;
+  }
+  
+  async updateProvider(id: number, provider: Partial<Provider>): Promise<Provider | undefined> {
+    const existing = this.providers.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...provider, updatedAt: new Date() };
+    this.providers.set(id, updated);
+    return updated;
+  }
+  
+  async getProviders(filters?: {status?: string}): Promise<Provider[]> {
+    let providers = Array.from(this.providers.values());
+    
+    if (filters?.status) {
+      providers = providers.filter(p => p.approvalStatus === filters.status);
+    }
+    
+    return providers;
+  }
 
   // Booking methods
   async getBookings(): Promise<Booking[]> {
@@ -325,6 +395,15 @@ export class SimpleStorage implements IStorage {
     
     this.notifications.set(id, newNotification);
     return newNotification;
+  }
+  
+  async updateNotification(id: number, notification: Partial<Notification>): Promise<Notification | undefined> {
+    const existing = this.notifications.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...notification };
+    this.notifications.set(id, updated);
+    return updated;
   }
 
   // System log methods

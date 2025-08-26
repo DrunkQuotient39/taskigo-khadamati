@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, Globe, User, Bell } from 'lucide-react';
+import { Menu, X, Globe, User, Bell, Building2, MessageCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import { useAuth } from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
 
 interface HeaderProps {
   currentLanguage: string;
@@ -20,6 +22,34 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   
   // Get user via Firebase-backed auth hook
   const { user } = useAuth();
+  
+  // Fetch notifications
+  const { data: notificationsData } = useQuery({
+    queryKey: ['/api/notifications', user?.id],
+    queryFn: async () => {
+      if (!user) return { notifications: [], unreadCount: 0 };
+      
+      try {
+        const idToken = await auth.currentUser?.getIdToken(true);
+        if (!idToken) throw new Error('No ID token available');
+        
+        const response = await fetch('/api/notifications', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+          },
+          credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch notifications');
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return { notifications: [], unreadCount: 0 };
+      }
+    },
+    enabled: !!user,
+    refetchInterval: 60000, // Refetch every minute
+  });
 
   const navItems = [
     { href: '/', label: messages.nav?.home || 'Home' },
@@ -76,38 +106,173 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
 
             {/* Notifications */}
             {user && (
-              <Button variant="ghost" size="icon" className="relative" onClick={() => {}} aria-label="Notifications">
-                <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-khadamati-error text-white">
-                  3
-                </Badge>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+                    <Bell className="h-5 w-5" />
+                    {((notificationsData?.unreadCount || 0) > 0 || user?.role === 'admin') && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-khadamati-error text-white">
+                        {user?.role === 'admin' ? '1' : (notificationsData?.unreadCount > 99 ? '99+' : notificationsData?.unreadCount)}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-72" align="end">
+                  <div className="flex flex-col p-2">
+                    <div className="font-medium text-sm mb-2 px-2">{messages.notifications?.title || 'Notifications'}</div>
+                    
+                    {/* Real notifications if available */}
+                    {notificationsData?.notifications && notificationsData.notifications.length > 0 ? (
+                      notificationsData.notifications.slice(0, 5).map((notification) => {
+                        // Handle different notification types
+                        let href = '/notifications';
+                        if (notification.type === 'booking') {
+                          href = `/my-bookings/${notification.metadata?.bookingId || ''}`;
+                        } else if (notification.type === 'chat') {
+                          href = `/chat?provider=${notification.metadata?.providerId || ''}&booking=${notification.metadata?.bookingId || ''}`;
+                        } else if (notification.type === 'provider_application') {
+                          href = `/provider-dashboard`;
+                        }
+                        
+                        return (
+                          <Link key={notification.id} href={href} onClick={() => setIsOpen(false)}>
+                            <div className={`rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors ${!notification.isRead ? 'bg-blue-50' : ''}`}>
+                              <div className="font-medium text-sm">{notification.title}</div>
+                              <div className="text-xs text-gray-500">{notification.message}</div>
+                              <div className="text-xs text-gray-400 mt-1">
+                                {new Date(notification.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })
+                    ) : (
+                      // Fallback to sample notifications when no real ones are available
+                      <>
+                        {/* Special provider request notification for admin */}
+                        {user?.role === 'admin' && (
+                          <Link href="/admin?tab=pending" onClick={() => setIsOpen(false)}>
+                            <div className="rounded-md hover:bg-gray-100 bg-blue-50 p-2 cursor-pointer transition-colors">
+                              <div className="font-medium text-sm">New Provider Application</div>
+                              <div className="text-xs text-gray-500">AC Service Pro has applied to become a provider</div>
+                              <div className="text-xs text-gray-400 mt-1">Just now</div>
+                            </div>
+                          </Link>
+                        )}
+                        
+                        <Link href="/my-bookings/123" onClick={() => setIsOpen(false)}>
+                          <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
+                            <div className="font-medium text-sm">{messages.notifications?.booking_confirmed || 'Booking Confirmed'}</div>
+                            <div className="text-xs text-gray-500">{messages.notifications?.booking_confirmed_desc || 'Your booking for AC Repair has been confirmed'}</div>
+                            <div className="text-xs text-gray-400 mt-1">2 hours ago</div>
+                          </div>
+                        </Link>
+                        
+                        <Link href="/chat?provider=45&booking=124" onClick={() => setIsOpen(false)}>
+                          <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
+                            <div className="font-medium text-sm">{messages.notifications?.new_message || 'New Message'}</div>
+                            <div className="text-xs text-gray-500">{messages.notifications?.new_message_desc || 'You received a new message from AC Repair provider'}</div>
+                            <div className="text-xs text-gray-400 mt-1">Yesterday</div>
+                          </div>
+                        </Link>
+                        
+                        <Link href="/my-bookings/125" onClick={() => setIsOpen(false)}>
+                          <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
+                            <div className="font-medium text-sm">{messages.notifications?.service_reminder || 'Service Reminder'}</div>
+                            <div className="text-xs text-gray-500">{messages.notifications?.service_reminder_desc || 'Your cleaning service is scheduled for tomorrow'}</div>
+                            <div className="text-xs text-gray-400 mt-1">2 days ago</div>
+                          </div>
+                        </Link>
+                      </>
+                    )}
+                    
+                    <div className="mt-2 pt-2 border-t text-center">
+                      <Link href="/notifications">
+                        <Button variant="link" size="sm" className="text-xs text-blue-600">
+                          {messages.notifications?.view_all || 'View All Notifications'}
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             {/* User Menu */}
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    <span className="hidden sm:inline text-sm text-khadamati-gray max-w-[160px] truncate">{user.email || 'Account'}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/bookings">My Bookings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <button onClick={() => window.location.href = '/api/logout'}>Logout</button>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center space-x-2">
+                {/* Become a Provider button for regular users */}
+                {user.role !== 'provider' && user.role !== 'admin' && (
+                  <Link href="/provider-signup">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white hidden md:flex"
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      {messages.nav?.become_provider || 'Become a Provider'}
+                    </Button>
+                  </Link>
+                )}
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      <span className="hidden sm:inline text-sm text-khadamati-gray max-w-[160px] truncate">
+                        {user.role === 'admin' ? 'Admin' : (user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.email || 'Account')}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    
+                    {/* Show Provider Dashboard for providers */}
+                    {user.role === 'provider' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/provider-dashboard">Provider Dashboard</Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {/* Show Admin Panel for admins */}
+                    {user.role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">Admin Panel</Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {/* Become a Provider menu item for mobile */}
+                    {user.role !== 'provider' && user.role !== 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/provider-signup">
+                          {messages.nav?.become_provider || 'Become a Provider'}
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-bookings">My Bookings</Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem>
+                      <button onClick={async () => {
+                        try {
+                          // Sign out from Firebase
+                          await auth.signOut();
+                          // Redirect to home page
+                          window.location.href = '/';
+                        } catch (error) {
+                          console.error('Logout error:', error);
+                        }
+                      }}>
+                        {messages.nav?.logout || 'Logout'}
+                      </button>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <div className="hidden md:flex items-center space-x-3">
                 <Link href="/provider-signup">

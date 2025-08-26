@@ -51,20 +51,22 @@ export default function Services({ messages }: ServicesProps) {
     ? servicesData
     : (servicesData && Array.isArray(servicesData.services) ? servicesData.services : []);
 
-  // Group services by category
-  const servicesByCategory = servicesList.reduce((acc: any, service: any) => {
-    const category = categories.find((cat: any) => cat.id === service.categoryId);
-    if (!category) return acc;
-    
-    if (!acc[category.name]) {
-      acc[category.name] = {
-        category,
-        services: []
-      };
-    }
-    acc[category.name].services.push(service);
-    return acc;
-  }, {});
+  // Group services by category (with null check to fix "h.reduce is not a function" error)
+  const servicesByCategory = servicesList && Array.isArray(servicesList) 
+    ? servicesList.reduce((acc: any, service: any) => {
+        const category = categories.find((cat: any) => cat.id === service.categoryId);
+        if (!category) return acc;
+        
+        if (!acc[category.name]) {
+          acc[category.name] = {
+            category,
+            services: []
+          };
+        }
+        acc[category.name].services.push(service);
+        return acc;
+      }, {})
+    : {};
 
   const handleBookService = (serviceId: number) => {
     console.log('Booking service', serviceId);

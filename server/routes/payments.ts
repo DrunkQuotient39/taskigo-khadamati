@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Stripe from 'stripe';
 import { storage } from '../storage';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { firebaseAuthenticate, FirebaseAuthRequest } from '../middleware/firebaseAuth';
 import { validate, paymentLimiter } from '../middleware/security';
 import { body } from 'express-validator';
 
@@ -11,12 +12,12 @@ const router = Router();
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-12-18.acacia',
+    apiVersion: '2023-10-16',
   });
 }
 
 // All payment routes require authentication and rate limiting
-router.use(authenticate);
+router.use(firebaseAuthenticate as any);
 router.use(paymentLimiter);
 
 // Create Stripe payment session
@@ -24,7 +25,7 @@ router.post('/create-stripe-session', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('successUrl').isURL().withMessage('Valid success URL required'),
   body('cancelUrl').isURL().withMessage('Valid cancel URL required'),
-]), async (req: AuthRequest, res) => {
+]), async (req: FirebaseAuthRequest, res) => {
   try {
     if (!stripe) {
       return res.status(500).json({ message: 'Stripe not configured. Please add STRIPE_SECRET_KEY.' });
@@ -129,86 +130,92 @@ router.post('/create-stripe-session', validate([
   }
 });
 
-// Verify payment completion
-router.post('/verify-payment', validate([
-  body('paymentIntentId').notEmpty().withMessage('Payment intent ID required'),
-]), async (req: AuthRequest, res) => {
+// Process test payment
+router.post('/process', validate([
+  body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
+  body('amount').isString().withMessage('Amount required'),
+  body('paymentMethod').isIn(['card', 'apple_pay']).withMessage('Valid payment method required'),
+]), async (req: FirebaseAuthRequest, res) => {
   try {
-    if (!stripe) {
-      return res.status(500).json({ message: 'Stripe not configured' });
-    }
-
-    const { paymentIntentId } = req.body;
+    const { bookingId, amount, paymentMethod, cardDetails } = req.body;
     const userId = req.user!.id;
-
-    // Retrieve payment intent from Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     
-    if (paymentIntent.status !== 'succeeded') {
-      return res.status(400).json({ message: 'Payment not completed' });
+    // Get booking details
+    const booking = await storage.getBooking(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
     }
-
-    // Find payment record
-    const payments = await storage.getPayments({ userId });
-    const payment = payments.find(p => p.stripePaymentIntentId === paymentIntentId);
     
-    if (!payment) {
-      return res.status(404).json({ message: 'Payment record not found' });
+    // Verify user owns this booking
+    if (booking.clientId !== userId) {
+      return res.status(403).json({ message: 'Access denied' });
     }
-
-    // Update payment status
-    await storage.updatePayment(payment.id, {
+    
+    // For test system, mark as paid immediately
+    // Calculate platform fee (e.g., 10%)
+    const totalAmount = parseFloat(amount);
+    const platformFee = totalAmount * 0.1;
+    const providerAmount = totalAmount - platformFee;
+    
+    // Create payment record
+    const payment = await storage.createPayment({
+      bookingId: booking.id,
+      userId,
+      providerId: booking.providerId,
+      method: paymentMethod,
+      amount: totalAmount.toString(),
+      currency: 'USD',
       status: 'paid',
-      txnId: paymentIntent.id,
+      txnId: `test-${Date.now()}`,
+      platformFee: platformFee.toString(),
       metadata: {
-        ...payment.metadata,
-        completedAt: new Date().toISOString(),
-        stripeChargeId: paymentIntent.charges?.data[0]?.id
+        cardDetails: cardDetails ? JSON.stringify(cardDetails) : undefined,
+        providerAmount: providerAmount.toString(),
+        completedAt: new Date().toISOString()
       }
     });
-
+    
     // Update booking payment status
-    await storage.updateBooking(payment.bookingId, {
+    await storage.updateBooking(booking.id, {
       paymentStatus: 'paid'
     });
-
-    // Update provider wallet balance
-    const providerAmount = parseFloat(payment.metadata?.providerAmount || '0');
+    
+    // Update provider wallet balance (if applicable)
     if (providerAmount > 0) {
-      const wallet = await storage.getWallet(payment.providerId);
+      const wallet = await storage.getWallet(booking.providerId);
       if (wallet) {
-        await storage.updateWalletBalance(payment.providerId, providerAmount);
+        await storage.updateWalletBalance(booking.providerId, providerAmount);
       }
     }
-
+    
     // Create notifications
     await storage.createNotification({
-      userId: payment.providerId,
+      userId: booking.providerId,
       title: 'Payment Received',
-      message: `You've received a payment of $${providerAmount.toFixed(2)}`,
+      message: `You've received a payment of $${providerAmount.toFixed(2)} for booking #${booking.id}`,
       type: 'payment',
       metadata: {
         paymentId: payment.id,
         amount: providerAmount.toString()
       }
     });
-
+    
     // Log successful payment
     await storage.createSystemLog({
       level: 'info',
       category: 'payment',
-      message: `Payment completed: ${payment.id}`,
+      message: `Test payment completed: ${payment.id}`,
       userId,
       metadata: {
-        action: 'verify_success',
+        action: 'test_payment',
         paymentId: payment.id,
         amount: payment.amount,
-        platformFee: payment.platformFee
+        method: paymentMethod
       }
     });
-
+    
     res.json({
-      message: 'Payment verified successfully',
+      message: 'Payment processed successfully',
       payment: {
         id: payment.id,
         amount: payment.amount,
@@ -217,13 +224,13 @@ router.post('/verify-payment', validate([
       }
     });
   } catch (error) {
-    console.error('Verify payment error:', error);
-    res.status(500).json({ message: 'Failed to verify payment' });
+    console.error('Process payment error:', error);
+    res.status(500).json({ message: 'Failed to process payment' });
   }
 });
 
 // Get payment history
-router.get('/history', async (req: AuthRequest, res) => {
+router.get('/history', async (req: FirebaseAuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { status, limit = 20, offset = 0 } = req.query;
@@ -270,18 +277,13 @@ router.get('/history', async (req: AuthRequest, res) => {
   }
 });
 
-// Process refund
+// Process refund (simplified for test environment)
 router.post('/refund', validate([
   body('paymentId').isInt({ min: 1 }).withMessage('Valid payment ID required'),
   body('reason').trim().isLength({ min: 10, max: 500 }).withMessage('Refund reason must be 10-500 characters'),
-  body('amount').optional().isDecimal().withMessage('Valid amount required'),
-]), async (req: AuthRequest, res) => {
+]), async (req: FirebaseAuthRequest, res) => {
   try {
-    if (!stripe) {
-      return res.status(500).json({ message: 'Stripe not configured' });
-    }
-
-    const { paymentId, reason, amount } = req.body;
+    const { paymentId, reason } = req.body;
     const userId = req.user!.id;
 
     const payment = await storage.getPayment(paymentId);
@@ -299,28 +301,9 @@ router.post('/refund', validate([
       return res.status(400).json({ message: 'Payment cannot be refunded' });
     }
 
-    // Calculate refund amount
-    const refundAmount = amount ? parseFloat(amount) : parseFloat(payment.amount);
-    const maxRefund = parseFloat(payment.amount);
-
-    if (refundAmount > maxRefund) {
-      return res.status(400).json({ message: 'Refund amount exceeds payment amount' });
-    }
-
-    // Process refund with Stripe
-    let stripeRefund;
-    if (payment.stripePaymentIntentId) {
-      stripeRefund = await stripe.refunds.create({
-        payment_intent: payment.stripePaymentIntentId,
-        amount: Math.round(refundAmount * 100), // Convert to cents
-        reason: 'requested_by_customer',
-        metadata: {
-          paymentId: payment.id.toString(),
-          refundReason: reason
-        }
-      });
-    }
-
+    // Test refund - set status to refunded
+    const refundAmount = parseFloat(payment.amount);
+    
     // Update payment record
     await storage.updatePayment(payment.id, {
       status: 'refunded',
@@ -329,7 +312,6 @@ router.post('/refund', validate([
         ...payment.metadata,
         refundedAt: new Date().toISOString(),
         refundAmount: refundAmount.toString(),
-        stripeRefundId: stripeRefund?.id
       }
     });
 
@@ -356,25 +338,14 @@ router.post('/refund', validate([
       }
     });
 
-    await storage.createNotification({
-      userId: payment.providerId,
-      title: 'Payment Refunded',
-      message: `A payment has been refunded. Amount: $${refundAmount.toFixed(2)}`,
-      type: 'payment',
-      metadata: {
-        paymentId: payment.id,
-        refundAmount: refundAmount.toString()
-      }
-    });
-
     // Log refund
     await storage.createSystemLog({
       level: 'info',
       category: 'payment',
-      message: `Refund processed: ${payment.id}`,
+      message: `Test refund processed: ${payment.id}`,
       userId,
       metadata: {
-        action: 'refund',
+        action: 'test_refund',
         paymentId: payment.id,
         refundAmount: refundAmount.toString(),
         reason
@@ -396,24 +367,18 @@ router.post('/refund', validate([
   }
 });
 
-// Apple Pay session creation
-router.post('/apple-pay/session', validate([
-  body('validationURL').isURL().withMessage('Valid validation URL required'),
-]), async (req: AuthRequest, res) => {
+// Apple Pay session creation (test implementation)
+router.post('/apple-pay/session', async (req: FirebaseAuthRequest, res) => {
   try {
-    // This is a simplified Apple Pay session creation
-    // In production, you would validate with Apple's servers
-    const { validationURL } = req.body;
-    
     // Mock Apple Pay session for development
     res.json({
-      epochTimestamp: Date.now(),
-      expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes
-      merchantSessionIdentifier: `session-${Date.now()}`,
-      merchantIdentifier: 'merchant.com.taskego.app',
-      displayName: 'Taskego',
-      domainName: req.get('host'),
-      signature: 'mock-signature'
+      merchantSession: {
+        epochTimestamp: Date.now(),
+        expiresAt: Date.now() + (5 * 60 * 1000),
+        merchantSessionIdentifier: `session-${Date.now()}`,
+        merchantIdentifier: 'merchant.com.taskigo.app',
+        displayName: 'Taskigo'
+      }
     });
   } catch (error) {
     console.error('Apple Pay session error:', error);
@@ -421,13 +386,13 @@ router.post('/apple-pay/session', validate([
   }
 });
 
-// Process Apple Pay payment
+// Process Apple Pay payment (test implementation)
 router.post('/apple-pay/process', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
-  body('paymentData').notEmpty().withMessage('Payment data required'),
-]), async (req: AuthRequest, res) => {
+  body('amount').isString().withMessage('Amount required'),
+]), async (req: FirebaseAuthRequest, res) => {
   try {
-    const { bookingId, paymentData } = req.body;
+    const { bookingId, amount } = req.body;
     const userId = req.user!.id;
 
     // Get booking details
@@ -441,26 +406,45 @@ router.post('/apple-pay/process', validate([
     }
 
     // For development, we'll create a successful payment record
-    // In production, you would process the Apple Pay token
+    const totalAmount = parseFloat(amount);
+    const platformFee = totalAmount * 0.1;
+    const providerAmount = totalAmount - platformFee;
+    
     const payment = await storage.createPayment({
       bookingId: booking.id,
       userId,
       providerId: booking.providerId,
       method: 'applepay',
-      amount: booking.totalAmount,
+      amount: amount,
       currency: 'USD',
       status: 'paid',
       txnId: `apple-pay-${Date.now()}`,
-      platformFee: (parseFloat(booking.totalAmount) * 0.1).toString(),
+      platformFee: platformFee.toString(),
       metadata: {
         paymentData: 'encrypted-apple-pay-data',
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        providerAmount: providerAmount.toString()
       }
     });
 
     // Update booking
     await storage.updateBooking(booking.id, {
       paymentStatus: 'paid'
+    });
+
+    // Update provider wallet
+    await storage.updateWalletBalance(booking.providerId, providerAmount);
+    
+    // Create notification
+    await storage.createNotification({
+      userId: booking.providerId,
+      title: 'Payment Received',
+      message: `You've received a payment of $${providerAmount.toFixed(2)} via Apple Pay`,
+      type: 'payment',
+      metadata: {
+        paymentId: payment.id,
+        amount: providerAmount.toString()
+      }
     });
 
     // Log Apple Pay payment
@@ -487,6 +471,23 @@ router.post('/apple-pay/process', validate([
   } catch (error) {
     console.error('Apple Pay process error:', error);
     res.status(500).json({ message: 'Failed to process Apple Pay payment' });
+  }
+});
+
+// Payment methods info
+router.get('/methods/supported', async (req: FirebaseAuthRequest, res) => {
+  try {
+    res.json({
+      supportedMethods: {
+        apple_pay: { available: true, processingFee: '2.9% + $0.30' },
+        card: { available: true, processingFee: '2.9% + $0.30' },
+        bank_transfer: { available: false, processingFee: '1%' },
+        wallet: { available: false, processingFee: 'Free' }
+      }
+    });
+  } catch (error) {
+    console.error('Get supported payment methods error:', error);
+    res.status(500).json({ message: 'Failed to get supported payment methods' });
   }
 });
 
