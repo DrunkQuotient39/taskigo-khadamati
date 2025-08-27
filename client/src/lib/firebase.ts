@@ -24,6 +24,12 @@ const firebaseConfig: FirebaseOptions = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
+// Expose auth in local dev for easy token retrieval via console
+if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  // @ts-ignore
+  window.auth = auth;
+}
+
 // Configure auth persistence (modular API)
 setPersistence(auth, browserLocalPersistence)
   .then(() => {

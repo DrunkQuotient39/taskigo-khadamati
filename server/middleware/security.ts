@@ -13,12 +13,13 @@ export const generalLimiter = rateLimit({
   legacyHeaders: false,
   // Use client IP from proxy header when behind a proxy (requires app.set('trust proxy', 1))
   keyGenerator: (req) => {
-    const xff = (req.headers['x-forwarded-for'] as string) || '';
-    const forwardedIp = xff.split(',')[0]?.trim();
-    return forwardedIp || req.ip;
+    const xffHeader = req.headers['x-forwarded-for'] as string | undefined;
+    const forwardedIp = xffHeader?.split(',')[0]?.trim();
+    const ip = forwardedIp || req.ip || (req.socket as any)?.remoteAddress || '';
+    return ip || 'unknown';
   },
   // Do not throttle auth identity checks
-  skip: (req) => req.path === '/auth/me-firebase'
+  skip: (req) => req.path === '/api/auth/me-firebase'
 });
 
 export const authLimiter = rateLimit({
@@ -74,6 +75,7 @@ export const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:5000',
+      'http://localhost:5173',
       'https://localhost:3000',
       'https://localhost:5000',
       /\.replit\.app$/,
@@ -95,7 +97,8 @@ export const corsOptions = {
       if (typeof allowed === 'string') {
         return origin === allowed;
       }
-      return allowed.test(origin);
+      // Handle RegExp test only if allowed is defined
+      return allowed?.test(origin) ?? false;
     });
     
     if (isAllowed) {

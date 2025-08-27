@@ -14,7 +14,7 @@ function initFirebase() {
   const storageBucket = process.env.FIREBASE_STORAGE_BUCKET; // e.g. your-project.appspot.com
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn('Firebase Admin not configured. Skipping Firebase auth.');
+    console.warn('[Auth] Firebase Admin not configured. Skipping Admin SDK init.', { projectIdSet: !!projectId, clientEmailSet: !!clientEmail, privateKeySet: !!privateKey });
     return;
   }
 
@@ -29,7 +29,7 @@ function initFirebase() {
   initialized = true;
   try {
     const appProject = (admin.app().options as any)?.projectId;
-    console.log('[FirebaseAdmin] Initialized. projectId =', appProject);
+    console.log('[Auth] FirebaseAdmin initialized', { projectId: appProject });
   } catch {}
 }
 
@@ -40,97 +40,84 @@ export interface FirebaseAuthRequest extends Request {
 
 export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Response, next: NextFunction) {
   initFirebase();
-  // Fallback path: accept admin_auth cookie (JWT) when present
-  const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
+  const requestId = (req.headers['x-request-id'] as string) || Math.random().toString(36).slice(2, 10);
+  const route = req.originalUrl;
+  const method = req.method;
   const authHeader = req.headers.authorization;
+  const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
 
-  // If we have a Firebase Bearer token, validate it first (primary path)
-  if (!initialized && !cookieToken) {
-    console.error('Firebase auth not configured');
-    return res.status(401).json({ message: 'Auth not configured' });
-  }
+  const logEvent = async (level: 'info' | 'warn' | 'error', message: string, extra?: Record<string, any>) => {
+    try {
+      await storage.createSystemLog?.({
+        level,
+        category: 'auth',
+        message,
+        metadata: { requestId, route, method, ...extra },
+        userId: (req as any).user?.id || null,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent') || null,
+      });
+    } catch {}
+  };
 
-  if (!authHeader?.startsWith('Bearer ')) {
-    if (cookieToken) {
+  try {
+    if (!authHeader?.startsWith('Bearer ')) {
+      if (cookieToken) {
+        try {
+          const decoded: any = verifyToken(cookieToken);
+          req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+          await logEvent('info', 'Admin cookie auth accepted');
+          return next();
+        } catch (e) {
+          await logEvent('warn', 'Admin cookie JWT invalid', { reason: (e as any)?.message });
+        }
+      }
+      await logEvent('warn', 'Missing Authorization Bearer token');
+      return res.status(401).json({ message: 'Missing auth token', requestId });
+    }
+
+    // Dev fallback gated by env
+    const devDecodeEnabled = process.env.AUTH_DEV_DECODE_FALLBACK === 'true';
+    if (!initialized && devDecodeEnabled) {
       try {
-        const decoded: any = verifyToken(cookieToken);
-        req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+        const idToken = authHeader.split(' ')[1];
+        const base64Payload = idToken.split('.')[1];
+        const json = Buffer.from(base64Payload, 'base64').toString('utf8');
+        const payload: any = JSON.parse(json);
+        const uid = payload.user_id || payload.sub || 'dev-uid';
+        const email = payload.email || '';
+        const isAdminEmail = email.toLowerCase() === 'taskigo.khadamati@gmail.com';
+        req.firebaseUser = payload;
+        req.user = { id: uid, email, role: isAdminEmail ? 'admin' : 'client' };
+        await logEvent('warn', 'DEV decode fallback used (unverified token)', { email, devDecodeEnabled });
         return next();
       } catch (e) {
-        // fallthrough to 401 below if cookie invalid
+        await logEvent('error', 'DEV decode fallback failed', { error: (e as any)?.message });
+        return res.status(401).json({ message: 'Invalid auth token (dev fallback failed)', requestId });
       }
     }
-    console.warn('[Auth] Missing Authorization Bearer token for', req.originalUrl);
-    return res.status(401).json({ message: 'Missing auth token' });
-  }
 
-  const idToken = authHeader.split(' ')[1];
-  try {
-    console.log('Verifying Firebase token... projectId =', (admin.app().options as any)?.projectId);
+    if (!initialized) {
+      await logEvent('error', 'Firebase Admin not configured', { hasProjectId: !!process.env.FIREBASE_PROJECT_ID });
+      return res.status(401).json({ message: 'Auth not configured', requestId });
+    }
+
+    const idToken = authHeader.split(' ')[1];
+    await logEvent('info', 'Verifying Firebase token start');
     const decoded = await admin.auth().verifyIdToken(idToken);
-    console.log('Firebase token verified for user:', decoded.uid);
     req.firebaseUser = decoded;
-    
-    // Extract user details from token
+    await logEvent('info', 'Firebase token verified', { uid: decoded.uid, email: decoded.email });
+
+    // Extract and upsert user
     const userId = decoded.uid;
     const email = decoded.email || null;
     const name = decoded.name || '';
     const [firstName, ...rest] = name.split(' ');
     const lastName = rest.join(' ');
-    
-    // Check for admin user
     const isAdminEmail = email && email.toLowerCase() === 'taskigo.khadamati@gmail.com';
-    if (isAdminEmail) {
-      console.log('Admin email detected in Firebase auth:', email);
-    }
-    
-    // Determine appropriate role
     const desiredRole = isAdminEmail ? 'admin' : 'client';
-    
-    // Special handling for the admin user - force specific settings
-    if (isAdminEmail) {
-      console.log('Setting up admin user in database');
-      
-      // Check if user exists in database first
-      const existingUser = await storage.getUser(userId);
-      if (existingUser) {
-        console.log('Found existing admin user in database:', existingUser.id);
-        
-        // Force update the role and other fields for the admin user
-        const updatedUser = await storage.updateUser(userId, {
-          role: 'admin',
-          firstName: 'Taskigo',
-          lastName: 'Admin',
-          isVerified: true,
-          isActive: true
-        });
-        
-        if (updatedUser && updatedUser.role === 'admin') {
-          console.log('Admin role successfully updated for user:', userId);
-        } else {
-          console.warn('Failed to update admin role for user:', userId);
-        }
-        
-        req.user = { 
-          id: existingUser.id, 
-          email: existingUser.email || '', 
-          role: 'admin' // Force admin role regardless of what's in the database
-        };
-        
-        await storage.createSystemLog?.({
-          level: 'info',
-          category: 'auth',
-          message: `Admin user authenticated: ${email}`,
-          userId: existingUser.id,
-          metadata: { action: 'admin_login', ip: req.ip, forced: true }
-        });
-        
-        return next();
-      }
-    }
-    
-    // Standard user handling for non-admin or new admin
-    console.log('Upserting user in database:', { userId, email, role: desiredRole });
+
+    // Upsert in storage
     const user = await storage.upsertUser({
       id: userId,
       email: email || undefined,
@@ -140,26 +127,22 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
       isVerified: true,
       isActive: true,
     } as any);
-    
-    // Log admin login
-    if (isAdminEmail) {
-      await storage.createSystemLog?.({
-        level: 'info',
-        category: 'auth',
-        message: `Admin logged in: ${email}`,
-        userId: user.id,
-        metadata: { action: 'admin_login', ip: req.ip }
-      });
-    }
-    
     req.user = { id: user.id, email: user.email || '', role: user.role };
-    next();
+    await logEvent('info', 'User upserted from Firebase token', { role: user.role });
+
+    // Ensure admin role correction
+    if (isAdminEmail && user.role !== 'admin') {
+      await storage.updateUser(user.id, { role: 'admin' });
+      req.user.role = 'admin';
+      await logEvent('info', 'Admin role enforced for admin email');
+    }
+
+    return next();
   } catch (e: any) {
-    console.error('Firebase token verification failed:', {
-      message: e?.message,
-      code: e?.code,
-    });
-    return res.status(401).json({ message: 'Invalid auth token' });
+    const code = e?.code;
+    const msg = e?.message;
+    await logEvent('error', 'Firebase token verification failed', { code, msg });
+    return res.status(401).json({ message: 'Invalid auth token', code, requestId });
   }
 }
 

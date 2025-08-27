@@ -14,8 +14,35 @@ import {
   authLimiter 
 } from '../middleware/security';
 import { FirebaseAuthRequest } from '../middleware/firebaseAuth';
+import { randomUUID } from 'crypto';
+
+// Declare global types for admin login attempts tracking
+declare global {
+  var adminLoginAttempts: Map<string, number>;
+}
 
 const router = Router();
+
+// Helper for structured logging
+function logAuthEvent(level: 'info' | 'warn' | 'error', action: string, message: string, userId?: string, metadata?: any) {
+  const requestId = randomUUID().substring(0, 8);
+  console.log(`[Auth:${level}] [${requestId}] ${action}: ${message}`, { userId, ...metadata });
+  
+  // Also store in system logs if storage is available
+  try {
+    storage.createSystemLog?.({
+      level,
+      category: 'auth',
+      message,
+      userId: userId || null,
+      metadata: { ...metadata, requestId, action }
+    }).catch(err => console.error(`Failed to log auth event: ${err.message}`));
+  } catch (err) {
+    console.error('Error creating system log:', err);
+  }
+  
+  return requestId;
+}
 
 // Apply rate limiting only to sensitive auth mutation routes (not to identity checks)
 
@@ -26,13 +53,28 @@ router.post('/signup', authLimiter, validate([
   userValidation.firstName,
   userValidation.lastName,
 ]), async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
     const { email, password, firstName, lastName, role = 'client', language = 'en' } = req.body;
+
+    logAuthEvent('info', 'signup_attempt', `Signup attempt for ${email}`, undefined, { 
+      requestId, 
+      ip: req.ip, 
+      role 
+    });
 
     // Check if user already exists
     const existingUser = await storage.getUserByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email' });
+      logAuthEvent('warn', 'signup_duplicate', `Signup failed - user exists: ${email}`, undefined, { 
+        requestId, 
+        ip: req.ip 
+      });
+      return res.status(400).json({ 
+        message: 'User already exists with this email',
+        code: 'USER_EXISTS',
+        requestId
+      });
     }
 
     // Hash password
@@ -66,12 +108,9 @@ router.post('/signup', authLimiter, validate([
     });
 
     // Log successful signup
-    await storage.createSystemLog({
-      level: 'info',
-      category: 'auth',
-      message: `User signed up: ${email}`,
-      userId: user.id,
-      metadata: { action: 'signup', role: user.role }
+    logAuthEvent('info', 'signup_success', `User signed up: ${email}`, user.id, { 
+      requestId, 
+      role: user.role 
     });
 
     res.status(201).json({
@@ -84,11 +123,19 @@ router.post('/signup', authLimiter, validate([
         role: user.role,
         language: user.language
       },
-      token
+      token,
+      requestId
     });
   } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ message: 'Failed to create user' });
+    const errorId = logAuthEvent('error', 'signup_error', `Signup error: ${(error as Error).message}`, undefined, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    res.status(500).json({ 
+      message: 'Failed to create user',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
@@ -97,17 +144,40 @@ router.post('/signin', authLimiter, validate([
   userValidation.email,
   userValidation.password
 ]), async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
     const { email, password } = req.body;
+
+    logAuthEvent('info', 'signin_attempt', `Login attempt for ${email}`, undefined, { 
+      requestId, 
+      ip: req.ip 
+    });
 
     // Get user by email
     const user = await storage.getUserByEmail(email);
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      logAuthEvent('warn', 'signin_invalid', `Login failed - invalid credentials: ${email}`, undefined, { 
+        requestId, 
+        ip: req.ip,
+        reason: 'user_not_found'
+      });
+      return res.status(400).json({ 
+        message: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS',
+        requestId
+      });
     }
 
     if (!user.isActive) {
-      return res.status(400).json({ message: 'Account is disabled' });
+      logAuthEvent('warn', 'signin_disabled', `Login failed - account disabled: ${email}`, user.id, { 
+        requestId, 
+        ip: req.ip 
+      });
+      return res.status(400).json({ 
+        message: 'Account is disabled',
+        code: 'ACCOUNT_DISABLED',
+        requestId
+      });
     }
 
     // For this implementation, we'll use a simple password check
@@ -133,12 +203,9 @@ router.post('/signin', authLimiter, validate([
     });
 
     // Log successful login
-    await storage.createSystemLog({
-      level: 'info',
-      category: 'auth',
-      message: `User logged in: ${email}`,
-      userId: user.id,
-      metadata: { action: 'login', ip: req.ip }
+    logAuthEvent('info', 'signin_success', `User logged in: ${email}`, user.id, { 
+      requestId, 
+      ip: req.ip 
     });
 
     res.json({
@@ -151,20 +218,39 @@ router.post('/signin', authLimiter, validate([
         role: user.role,
         language: user.language
       },
-      token
+      token,
+      requestId
     });
   } catch (error) {
-    console.error('Signin error:', error);
-    res.status(500).json({ message: 'Failed to authenticate user' });
+    const errorId = logAuthEvent('error', 'signin_error', `Signin error: ${(error as Error).message}`, undefined, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    res.status(500).json({ 
+      message: 'Failed to authenticate user',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Get current user
 router.get('/me', authenticate, async (req: AuthRequest, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
+    logAuthEvent('info', 'me_request', 'User identity check', req.user?.id, { requestId });
+    
     const user = await storage.getUser(req.user!.id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      logAuthEvent('warn', 'me_not_found', 'User not found in database', req.user?.id, { 
+        requestId,
+        tokenId: req.user?.id
+      });
+      return res.status(404).json({ 
+        message: 'User not found',
+        code: 'USER_NOT_FOUND',
+        requestId
+      });
     }
 
     res.json({
@@ -175,38 +261,72 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
       role: user.role,
       language: user.language,
       isVerified: user.isVerified,
-      profileImageUrl: user.profileImageUrl
+      profileImageUrl: user.profileImageUrl,
+      requestId
     });
   } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({ message: 'Failed to get user data' });
+    const errorId = logAuthEvent('error', 'me_error', `Get user error: ${(error as Error).message}`, req.user?.id, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    res.status(500).json({ 
+      message: 'Failed to get user data',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Firebase-backed: current user profile
-router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+router.get('/me-firebase', firebaseAuthenticate, async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
-    console.log('me-firebase endpoint called', { 
-      user: req.user?.id, 
-      firebaseUser: req.firebaseUser?.uid,
-      email: req.firebaseUser?.email || req.user?.email
+    // Type assertion for req
+    const typedReq = req as unknown as FirebaseAuthRequest;
+    
+    logAuthEvent('info', 'me_firebase_request', 'Firebase user identity check', typedReq.user?.id, { 
+      requestId,
+      firebaseUid: typedReq.firebaseUser?.uid,
+      email: typedReq.firebaseUser?.email || typedReq.user?.email
     });
     
-    if (!req.user?.id) {
-      console.log('No user ID found in request');
-      return res.status(401).json({ message: 'Unauthorized' });
+    if (!typedReq.user?.id) {
+      logAuthEvent('warn', 'me_firebase_unauthorized', 'No user ID found in request', undefined, { 
+        requestId,
+        headers: {
+          auth: req.headers.authorization ? 'present' : 'missing'
+        }
+      });
+      return res.status(401).json({ 
+        message: 'Unauthorized',
+        code: 'NO_USER_ID',
+        requestId
+      });
     }
     
-    const user = await storage.getUser(req.user.id);
-    console.log('User from storage:', user ? { id: user.id, email: user.email, role: user.role } : 'Not found');
+    const user = await storage.getUser(typedReq.user.id);
     
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      logAuthEvent('warn', 'me_firebase_not_found', 'Firebase user not found in database', typedReq.user.id, { 
+        requestId,
+        firebaseUid: typedReq.firebaseUser?.uid,
+        email: typedReq.firebaseUser?.email
+      });
+      
+      return res.status(404).json({ 
+        message: 'User not found',
+        code: 'USER_NOT_FOUND',
+        requestId
+      });
     }
     
     // Check if this is the admin user and ensure they have the admin role
     if (user.email?.toLowerCase() === 'taskigo.khadamati@gmail.com' && user.role !== 'admin') {
-      console.log('Updating admin role for user:', user.id);
+      logAuthEvent('info', 'me_firebase_admin_update', 'Updating admin role for user', user.id, { 
+        requestId,
+        email: user.email
+      });
+      
       const updatedUser = await storage.updateUser(user.id, { role: 'admin' });
       if (updatedUser) {
         user.role = 'admin';
@@ -222,97 +342,176 @@ router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuth
       role: user.role,
       language: user.language,
       isVerified: user.isVerified,
-      profileImageUrl: user.profileImageUrl
+      profileImageUrl: user.profileImageUrl,
+      requestId
     };
     
-    console.log('Returning user data:', userData);
+    logAuthEvent('info', 'me_firebase_success', 'Firebase user identity verified', user.id, { 
+      requestId,
+      role: user.role
+    });
+    
     res.json(userData);
   } catch (error) {
-    console.error('Get firebase user error:', error);
-    res.status(500).json({ message: 'Failed to get user data' });
+    const typedReq = req as unknown as FirebaseAuthRequest;
+    const errorId = logAuthEvent('error', 'me_firebase_error', `Get firebase user error: ${(error as Error).message}`, typedReq.user?.id, { 
+      requestId,
+      error: (error as Error).stack,
+      firebaseUid: typedReq.firebaseUser?.uid
+    });
+    
+    res.status(500).json({ 
+      message: 'Failed to get user data',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Logout
-router.post('/logout', authenticate, async (req: AuthRequest, res) => {
+router.post('/logout', authenticate, async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
-    // In a real implementation, you'd invalidate the token/session
-    // For now, we'll just log the logout
-    await storage.createSystemLog({
-      level: 'info',
-      category: 'auth',
-      message: `User logged out`,
-      userId: req.user!.id,
-      metadata: { action: 'logout' }
-    });
+    const typedReq = req as unknown as AuthRequest;
+    logAuthEvent('info', 'logout', 'User logged out', typedReq.user!.id, { requestId });
 
-    res.json({ message: 'Logged out successfully' });
+    res.json({ 
+      message: 'Logged out successfully',
+      requestId
+    });
   } catch (error) {
-    console.error('Logout error:', error);
-    res.status(500).json({ message: 'Failed to logout' });
+    const typedReq = req as unknown as AuthRequest;
+    const errorId = logAuthEvent('error', 'logout_error', `Logout error: ${(error as Error).message}`, typedReq.user?.id, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    
+    res.status(500).json({ 
+      message: 'Failed to logout',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Forgot password (placeholder for now)
 router.post('/forgot-password', authLimiter, validate([userValidation.email]), async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
     const { email } = req.body;
+    
+    logAuthEvent('info', 'forgot_password_request', `Password reset requested for: ${email}`, undefined, { 
+      requestId,
+      ip: req.ip
+    });
     
     const user = await storage.getUserByEmail(email);
     if (!user) {
       // Don't reveal if user exists
-      return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+      return res.json({ 
+        message: 'If an account with that email exists, a password reset link has been sent.',
+        requestId
+      });
     }
 
     // TODO: Generate reset token and send email
-    await storage.createSystemLog({
-      level: 'info',
-      category: 'auth',
-      message: `Password reset requested for: ${email}`,
-      userId: user.id,
-      metadata: { action: 'forgot_password' }
-    });
 
-    res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+    res.json({ 
+      message: 'If an account with that email exists, a password reset link has been sent.',
+      requestId
+    });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ message: 'Failed to process password reset request' });
+    const errorId = logAuthEvent('error', 'forgot_password_error', `Forgot password error: ${(error as Error).message}`, undefined, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    
+    res.status(500).json({ 
+      message: 'Failed to process password reset request',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Reset password (placeholder for now)
 router.post('/reset-password', authLimiter, async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
     const { token, password } = req.body;
     
+    logAuthEvent('info', 'reset_password_request', 'Password reset attempt', undefined, { 
+      requestId,
+      ip: req.ip,
+      hasToken: !!token
+    });
+    
     if (!token || !password) {
-      return res.status(400).json({ message: 'Token and password are required' });
+      return res.status(400).json({ 
+        message: 'Token and password are required',
+        code: 'MISSING_FIELDS',
+        requestId
+      });
     }
 
     // TODO: Verify reset token and update password
     
-    res.json({ message: 'Password has been reset successfully' });
+    res.json({ 
+      message: 'Password has been reset successfully',
+      requestId
+    });
   } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Failed to reset password' });
+    const errorId = logAuthEvent('error', 'reset_password_error', `Reset password error: ${(error as Error).message}`, undefined, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    
+    res.status(500).json({ 
+      message: 'Failed to reset password',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Setup admin account
-router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+router.post('/setup-admin', firebaseAuthenticate, async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
-    const userId = req.user?.id;
+    const typedReq = req as unknown as FirebaseAuthRequest;
+    const userId = typedReq.user?.id;
     const { email } = req.body;
     
-    console.log('Setup admin endpoint called', { userId, email });
+    logAuthEvent('info', 'setup_admin_request', 'Setup admin account request', userId, { 
+      requestId,
+      email
+    });
     
     if (!userId) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      logAuthEvent('warn', 'setup_admin_unauthorized', 'Unauthorized setup admin attempt', undefined, { 
+        requestId,
+        ip: req.ip
+      });
+      
+      return res.status(401).json({ 
+        message: 'Unauthorized',
+        code: 'UNAUTHORIZED',
+        requestId
+      });
     }
     
     // Only allow setting admin role for the specific admin email
     if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
-      return res.status(403).json({ message: 'Forbidden - cannot set admin role for this email' });
+      logAuthEvent('warn', 'setup_admin_forbidden', 'Forbidden admin setup attempt', userId, { 
+        requestId,
+        email
+      });
+      
+      return res.status(403).json({ 
+        message: 'Forbidden - cannot set admin role for this email',
+        code: 'FORBIDDEN_EMAIL',
+        requestId
+      });
     }
     
     // Get user from storage
@@ -333,36 +532,73 @@ router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAut
         updatedAt: new Date()
       });
       
-      console.log('Created new admin user:', user.id);
+      logAuthEvent('info', 'setup_admin_created', 'Created new admin user', user.id, { 
+        requestId,
+        email
+      });
     } else {
       // Update to admin role
-      user = await storage.updateUser(userId, { 
+      const updatedUser = await storage.updateUser(userId, { 
         role: 'admin',
         firstName: user.firstName || 'Taskigo',
         lastName: user.lastName || 'Admin'
       });
       
-      console.log('Updated existing user to admin:', user.id);
+      if (updatedUser) {
+        user = updatedUser;
+      }
+      
+      logAuthEvent('info', 'setup_admin_updated', 'Updated existing user to admin', user.id, { 
+        requestId,
+        email
+      });
     }
     
-    return res.json({ message: 'Admin role set successfully', user });
+    return res.json({ 
+      message: 'Admin role set successfully', 
+      user,
+      requestId
+    });
   } catch (error) {
-    console.error('Error setting admin role:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    const typedReq = req as unknown as FirebaseAuthRequest;
+    const errorId = logAuthEvent('error', 'setup_admin_error', `Error setting admin role: ${(error as Error).message}`, typedReq.user?.id, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    
+    return res.status(500).json({ 
+      message: 'Internal server error',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
 // Direct admin login - bypass Firebase for emergency access
 router.post('/direct-admin-login', authLimiter, async (req, res) => {
+  const requestId = randomUUID().substring(0, 8);
   try {
     const { email, adminKey } = req.body;
     
-    console.log('Direct admin login attempt');
+    logAuthEvent('warn', 'direct_admin_login_attempt', 'Direct admin login attempt', undefined, { 
+      requestId,
+      ip: req.ip,
+      email
+    });
     
     // Only allow admin email
     if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
-      console.log('Invalid admin email provided');
-      return res.status(401).json({ message: 'Unauthorized access' });
+      logAuthEvent('warn', 'direct_admin_login_invalid_email', 'Invalid admin email provided', undefined, { 
+        requestId,
+        ip: req.ip,
+        email
+      });
+      
+      return res.status(401).json({ 
+        message: 'Unauthorized access',
+        code: 'INVALID_ADMIN_EMAIL',
+        requestId
+      });
     }
     
     // Verify request is coming from the application itself
@@ -376,8 +612,18 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
                          referer.includes('127.0.0.1');
                          
     if (!validReferer) {
-      console.log('Invalid referer for admin access:', referer);
-      return res.status(403).json({ message: 'Access denied' });
+      logAuthEvent('warn', 'direct_admin_login_invalid_referer', 'Invalid referer for admin access', undefined, { 
+        requestId,
+        ip: req.ip,
+        referer,
+        userAgent
+      });
+      
+      return res.status(403).json({ 
+        message: 'Access denied',
+        code: 'INVALID_REFERER',
+        requestId
+      });
     }
     
     // Rate limiting - only allow 5 attempts per hour from an IP
@@ -389,13 +635,25 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
     const attempts = global.adminLoginAttempts.get(hourlyKey) || 0;
     
     if (attempts >= 5) {
-      console.log('Too many admin login attempts from IP:', clientIp);
-      return res.status(429).json({ message: 'Too many attempts' });
+      logAuthEvent('warn', 'direct_admin_login_rate_limit', 'Too many admin login attempts', undefined, { 
+        requestId,
+        ip: clientIp,
+        attempts
+      });
+      
+      return res.status(429).json({ 
+        message: 'Too many attempts',
+        code: 'RATE_LIMITED',
+        requestId
+      });
     }
     
     global.adminLoginAttempts.set(hourlyKey, attempts + 1);
     
-    console.log('Valid admin key provided, creating admin session');
+    logAuthEvent('info', 'direct_admin_login_validated', 'Valid admin key provided', undefined, { 
+      requestId,
+      ip: clientIp
+    });
     
     // Generate a random user ID if needed
     const adminUserId = 'admin-' + Math.random().toString(36).substring(2, 15);
@@ -418,15 +676,26 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
         updatedAt: new Date()
       });
       
-      console.log('Created new admin user via direct login:', adminUser.id);
+      logAuthEvent('info', 'direct_admin_login_user_created', 'Created new admin user via direct login', adminUser.id, { 
+        requestId,
+        ip: clientIp
+      });
     } else {
       // Ensure user has admin role
       if (adminUser.role !== 'admin') {
-        adminUser = await storage.updateUser(adminUser.id, { 
+        const updatedUser = await storage.updateUser(adminUser.id, { 
           role: 'admin',
           isActive: true
         });
-        console.log('Updated user to admin role:', adminUser.id);
+        
+        if (updatedUser) {
+          adminUser = updatedUser;
+        }
+        
+        logAuthEvent('info', 'direct_admin_login_role_updated', 'Updated user to admin role', adminUser.id, { 
+          requestId,
+          ip: clientIp
+        });
       }
     }
     
@@ -437,20 +706,16 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
       role: 'admin'
     });
     
-    // Log admin access
-    await storage.createSystemLog?.({
-      level: 'warn',
-      category: 'auth',
-      message: `Admin direct login used: ${email}`,
-      userId: adminUser.id,
-      metadata: { action: 'direct_admin_login', ip: req.ip }
-    });
-    
     // Set cookie for authentication
     res.cookie('admin_auth', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+    
+    logAuthEvent('warn', 'direct_admin_login_success', 'Admin direct login successful', adminUser.id, { 
+      requestId,
+      ip: clientIp
     });
     
     return res.json({
@@ -462,11 +727,20 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
         lastName: adminUser.lastName || 'Admin',
         role: 'admin'
       },
-      token
+      token,
+      requestId
     });
   } catch (error) {
-    console.error('Direct admin login error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    const errorId = logAuthEvent('error', 'direct_admin_login_error', `Direct admin login error: ${(error as Error).message}`, undefined, { 
+      requestId,
+      error: (error as Error).stack
+    });
+    
+    return res.status(500).json({ 
+      message: 'Internal server error',
+      code: 'SERVER_ERROR',
+      requestId: errorId
+    });
   }
 });
 
