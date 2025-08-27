@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import admin from 'firebase-admin';
 import { storage } from '../storage';
+import { verifyToken } from './auth';
 
 // Initialize Firebase Admin once
 let initialized = false;
@@ -35,13 +36,26 @@ export interface FirebaseAuthRequest extends Request {
 
 export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Response, next: NextFunction) {
   initFirebase();
-  if (!initialized) {
+  // Fallback path: accept admin_auth cookie (JWT) when present
+  const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
+  const authHeader = req.headers.authorization;
+
+  // If we have a Firebase Bearer token, validate it first (primary path)
+  if (!initialized && !cookieToken) {
     console.error('Firebase auth not configured');
     return res.status(401).json({ message: 'Auth not configured' });
   }
 
-  const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
+    if (cookieToken) {
+      try {
+        const decoded: any = verifyToken(cookieToken);
+        req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+        return next();
+      } catch (e) {
+        // fallthrough to 401 below if cookie invalid
+      }
+    }
     console.log('No Bearer token in authorization header');
     return res.status(401).json({ message: 'Missing auth token' });
   }

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { PORT } from "./config";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -8,6 +9,7 @@ const app = express();
 // Increase JSON payload limit to 50MB
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();
