@@ -17,11 +17,10 @@ import { FirebaseAuthRequest } from '../middleware/firebaseAuth';
 
 const router = Router();
 
-// Apply rate limiting to all auth routes
-router.use(authLimiter);
+// Apply rate limiting only to sensitive auth mutation routes (not to identity checks)
 
 // Sign up
-router.post('/signup', validate([
+router.post('/signup', authLimiter, validate([
   userValidation.email,
   userValidation.password,
   userValidation.firstName,
@@ -94,7 +93,7 @@ router.post('/signup', validate([
 });
 
 // Sign in
-router.post('/signin', validate([
+router.post('/signin', authLimiter, validate([
   userValidation.email,
   userValidation.password
 ]), async (req, res) => {
@@ -255,7 +254,7 @@ router.post('/logout', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Forgot password (placeholder for now)
-router.post('/forgot-password', validate([userValidation.email]), async (req, res) => {
+router.post('/forgot-password', authLimiter, validate([userValidation.email]), async (req, res) => {
   try {
     const { email } = req.body;
     
@@ -282,7 +281,7 @@ router.post('/forgot-password', validate([userValidation.email]), async (req, re
 });
 
 // Reset password (placeholder for now)
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', authLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
     
@@ -354,7 +353,7 @@ router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAut
 });
 
 // Direct admin login - bypass Firebase for emergency access
-router.post('/direct-admin-login', async (req, res) => {
+router.post('/direct-admin-login', authLimiter, async (req, res) => {
   try {
     const { email, adminKey } = req.body;
     

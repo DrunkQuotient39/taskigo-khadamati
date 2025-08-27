@@ -7,10 +7,18 @@ import { storage } from '../storage';
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 10000 : 100,
+  max: process.env.NODE_ENV === 'development' ? 10000 : (Number(process.env.API_RATE_LIMIT_MAX) || 300),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Use client IP from proxy header when behind a proxy (requires app.set('trust proxy', 1))
+  keyGenerator: (req) => {
+    const xff = (req.headers['x-forwarded-for'] as string) || '';
+    const forwardedIp = xff.split(',')[0]?.trim();
+    return forwardedIp || req.ip;
+  },
+  // Do not throttle auth identity checks
+  skip: (req) => req.path === '/auth/me-firebase'
 });
 
 export const authLimiter = rateLimit({
