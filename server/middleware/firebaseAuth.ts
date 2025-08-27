@@ -27,6 +27,10 @@ function initFirebase() {
     ...(storageBucket ? { storageBucket } : {}),
   });
   initialized = true;
+  try {
+    const appProject = (admin.app().options as any)?.projectId;
+    console.log('[FirebaseAdmin] Initialized. projectId =', appProject);
+  } catch {}
 }
 
 export interface FirebaseAuthRequest extends Request {
@@ -56,13 +60,13 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
         // fallthrough to 401 below if cookie invalid
       }
     }
-    console.log('No Bearer token in authorization header');
+    console.warn('[Auth] Missing Authorization Bearer token for', req.originalUrl);
     return res.status(401).json({ message: 'Missing auth token' });
   }
 
   const idToken = authHeader.split(' ')[1];
   try {
-    console.log('Verifying Firebase token...');
+    console.log('Verifying Firebase token... projectId =', (admin.app().options as any)?.projectId);
     const decoded = await admin.auth().verifyIdToken(idToken);
     console.log('Firebase token verified for user:', decoded.uid);
     req.firebaseUser = decoded;
@@ -150,8 +154,11 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
     
     req.user = { id: user.id, email: user.email || '', role: user.role };
     next();
-  } catch (e) {
-    console.error('Firebase token verification failed:', e);
+  } catch (e: any) {
+    console.error('Firebase token verification failed:', {
+      message: e?.message,
+      code: e?.code,
+    });
     return res.status(401).json({ message: 'Invalid auth token' });
   }
 }

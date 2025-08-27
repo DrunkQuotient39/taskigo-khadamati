@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { auth } from "@/lib/firebase";
+
+let authListenersAttached = false;
 
 export function useAuth() {
   const [firebaseReady, setFirebaseReady] = useState(false);
 
   useEffect(() => {
+    if (authListenersAttached) return;
+    authListenersAttached = true;
+
     console.log('Setting up auth state listener');
     const unsub = auth.onAuthStateChanged(async (fbUser) => {
       console.log('Auth state changed:', fbUser?.email || 'No user');
@@ -19,7 +24,10 @@ export function useAuth() {
         }
       }
     });
-    return () => unsub();
+    return () => {
+      unsub();
+      authListenersAttached = false;
+    };
   }, []);
 
   const { data: user, isLoading, refetch } = useQuery({
@@ -128,18 +136,25 @@ export function useAuth() {
     refetchOnReconnect: false,
   });
 
-  // Only refetch explicitly when token changes; do not auto-run this query
+  // Debounced refetch after ID token changes to avoid bursts
   useEffect(() => {
+    let timer: any;
     const unsub = auth.onIdTokenChanged(async (fbUser) => {
       console.log('ID token changed:', fbUser?.email || 'No user');
       if (fbUser) {
-        console.log('Refreshing user data after token change');
-        await refetch();
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          console.log('Refreshing user data after token change');
+          refetch();
+        }, 250);
       } else {
         console.log('No user after token change');
       }
     });
-    return () => unsub();
+    return () => {
+      clearTimeout(timer);
+      unsub();
+    };
   }, [refetch]);
 
   return {
