@@ -7,6 +7,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence,
 } from 'firebase/auth';
 
 const firebaseConfig: FirebaseOptions = {
@@ -22,8 +24,8 @@ const firebaseConfig: FirebaseOptions = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Configure auth persistence
-auth.setPersistence('local')
+// Configure auth persistence (modular API)
+setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log('Firebase: Auth persistence set to LOCAL');
   })

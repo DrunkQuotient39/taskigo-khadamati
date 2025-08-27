@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Messages } from '@/lib/i18n';
 import { motion } from 'framer-motion';

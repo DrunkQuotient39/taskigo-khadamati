@@ -414,6 +414,34 @@ export default function Login({ messages }: LoginProps) {
                   >
                     <Mail className="mr-2 w-5 h-5" /> Sign in with Email
                   </Button>
+                  <button
+                    type="button"
+                    className="text-sm text-blue-600 hover:underline mt-1 text-left"
+                    onClick={async () => {
+                      if (!email) {
+                        toast({
+                          title: 'Enter your email',
+                          description: 'Please type your email above first.',
+                        });
+                        return;
+                      }
+                      try {
+                        await resetPassword(email);
+                        toast({
+                          title: 'Password reset sent',
+                          description: 'Check your inbox for reset instructions.',
+                        });
+                      } catch (e: any) {
+                        toast({
+                          title: 'Could not send reset email',
+                          description: e?.message || 'Try again later.',
+                          variant: 'destructive',
+                        });
+                      }
+                    }}
+                  >
+                    Forgot password?
+                  </button>
                 </div>
               </div>
               
