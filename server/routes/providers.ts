@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { storage } from '../storage';
 import { authorize, AuthRequest } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
-import { validate } from '../middleware/security';
+import { validate, authLimiter } from '../middleware/security';
 import { body } from 'express-validator';
 import { isFirebaseStorageConfigured, uploadDataUrlToFirebase } from '../lib/uploads';
+import { audit } from '../middleware/audit';
+import { log } from '../middleware/log';
+import { getFirestore } from '../storage/firestore';
 
 const router = Router();
 
@@ -13,6 +16,7 @@ router.use(firebaseAuthenticate as any);
 
 // Provider application with increased payload limit
 router.post('/apply', 
+  authLimiter,
   // Add specific middleware for this route to handle large file uploads
   (req, res, next) => {
     const jsonParser = require('express').json({ limit: '50mb' });
@@ -30,6 +34,7 @@ router.post('/apply',
 ]), async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
+    const requestId = (req as any).requestId as string | undefined;
     
     // Check if user already has a provider profile
     const existingProvider = await storage.getProvider(userId);
@@ -86,6 +91,15 @@ router.post('/apply',
       insuranceInfo
     } = req.body;
 
+    // Log payload shape only (no raw bodies)
+    const docCount = Array.isArray(businessDocs) ? businessDocs.length : 0;
+    log('info', 'provider.apply.start', {
+      requestId,
+      userId,
+      docs: docCount,
+      hasInsurance: Boolean(insuranceInfo),
+    });
+
     // Persist documents to Firebase Storage if configured
     let normalizedDocs = Array.isArray(businessDocs) ? businessDocs : [];
     if (normalizedDocs.length > 0) {
@@ -125,7 +139,7 @@ router.post('/apply',
         updatedAt: new Date()
       });
       
-      console.log('Updated existing provider application after rejection:', provider?.id);
+      log('info', 'provider.apply.update_after_reject', { requestId, providerId: provider?.id });
     } else {
       // Create a new provider record
       provider = await storage.createProvider({
@@ -141,28 +155,47 @@ router.post('/apply',
         serviceCount: 0
       });
       
-      console.log('Created new provider application:', provider?.id);
+      log('info', 'provider.apply.created', { requestId, providerId: provider?.id });
     }
-    // Notify admin(s)
-    await storage.createNotification({
-      userId: 'admin',
-      title: 'New Provider Application',
-      message: `${businessName} applied to become a provider`,
-      type: 'admin',
-      metadata: { applicantUserId: userId, city }
-    } as any);
 
-    // Log provider application
-    await storage.createSystemLog({
-      level: 'info',
-      category: 'provider',
-      message: `Provider application submitted: ${businessName}`,
-      userId,
-      metadata: { 
-        action: 'apply',
-        businessName,
-        city
+    // Mirror application in Firestore if available
+    try {
+      const fs = getFirestore();
+      if (fs) {
+        await fs.doc(`provider_applications/${userId}`).set({
+          uid: userId,
+          companyName: businessName,
+          city,
+          status: 'pending',
+          idCardImageUrl: (normalizedDocs || []).find((d: any) => d.type === 'id_card')?.url || null,
+          extraDocs: (normalizedDocs || []).filter((d: any) => d.type !== 'id_card').map((d: any) => d.url).filter(Boolean),
+          createdAt: Date.now(),
+        }, { merge: true });
       }
+    } catch {}
+    // Notify admin(s)
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+      const adminUser = adminEmail ? await storage.getUserByEmail(adminEmail) : undefined;
+      await storage.createNotification({
+        userId: adminUser?.id || 'admin',
+        title: 'New Provider Application',
+        message: `${businessName} applied to become a provider`,
+        type: 'admin',
+        metadata: { applicantUserId: userId, city }
+      } as any);
+    } catch {}
+
+    // Audit row
+    await audit({
+      requestId,
+      actorUid: userId,
+      actorEmail: undefined,
+      action: 'provider.apply',
+      targetUid: userId,
+      targetId: provider?.id,
+      resultCode: 'ok',
+      details: { businessName, city },
     });
 
     res.status(201).json({
@@ -175,7 +208,8 @@ router.post('/apply',
       }
     });
   } catch (error) {
-    console.error('Provider apply error:', error);
+    const requestId = (req as any).requestId as string | undefined;
+    log('error', 'provider.apply.fail', { requestId });
     res.status(500).json({ message: 'Failed to submit provider application' });
   }
 });

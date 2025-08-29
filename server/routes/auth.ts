@@ -8,6 +8,8 @@ import {
   AuthRequest 
 } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
+import admin from 'firebase-admin';
+import { requireAuth } from '../middleware/roles';
 import { 
   validate, 
   userValidation, 
@@ -17,8 +19,11 @@ import { FirebaseAuthRequest } from '../middleware/firebaseAuth';
 
 const router = Router();
 
-// Apply rate limiting to all auth routes
-router.use(authLimiter);
+// Apply rate limiting to mutating/credential endpoints only
+router.post('/signup', authLimiter);
+router.post('/signin', authLimiter);
+router.post('/forgot-password', authLimiter);
+router.post('/reset-password', authLimiter);
 
 // Sign up
 router.post('/signup', validate([
@@ -472,3 +477,35 @@ router.post('/direct-admin-login', async (req, res) => {
 });
 
 export default router;
+
+// Claims/me endpoint using Firebase token
+router.get('/me', requireAuth as any, async (req, res) => {
+  try {
+    const u: any = (req as any).user;
+    return res.json({
+      uid: u.uid,
+      email: u.email,
+      claims: {
+        admin: !!u.admin,
+        provider: !!u.provider
+      }
+    });
+  } catch (e) {
+    return res.status(500).json({ message: 'Failed to get auth info' });
+  }
+});
+
+// Admin approval endpoint to set provider claim
+router.post('/applications/:uid/approve', requireAuth as any, async (req, res) => {
+  try {
+    const caller: any = (req as any).user;
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    const isAdminEmail = caller?.email && caller.email.toLowerCase() === adminEmail;
+    if (!isAdminEmail) return res.status(403).json({ error: 'Forbidden' });
+    const { uid } = req.params;
+    await admin.auth().setCustomUserClaims(uid, { provider: true });
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ message: 'Failed to approve application' });
+  }
+});

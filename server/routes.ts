@@ -38,8 +38,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
   app.use(cors(corsOptions));
   app.use(securityHeaders);
-  // Apply rate limiting only to API routes to avoid throttling Vite/static in development
-  app.use('/api', generalLimiter);
+  // Apply rate limiting only to API routes; skip in development to avoid accidental 429s during polling
+  if (process.env.NODE_ENV !== 'development') {
+    app.use('/api', generalLimiter);
+  }
   app.use(sanitizeInput);
   app.use(logRequest);
 
@@ -703,7 +705,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
       
-      const notifications = await storage.getNotifications(userId);
+      let notifications = await storage.getNotifications(userId);
+      // If admin, also include global admin notifications addressed to 'admin'
+      if ((req as any).user?.role === 'admin') {
+        try {
+          const adminGlobal = await storage.getNotifications('admin' as any);
+          notifications = [...notifications, ...adminGlobal];
+        } catch {}
+      }
       
       // Mark all as read (optional - can be a separate endpoint)
       // for (const notification of notifications) {
@@ -743,6 +752,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to mark notification as read" });
     }
   });
+
+  // Global error handler (last)
+  app.use(errorHandler);
 
   return server;
 }

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import AnimatedCounter from '@/components/common/AnimatedCounter';
 import { auth } from '@/lib/firebase';
@@ -21,13 +22,20 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [previewDocs, setPreviewDocs] = useState<any[] | null>(null);
   const [location] = useLocation();
 
   // Live data from API
   const { data: stats } = useQuery({
     queryKey: ['/api/admin/stats'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/stats', { credentials: 'include' });
+      const fbUser = auth.currentUser;
+      if (!fbUser) throw new Error('Not authenticated');
+      const idToken = await fbUser.getIdToken(true);
+      const res = await fetch('/api/admin/stats', { 
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
       return res.json();
     }
   });
@@ -35,7 +43,13 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   const { data: pending = { providers: [], services: [], counts: {} }, refetch } = useQuery({
     queryKey: ['/api/admin/pending-approvals'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/pending-approvals', { credentials: 'include' });
+      const fbUser = auth.currentUser;
+      if (!fbUser) throw new Error('Not authenticated');
+      const idToken = await fbUser.getIdToken(true);
+      const res = await fetch('/api/admin/pending-approvals', { 
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
       return res.json();
     }
   });
@@ -43,7 +57,13 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   const { data: usersData } = useQuery({
     queryKey: ['/api/admin/users', searchTerm],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(searchTerm)}`, { credentials: 'include' });
+      const fbUser = auth.currentUser;
+      if (!fbUser) throw new Error('Not authenticated');
+      const idToken = await fbUser.getIdToken(true);
+      const res = await fetch(`/api/admin/users?search=${encodeURIComponent(searchTerm)}`, { 
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
       return res.json();
     }
   });
@@ -375,6 +395,31 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                           </div>
                         </div>
                         <div className="flex space-x-2">
+                          <a href={`/admin/applications/${provider.userId}`} className="px-3 py-2 rounded border">Review</a>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="secondary" onClick={() => setPreviewDocs(provider.businessDocs || [])}>
+                                View
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Application Documents</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid grid-cols-2 gap-4">
+                                {(previewDocs || []).map((doc, idx) => (
+                                  <div key={idx} className="space-y-2">
+                                    <div className="text-sm text-khadamati-gray">{doc.type}</div>
+                                    {doc.url ? (
+                                      <img src={doc.url} alt={doc.type} className="w-full h-40 object-cover rounded-md border" />
+                                    ) : (
+                                      <div className="p-3 rounded-md bg-gray-50 border text-sm break-words">{doc.text || 'No content'}</div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             size="sm"
                             onClick={() => approveProvider(provider.id, true)}

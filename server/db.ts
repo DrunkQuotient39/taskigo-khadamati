@@ -14,6 +14,15 @@ if (!process.env.DATABASE_URL) {
 } else {
   poolInstance = new Pool({ connectionString: process.env.DATABASE_URL });
   dbInstance = drizzle({ client: poolInstance as any, schema });
+  try {
+    // Best-effort: log and continue on pool-level errors (e.g., Neon admin restarts)
+    (poolInstance as any)?.on?.('error', (err: any) => {
+      // eslint-disable-next-line no-console
+      console.warn('Neon pool error (non-fatal):', err?.message || err);
+    });
+  } catch {
+    // ignore if pool doesn't support events
+  }
 }
 
 export const pool = poolInstance as unknown as Pool;

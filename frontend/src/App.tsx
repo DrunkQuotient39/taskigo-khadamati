@@ -24,6 +24,7 @@ import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import ProviderDashboard from '@/pages/ProviderDashboard';
 import AdminPanel from '@/pages/AdminPanel';
+// removed duplicate import if existed
 import NotFound from '@/pages/not-found';
 
 function Router({ messages, currentLanguage, onLanguageChange }: { 

@@ -9,6 +9,65 @@ import { validate } from '../middleware/security';
 import { body } from 'express-validator';
 // Import seed route
 import seedRouter from './admin/seed';
+import admin from 'firebase-admin';
+import { audit } from '../middleware/audit';
+import { log } from '../middleware/log';
+import { flush as flushExport } from '../middleware/ndjsonExport';
+import { getFirestore } from '../storage/firestore';
+import { pool } from '../db';
+// Application detail endpoint
+router.get('/applications/:uid', async (req: AuthRequest, res) => {
+  const { uid } = req.params as any;
+  const requestId = (req as any).requestId as string | undefined;
+  try {
+    const fs = getFirestore();
+    if (!fs) return res.status(503).json({ error: 'Firestore not configured' });
+    const snap = await fs.doc(`provider_applications/${uid}`).get();
+    if (!snap.exists) return res.status(404).json({ error: 'Application not found' });
+    const data = snap.data();
+    log('info','admin.applications.detail.ok',{requestId, uid});
+    return res.json({ uid, ...data });
+  } catch (err: any) {
+    log('error','admin.applications.detail.fail',{requestId, uid, err: err?.message});
+    return res.status(500).json({ error: 'Failed to load application' });
+  }
+});
+
+// Application reject endpoint
+router.post('/applications/:uid/reject', async (req: AuthRequest, res) => {
+  const { uid } = req.params as any;
+  const { reason = '' } = req.body || {};
+  const requestId = (req as any).requestId as string | undefined;
+  try {
+    const fs = getFirestore();
+    if (!fs) return res.status(503).json({ error: 'Firestore not configured' });
+    await fs.doc(`provider_applications/${uid}`).set({
+      status: 'rejected',
+      reviewedAt: Date.now(),
+      reviewerUid: req.user!.id,
+      notes: reason,
+    }, { merge: true });
+    // Reflect in Neon as rejected (optional)
+    try {
+      if (pool) {
+        await (pool as any).query(
+          `INSERT INTO providers (uid, company_name, status, approved_at)
+           VALUES ($1, $2, 'rejected', NULL)
+           ON CONFLICT (uid) DO UPDATE SET status='rejected', approved_at=NULL`,
+          [uid, '']
+        );
+        log('info','admin.reject.db_update.ok',{ requestId, uid });
+      }
+    } catch (e: any) {
+      log('error','admin.reject.db_update.fail',{ requestId, uid, error: e?.message });
+    }
+    log('info','admin.reject.ok',{requestId, uid});
+    return res.json({ ok: true });
+  } catch (err: any) {
+    log('error','admin.reject.fail',{requestId, uid, err: err?.message});
+    return res.status(500).json({ error: 'Failed to reject application' });
+  }
+});
 
 const router = Router();
 
@@ -233,6 +292,7 @@ router.post('/approve-provider', validate([
   try {
     const { providerId, approved, notes } = req.body;
     const adminUserId = req.user!.id;
+    const requestId = (req as any).requestId as string | undefined;
 
       const targetProvider = await storage.getProviderById(providerId);
   
@@ -241,6 +301,7 @@ router.post('/approve-provider', validate([
   }
 
     const newStatus = approved ? 'approved' : 'rejected';
+    log('info', 'admin.approve.start', { requestId, providerId, newStatus });
     const updatedProvider = await storage.updateProvider(providerId, {
       approvalStatus: newStatus
     });
@@ -264,11 +325,57 @@ router.post('/approve-provider', validate([
       }
     });
 
-    // If approved, update user role to provider
+    // If approved, update user role to provider and set Firebase custom claim
     if (approved) {
-      await storage.updateUser(targetProvider.userId, {
-        role: 'provider'
-      });
+      try {
+        log('info', 'admin.approve.claim_set.start', { requestId, uid: targetProvider.userId });
+        // Only attempt if Firebase Admin is initialized
+        if ((admin as any)?.apps && (admin as any).apps.length > 0) {
+          await admin.auth().setCustomUserClaims(targetProvider.userId, { provider: true });
+        } else {
+          log('warn', 'admin.approve.claim_set.skipped', { requestId, reason: 'admin_not_initialized' });
+        }
+        log('info', 'admin.approve.claim_set.ok', { requestId, uid: targetProvider.userId });
+      } catch (e) {
+        log('error', 'admin.approve.claim_set.fail', { requestId, uid: targetProvider.userId });
+      }
+
+      try {
+        const usr = await storage.updateUser(targetProvider.userId, { role: 'provider' });
+        log('info', 'admin.approve.db_update.ok', { requestId, userId: usr?.id });
+      } catch {
+        log('error', 'admin.approve.db_update.fail', { requestId });
+      }
+
+      // Advise clients to refresh claims
+      res.setHeader('X-Action', 'claims-updated');
+
+      // Mirror Firestore application document
+      try {
+        const fs = getFirestore();
+        if (fs) {
+          await fs.doc(`provider_applications/${targetProvider.userId}`).set({
+            status: 'approved',
+            reviewedAt: Date.now(),
+            reviewerUid: req.user!.id,
+          }, { merge: true });
+        }
+      } catch {}
+
+      // Neon providers upsert (idempotent)
+      try {
+        if (pool) {
+          await (pool as any).query(
+            `INSERT INTO providers (uid, company_name, status, approved_at)
+             VALUES ($1, $2, 'approved', NOW())
+             ON CONFLICT (uid) DO UPDATE SET status='approved', approved_at=NOW()`,
+            [targetProvider.userId, targetProvider.businessName || '']
+          );
+          log('info','admin.approve.neon_upsert.ok',{ requestId, uid: targetProvider.userId });
+        }
+      } catch (e: any) {
+        log('error','admin.approve.neon_upsert.fail',{ requestId, error: e?.message });
+      }
     }
 
     // Log admin action
@@ -285,6 +392,18 @@ router.post('/approve-provider', validate([
       }
     });
 
+    // Audit
+    await audit({
+      requestId,
+      actorUid: adminUserId,
+      actorEmail: undefined,
+      action: approved ? 'provider.approve' : 'provider.reject',
+      targetUid: targetProvider.userId,
+      targetId: providerId,
+      resultCode: 'ok',
+      details: { businessName: targetProvider.businessName },
+    });
+
     res.json({
       message: `Provider ${newStatus} successfully`,
       provider: {
@@ -294,8 +413,9 @@ router.post('/approve-provider', validate([
       }
     });
   } catch (error) {
-    console.error('Approve provider error:', error);
-    res.status(500).json({ message: 'Failed to update provider status' });
+    const requestId = (req as any).requestId as string | undefined;
+    log('error', 'admin.approve.fail', { requestId, error: (error as any)?.message });
+    res.status(500).json({ message: 'Failed to update provider status', requestId });
   }
 });
 
@@ -394,6 +514,16 @@ router.get('/logs', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Get admin logs error:', error);
     res.status(500).json({ message: 'Failed to get system logs' });
+  }
+});
+
+// Flush NDJSON export buffer (admin only)
+router.post('/logs/flush', async (req: AuthRequest, res) => {
+  try {
+    await flushExport();
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ ok: false });
   }
 });
 
@@ -570,9 +700,11 @@ router.get('/pending-approvals', async (req: AuthRequest, res) => {
     res.json({
       providers: providers.map(p => ({
         id: p.id,
+        userId: p.userId,
         businessName: p.businessName,
         city: p.city,
         businessType: p.businessType,
+        businessDocs: p.businessDocs || [],
         createdAt: p.createdAt
       })),
       services: pendingServices.slice(0, 20).map(s => ({

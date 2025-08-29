@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Sparkles, ArrowRight, Shield, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Messages } from '@/lib/i18n';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginProps {
   messages: Messages;
 }
 
 export default function Login({ messages }: LoginProps) {
-
+  const { signInWithGoogle } = useAuth();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -35,14 +36,14 @@ export default function Login({ messages }: LoginProps) {
             <CardContent className="space-y-6">
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => signInWithGoogle()}
               >
-                {messages.login?.button || 'Continue with Replit'}
+                {messages.login?.button || 'Continue with Google'}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               
               <div className="text-center text-sm text-gray-500">
-                {messages.login?.secure || 'Secure authentication powered by Replit'}
+                {messages.login?.secure || 'Secure authentication powered by Firebase'}
               </div>
               
               <div className="grid grid-cols-2 gap-4 pt-4">

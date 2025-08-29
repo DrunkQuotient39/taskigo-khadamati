@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { storage } from '../storage';
+import { log } from './log';
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
@@ -11,6 +12,11 @@ export const generalLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res /*, next*/) => {
+    // Structured log for throttling
+    try { console.warn(JSON.stringify({ ts: new Date().toISOString(), level: 'warn', message: 'rate_limited', path: req.originalUrl })); } catch {}
+    res.status(429).json({ message: 'Too many requests' });
+  },
 });
 
 export const authLimiter = rateLimit({
@@ -18,6 +24,11 @@ export const authLimiter = rateLimit({
   max: 5, // limit each IP to 5 auth requests per windowMs
   message: 'Too many authentication attempts, please try again later.',
   skipSuccessfulRequests: true,
+  skip: () => process.env.NODE_ENV === 'development',
+  handler: (req, res /*, next*/) => {
+    try { console.warn(JSON.stringify({ ts: new Date().toISOString(), level: 'warn', message: 'auth_rate_limited', path: req.originalUrl })); } catch {}
+    res.status(429).json({ message: 'Too many authentication attempts' });
+  },
 });
 
 export const aiLimiter = rateLimit({
@@ -93,6 +104,7 @@ export const corsOptions = {
     if (isAllowed) {
       callback(null, true);
     } else {
+      log('warn', 'cors.denied', { origin, path: 'CORS', reason: 'origin_not_allowed' });
       callback(new Error('Not allowed by CORS'));
     }
   },

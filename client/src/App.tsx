@@ -32,6 +32,7 @@ import AdminPanel from '@/pages/AdminPanel';
 import MyBookings from '@/pages/MyBookings';
 import BookingDetail from '@/pages/BookingDetail';
 import Payment from '@/pages/Payment';
+import AdminApplicationDetail from '@/pages/AdminApplicationDetail';
 import NotFound from '@/pages/not-found';
 
 function Router({ messages, currentLanguage, onLanguageChange }: { 
@@ -67,6 +68,7 @@ function Router({ messages, currentLanguage, onLanguageChange }: {
           <Route path="/pending-approval" component={() => <PendingApproval messages={messages} />} />
           <Route path="/admin" component={() => <AdminPanel messages={messages} />} />
           <Route path="/admin-panel" component={() => <AdminPanel messages={messages} />} />
+          <Route path="/admin/applications/:uid" component={AdminApplicationDetail} />
           <Route path="/my-bookings" component={() => <MyBookings messages={messages} />} />
           <Route path="/my-bookings/:id" component={() => <BookingDetail messages={messages} />} />
           <Route path="/bookings" component={() => <MyBookings messages={messages} />} />

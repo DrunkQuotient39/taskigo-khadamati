@@ -434,10 +434,9 @@ export class SimpleStorage implements IStorage {
   }
 
   async getPendingApprovals(): Promise<any> {
-    return {
-      providers: [],
-      services: []
-    };
+    const providers = Array.from(this.providers.values()).filter(p => p.approvalStatus === 'pending');
+    const services = Array.from(this.services.values()).filter(s => s.status === 'pending');
+    return { providers, services };
   }
 
   async approveItem(id: number): Promise<any> {
