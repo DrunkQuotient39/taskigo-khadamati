@@ -15,6 +15,16 @@ import { log } from '../middleware/log';
 import { flush as flushExport } from '../middleware/ndjsonExport';
 import { getFirestore } from '../storage/firestore';
 import { pool } from '../db';
+
+const router = Router();
+
+// All admin routes require authentication and admin role
+router.use(firebaseAuthenticate as any);
+router.use(authorize('admin'));
+
+// Mount the seed route
+router.use(seedRouter);
+
 // Application detail endpoint
 router.get('/applications/:uid', async (req: AuthRequest, res) => {
   const { uid } = req.params as any;
@@ -41,12 +51,12 @@ router.post('/applications/:uid/reject', async (req: AuthRequest, res) => {
   try {
     const fs = getFirestore();
     if (!fs) return res.status(503).json({ error: 'Firestore not configured' });
-    await fs.doc(`provider_applications/${uid}`).set({
+    await fs.doc(`provider_applications/${uid}`).update({
       status: 'rejected',
       reviewedAt: Date.now(),
       reviewerUid: req.user!.id,
       notes: reason,
-    }, { merge: true });
+    });
     // Reflect in Neon as rejected (optional)
     try {
       if (pool) {
@@ -68,15 +78,6 @@ router.post('/applications/:uid/reject', async (req: AuthRequest, res) => {
     return res.status(500).json({ error: 'Failed to reject application' });
   }
 });
-
-const router = Router();
-
-// All admin routes require authentication and admin role
-router.use(firebaseAuthenticate as any);
-router.use(authorize('admin'));
-
-// Mount the seed route
-router.use(seedRouter);
 
 // Get admin dashboard stats
 router.get('/stats', async (req: AuthRequest, res) => {
