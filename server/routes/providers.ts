@@ -1,5 +1,8 @@
-import { Router } from 'express';
+import { Router, Request } from 'express';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
+import authorize from '../middleware/auth';
+import { validate } from '../middleware/security';
+import { body } from 'express-validator';
 import { log } from '../middleware/log';
 import { audit } from '../middleware/audit';
 import { getFirestore } from '../storage/firestore';
@@ -159,9 +162,9 @@ router.post('/apply', firebaseAuthenticate, async (req, res) => {
 });
 
 // Get my services (for providers)
-router.get('/my-services', authorize('provider'), async (req: AuthRequest, res) => {
+router.get('/my-services', authorize('provider'), async (req: Request, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = (req as any).user?.id;
     
     // Get provider profile first
     const provider = await storage.getProvider(userId);
@@ -185,9 +188,9 @@ router.get('/my-services', authorize('provider'), async (req: AuthRequest, res) 
 });
 
 // Get provider bookings
-router.get('/bookings', authorize('provider'), async (req: AuthRequest, res) => {
+router.get('/bookings', authorize('provider'), async (req: Request, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = (req as any).user?.id;
     const { status, limit = 20, offset = 0 } = req.query;
 
     const bookings = await storage.getProviderBookings();
@@ -220,9 +223,9 @@ router.get('/bookings', authorize('provider'), async (req: AuthRequest, res) => 
 router.put('/service-status', authorize('provider'), validate([
   body('serviceId').isInt({ min: 1 }).withMessage('Valid service ID required'),
   body('status').isIn(['active', 'inactive', 'pending']).withMessage('Valid status required'),
-]), async (req: AuthRequest, res) => {
+]), async (req: Request, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = (req as any).user?.id;
     const { serviceId, status } = req.body;
 
     // Get the service to verify ownership
@@ -266,9 +269,9 @@ router.put('/service-status', authorize('provider'), validate([
 });
 
 // Get provider dashboard stats
-router.get('/dashboard-stats', authorize('provider'), async (req: AuthRequest, res) => {
+router.get('/dashboard-stats', authorize('provider'), async (req: Request, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = (req as any).user?.id;
 
     // Get provider profile
     const provider = await storage.getProvider(userId);
@@ -333,9 +336,9 @@ router.put('/profile', authorize('provider'), validate([
   body('businessName').optional().trim().isLength({ min: 2, max: 100 }),
   body('city').optional().trim().isLength({ min: 2, max: 50 }),
   body('businessType').optional().trim(),
-]), async (req: AuthRequest, res) => {
+]), async (req: Request, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = (req as any).user?.id;
     
     const provider = await storage.getProvider(userId);
     if (!provider) {

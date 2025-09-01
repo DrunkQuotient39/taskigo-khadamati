@@ -1,6 +1,35 @@
 import { pool } from '../db';
 import { log } from '../middleware/log';
 
+export async function ensureProvidersTable() {
+  try {
+    // 1) Create if missing with minimal required columns
+    await (pool as any).query(`
+      CREATE TABLE IF NOT EXISTS providers (
+        uid TEXT PRIMARY KEY,
+        company_name TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        approved_at TIMESTAMPTZ
+      );
+    `);
+
+    // 2) Add optional columns defensively (no references in defaults)
+    await (pool as any).query(`ALTER TABLE providers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();`);
+    await (pool as any).query(`ALTER TABLE providers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;`);
+
+    // 3) (Optional) backfill updated_at without referencing non-existent cols
+    await (pool as any).query(`UPDATE providers SET updated_at = NOW() WHERE updated_at IS NULL;`);
+
+    log('info', 'db.providers_table.ready', {});
+  } catch (error: any) {
+    log('error', 'db.providers_table.fail', {
+      error: error.message,
+      code: error.code
+    });
+    throw error;
+  }
+}
+
 export async function ensureAuditLogTable() {
   try {
     await (pool as any).query(`
@@ -17,49 +46,11 @@ export async function ensureAuditLogTable() {
         details JSONB
       );
     `);
-    
-    // Create index for performance
-    await (pool as any).query(`
-      CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action);
-      CREATE INDEX IF NOT EXISTS idx_audit_log_actor ON audit_log(actor_uid);
-      CREATE INDEX IF NOT EXISTS idx_audit_log_target ON audit_log(target_uid);
-      CREATE INDEX IF NOT EXISTS idx_audit_log_at ON audit_log(at);
-    `);
-    
     log('info', 'db.audit_log_table.ready', {});
   } catch (error: any) {
-    log('error', 'db.audit_log_table.fail', { 
+    log('error', 'db.audit_log_table.fail', {
       error: error.message,
-      code: error.code 
-    });
-    throw error;
-  }
-}
-
-export async function ensureProvidersTable() {
-  try {
-    await (pool as any).query(`
-      CREATE TABLE IF NOT EXISTS providers (
-        uid TEXT PRIMARY KEY,
-        company_name TEXT,
-        status TEXT NOT NULL DEFAULT 'pending',
-        approved_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `);
-    
-    // Create indexes for performance
-    await (pool as any).query(`
-      CREATE INDEX IF NOT EXISTS idx_providers_status ON providers(status);
-      CREATE INDEX IF NOT EXISTS idx_providers_approved_at ON providers(approved_at);
-    `);
-    
-    log('info', 'db.providers_table.ready', {});
-  } catch (error: any) {
-    log('error', 'db.providers_table.fail', { 
-      error: error.message,
-      code: error.code 
+      code: error.code
     });
     throw error;
   }
