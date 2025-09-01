@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Users, Briefcase, TrendingUp, DollarSign, Search, Eye, Ban, Check, X } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import ScrollReveal from '@/components/common/ScrollReveal';
-import AnimatedCounter from '@/components/common/AnimatedCounter';
+import { useQuery } from '@tanstack/react-query';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import ScrollReveal from '@/components/common/ScrollReveal';
+import { Check, X, Eye, Users, Building2, Calendar, CreditCard, Star, Bell, Search, Briefcase, TrendingUp, DollarSign } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AnimatedCounter from '@/components/common/AnimatedCounter';
 
 interface AdminPanelProps {
   messages: any;
@@ -636,7 +637,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                                     <Eye className="h-4 w-4" />
                                   </Button>
                                   <Button variant="ghost" size="icon">
-                                    <Ban className="h-4 w-4" />
+                                    <X className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </TableCell>

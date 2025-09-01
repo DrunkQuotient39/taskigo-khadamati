@@ -1,216 +1,160 @@
 import { Router } from 'express';
-import { storage } from '../storage';
-import { authorize, AuthRequest } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
-import { validate, authLimiter } from '../middleware/security';
-import { body } from 'express-validator';
-import { isFirebaseStorageConfigured, uploadDataUrlToFirebase } from '../lib/uploads';
-import { audit } from '../middleware/audit';
 import { log } from '../middleware/log';
+import { audit } from '../middleware/audit';
 import { getFirestore } from '../storage/firestore';
+import { pool } from '../db';
 
 const router = Router();
 
-// All routes require Firebase authentication
-router.use(firebaseAuthenticate as any);
+// Apply to become a provider
+router.post('/apply', firebaseAuthenticate, async (req, res) => {
+  const requestId = (req as any).requestId;
+  const uid = (req as any).user?.uid;
+  
+  if (!uid) {
+    log('error', 'provider.apply.unauthorized', { requestId });
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
-// Provider application with increased payload limit
-router.post('/apply', 
-  authLimiter,
-  // Add specific middleware for this route to handle large file uploads
-  (req, res, next) => {
-    const jsonParser = require('express').json({ limit: '50mb' });
-    jsonParser(req, res, next);
-  },
-  validate([
-  body('businessName').trim().isLength({ min: 2, max: 100 }).withMessage('Business name must be 2-100 characters'),
-  body('city').trim().isLength({ min: 2, max: 50 }).withMessage('City is required'),
-  body('businessType').optional().trim(),
-  body('licenseNumber').optional().trim(),
-  body('businessDocs').optional().isArray().withMessage('businessDocs must be an array'),
-  body('businessDocs.*.type').optional().isIn(['id_card','certification','description']).withMessage('Invalid doc type'),
-  body('businessDocs.*.dataUrl').optional().isString(),
-  body('businessDocs.*.text').optional().isString(),
-]), async (req: AuthRequest, res) => {
   try {
-    const userId = req.user!.id;
-    const requestId = (req as any).requestId as string | undefined;
+    log('info', 'provider.apply.start', { requestId, uid });
     
-    // Check if user already has a provider profile
-    const existingProvider = await storage.getProvider(userId);
-    
-    // For testing purposes in development, allow deleting existing provider profiles with a special flag
-    const forceReapply = req.query.force === 'true';
-    console.log('Force reapply requested:', forceReapply, 'Query params:', req.query);
-    
-    if (existingProvider) {
-      // Always allow reapplying with force=true
-      if (forceReapply) {
-        // Delete the existing provider profile to allow reapplying
-        console.log('Force reapply requested, deleting existing provider profile for user:', userId);
-        try {
-          await storage.deleteProvider(userId);
-          console.log('Successfully deleted existing provider profile');
-        } catch (deleteError) {
-          console.error('Error deleting provider profile:', deleteError);
-          // Continue anyway - we'll try to update if delete fails
-        }
-        // Continue with the application process
-      } else if (existingProvider.approvalStatus === 'rejected') {
-        console.log('Reapplying after rejection for user:', userId);
-        // Continue with the application process
-      } else if (existingProvider.approvalStatus === 'pending') {
-        // Already has a pending application
-        return res.status(400).json({ 
-          message: 'You already have a pending application. Please wait for admin review.',
-          provider: {
-            id: existingProvider.id,
-            businessName: existingProvider.businessName,
-            approvalStatus: existingProvider.approvalStatus
-          }
-        });
-      } else if (existingProvider.approvalStatus === 'approved') {
-        // Already an approved provider
-        return res.status(400).json({ 
-          message: 'You are already an approved provider',
-          provider: {
-            id: existingProvider.id,
-            businessName: existingProvider.businessName,
-            approvalStatus: existingProvider.approvalStatus
-          }
-        });
-      }
-    }
-
     const {
-      businessName,
+      companyName,
+      nationalId,
+      idCardImageUrl,
+      extraDocs = [],
       city,
       businessType,
-      licenseNumber,
-      businessDocs,
-      insuranceInfo
+      phone,
+      address
     } = req.body;
 
-    // Log payload shape only (no raw bodies)
-    const docCount = Array.isArray(businessDocs) ? businessDocs.length : 0;
-    log('info', 'provider.apply.start', {
-      requestId,
-      userId,
-      docs: docCount,
-      hasInsurance: Boolean(insuranceInfo),
-    });
-
-    // Persist documents to Firebase Storage if configured
-    let normalizedDocs = Array.isArray(businessDocs) ? businessDocs : [];
-    if (normalizedDocs.length > 0) {
-      const useFirebaseStorage = isFirebaseStorageConfigured();
-      const uploaded: any[] = [];
-      for (const doc of normalizedDocs) {
-        if ((doc.type === 'id_card' || doc.type === 'certification') && doc.dataUrl) {
-          try {
-            if (useFirebaseStorage) {
-              const url = await uploadDataUrlToFirebase(doc.dataUrl, { folder: `provider-docs/${userId}` });
-              uploaded.push({ type: doc.type, url });
-            } else {
-              uploaded.push({ type: doc.type, url: doc.dataUrl });
-            }
-          } catch {
-            uploaded.push({ type: doc.type, url: doc.dataUrl });
-          }
-        } else if (doc.type === 'description' && doc.text) {
-          uploaded.push({ type: doc.type, text: doc.text });
-        }
-      }
-      normalizedDocs = uploaded;
+    // Validate required fields
+    if (!companyName || !nationalId || !idCardImageUrl) {
+      log('warn', 'provider.apply.validation_fail', { 
+        requestId, 
+        uid, 
+        missing: ['companyName', 'nationalId', 'idCardImageUrl'].filter(f => !req.body[f])
+      });
+      return res.status(400).json({ 
+        error: 'Missing required fields: companyName, nationalId, idCardImageUrl' 
+      });
     }
 
-    // Check if we're updating an existing provider or creating a new one
-    let provider;
-    if (existingProvider && existingProvider.approvalStatus === 'rejected') {
-      // Update the existing provider record with new information
-      provider = await storage.updateProvider(existingProvider.id, {
-        businessName,
-        city,
-        businessType,
-        licenseNumber,
-        businessDocs: normalizedDocs || [],
-        insuranceInfo: insuranceInfo || {},
-        approvalStatus: 'pending', // Reset to pending
-        updatedAt: new Date()
-      });
-      
-      log('info', 'provider.apply.update_after_reject', { requestId, providerId: provider?.id });
-    } else {
-      // Create a new provider record
-      provider = await storage.createProvider({
-        userId,
-        businessName,
-        city,
-        businessType,
-        licenseNumber,
-        businessDocs: normalizedDocs || [],
-        insuranceInfo: insuranceInfo || {},
-        approvalStatus: 'pending',
-        ratings: "0.00",
-        serviceCount: 0
-      });
-      
-      log('info', 'provider.apply.created', { requestId, providerId: provider?.id });
+    // Get Firestore instance
+    const fs = getFirestore();
+    if (!fs) {
+      log('error', 'provider.apply.firestore_unavailable', { requestId, uid });
+      return res.status(500).json({ error: 'Firestore not available' });
     }
 
-    // Mirror application in Firestore if available
-    try {
-      const fs = getFirestore();
-      if (fs) {
-        await fs.doc(`provider_applications/${userId}`).set({
-          uid: userId,
-          companyName: businessName,
-          city,
-          status: 'pending',
-          idCardImageUrl: (normalizedDocs || []).find((d: any) => d.type === 'id_card')?.url || null,
-          extraDocs: (normalizedDocs || []).filter((d: any) => d.type !== 'id_card').map((d: any) => d.url).filter(Boolean),
-          createdAt: Date.now(),
-        }, { merge: true });
+    // Check if application already exists
+    const existingDoc = await fs.doc(`provider_applications/${uid}`).get();
+    if (existingDoc.exists) {
+      const existingData = existingDoc.data();
+      if (existingData?.status === 'pending') {
+        log('warn', 'provider.apply.already_pending', { requestId, uid });
+        return res.status(409).json({ error: 'Application already submitted and pending review' });
       }
-    } catch {}
-    // Notify admin(s)
-    try {
-      const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
-      const adminUser = adminEmail ? await storage.getUserByEmail(adminEmail) : undefined;
-      await storage.createNotification({
-        userId: adminUser?.id || 'admin',
-        title: 'New Provider Application',
-        message: `${businessName} applied to become a provider`,
-        type: 'admin',
-        metadata: { applicantUserId: userId, city }
-      } as any);
-    } catch {}
+      if (existingData?.status === 'approved') {
+        log('warn', 'provider.apply.already_approved', { requestId, uid });
+        return res.status(409).json({ error: 'You are already an approved provider' });
+      }
+    }
 
-    // Audit row
+    // Create the application document
+    const applicationData = {
+      uid,
+      companyName,
+      nationalId,
+      idCardImageUrl,
+      extraDocs,
+      city,
+      businessType,
+      phone,
+      address,
+      status: 'pending',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    await fs.doc(`provider_applications/${uid}`).set(applicationData);
+    
+    log('info', 'provider.apply.firestore_ok', { requestId, uid });
+
+    // Also upsert into Neon providers table for consistency
+    try {
+      if (pool) {
+        await (pool as any).query(
+          `INSERT INTO providers (uid, company_name, status, created_at, updated_at)
+           VALUES ($1, $2, 'pending', NOW(), NOW())
+           ON CONFLICT (uid) DO UPDATE SET 
+             company_name = EXCLUDED.company_name,
+             status = 'pending',
+             updated_at = NOW()`,
+          [uid, companyName]
+        );
+        log('info', 'provider.apply.neon_upsert.ok', { requestId, uid });
+      }
+    } catch (e: any) {
+      log('warn', 'provider.apply.neon_upsert.fail', { 
+        requestId, 
+        uid, 
+        error: e?.message 
+      });
+      // Don't fail the whole request if Neon upsert fails
+    }
+
+    // Audit log
     await audit({
       requestId,
-      actorUid: userId,
-      actorEmail: undefined,
+      actorUid: uid,
       action: 'provider.apply',
-      targetUid: userId,
-      targetId: provider?.id,
+      targetUid: uid,
       resultCode: 'ok',
-      details: { businessName, city },
+      details: { companyName, city, businessType }
     });
 
-    res.status(201).json({
-      message: 'Provider application submitted successfully',
-      provider: {
-        id: provider.id,
-        businessName: provider.businessName,
-        approvalStatus: provider.approvalStatus,
-        city: provider.city
-      }
+    log('info', 'provider.apply.success', { requestId, uid });
+
+    res.json({ 
+      message: 'Application submitted successfully for review',
+      applicationId: uid
     });
-  } catch (error) {
-    const requestId = (req as any).requestId as string | undefined;
-    log('error', 'provider.apply.fail', { requestId });
-    res.status(500).json({ message: 'Failed to submit provider application' });
+
+  } catch (error: any) {
+    log('error', 'provider.apply.fail', { 
+      requestId, 
+      uid, 
+      error: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+
+    // Audit log for failure
+    try {
+      await audit({
+        requestId,
+        actorUid: uid,
+        action: 'provider.apply',
+        targetUid: uid,
+        resultCode: 'fail',
+        details: { error: error.message }
+      });
+    } catch (auditError) {
+      log('error', 'provider.apply.audit_fail', { 
+        requestId, 
+        uid, 
+        auditError: (auditError as any)?.message 
+      });
+    }
+
+    res.status(500).json({ 
+      error: 'Failed to submit application',
+      requestId 
+    });
   }
 });
 

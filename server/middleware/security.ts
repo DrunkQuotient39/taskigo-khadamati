@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { storage } from '../storage';
 import { log } from './log';
@@ -114,27 +114,18 @@ export const corsOptions = {
 };
 
 // Input validation middleware
-export const validate = (validations: ValidationChain[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    // Run all validations
-    for (const validation of validations) {
-      const result = await validation.run(req);
-      if (result.array().length) break;
-    }
-
+export const validate = (validations: ValidationChain[]): RequestHandler[] => [
+  ...(validations as RequestHandler[]),
+  ((req, res, next) => {
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-      return next();
+    if (!errors.isEmpty()) {
+      const extractedErrors: any[] = [];
+      errors.array().map(err => extractedErrors.push({ [err.type]: err.msg }));
+      return res.status(422).json({ errors: extractedErrors });
     }
-
-    const extractedErrors: any[] = [];
-    errors.array().map(err => extractedErrors.push({ [err.type]: err.msg }));
-
-    return res.status(422).json({
-      errors: extractedErrors,
-    });
-  };
-};
+    next();
+  }) as RequestHandler
+];
 
 // Common validation rules
 export const userValidation = {
@@ -166,7 +157,7 @@ export const reviewValidation = {
 };
 
 // Input sanitization
-export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeInput: RequestHandler = (req, res, next) => {
   // Recursively sanitize all string inputs
   const sanitize = (obj: any): any => {
     if (typeof obj === 'string') {
@@ -188,7 +179,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
 };
 
 // Request logging middleware
-export const logRequest = async (req: Request, res: Response, next: NextFunction) => {
+export const logRequest: RequestHandler = async (req, res, next) => {
   const startTime = Date.now();
   
   // Log request
@@ -227,7 +218,7 @@ export const logRequest = async (req: Request, res: Response, next: NextFunction
 };
 
 // Error handling middleware
-export const errorHandler = async (error: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler: RequestHandler = async (error: any, req, res, next) => {
   // Log error
   await storage.createSystemLog({
     level: 'error',
@@ -256,7 +247,7 @@ export const errorHandler = async (error: any, req: Request, res: Response, next
 };
 
 // Health check endpoint
-export const healthCheck = (req: Request, res: Response) => {
+export const healthCheck: RequestHandler = (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),

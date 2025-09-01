@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import admin from 'firebase-admin';
 import { storage } from '../storage';
 import { verifyToken } from './auth';
@@ -29,12 +29,7 @@ function initFirebase() {
   initialized = true;
 }
 
-export interface FirebaseAuthRequest extends Request {
-  firebaseUser?: admin.auth.DecodedIdToken;
-  user?: { id: string; email: string; role: string };
-}
-
-export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Response, next: NextFunction) {
+export const firebaseAuthenticate: RequestHandler = async (req, res, next) => {
   initFirebase();
   // Fallback path: accept admin_auth cookie (JWT) when present
   const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
@@ -50,7 +45,7 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
     if (cookieToken) {
       try {
         const decoded: any = verifyToken(cookieToken);
-        req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+        (req as any).user = { id: decoded.id, email: decoded.email, role: decoded.role };
         return next();
       } catch (e) {
         // fallthrough to 401 below if cookie invalid
@@ -65,7 +60,7 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
     console.log('Verifying Firebase token...');
     const decoded = await admin.auth().verifyIdToken(idToken);
     console.log('Firebase token verified for user:', decoded.uid);
-    req.firebaseUser = decoded;
+    (req as any).firebaseUser = decoded;
     
     // Extract user details from token
     const userId = decoded.uid;
@@ -107,7 +102,7 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
           console.warn('Failed to update admin role for user:', userId);
         }
         
-        req.user = { 
+        (req as any).user = { 
           id: existingUser.id, 
           email: existingUser.email || '', 
           role: 'admin' // Force admin role regardless of what's in the database
@@ -148,11 +143,13 @@ export async function firebaseAuthenticate(req: FirebaseAuthRequest, res: Respon
       });
     }
     
-    req.user = { id: user.id, email: user.email || '', role: user.role };
+    (req as any).user = { id: user.id, email: user.email || '', role: user.role };
     next();
   } catch (e) {
     console.error('Firebase token verification failed:', e);
     return res.status(401).json({ message: 'Invalid auth token' });
   }
-}
+};
+
+export default firebaseAuthenticate;
 

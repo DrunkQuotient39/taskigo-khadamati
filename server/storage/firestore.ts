@@ -1,12 +1,13 @@
 import admin from 'firebase-admin';
 
 export function getFirestore() {
-  try {
-    if ((admin as any)?.apps && (admin as any).apps.length > 0) {
-      return admin.firestore();
-    }
-  } catch {}
-  return null as any;
+  if (admin.apps.length > 0) {
+    return admin.firestore();
+  }
+  return null;
 }
+
+// Export the Firestore instance directly for convenience
+export const firestore = getFirestore();
 
 
