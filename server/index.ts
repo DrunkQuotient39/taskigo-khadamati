@@ -6,9 +6,9 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
-import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
+import fs from 'fs';
 import { requestId } from './middleware/requestId';
 import { log, accessLog } from './middleware/log';
 import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler';
@@ -220,24 +220,62 @@ app.use('/api/ai', aiRouter);
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   // Try multiple possible paths for the built frontend
+  // The frontend is built to dist/public relative to project root
   const possiblePaths = [
-    join(__dirname, '../client/dist'),
-    join(__dirname, '../dist/public'),
-    join(__dirname, '../../dist/public'),
-    join(__dirname, '../public')
+    join(__dirname, '../dist/public'),  // Most likely path: server/../dist/public
+    join(__dirname, '../../dist/public'), // Alternative: server/../../dist/public
+    join(__dirname, '../client/dist'),   // Legacy path
+    join(__dirname, '../public'),        // Simple public path
+    join(__dirname, '../../client/dist'), // Alternative client path
+    join(__dirname, '../../../dist/public'), // Deep alternative
+    join(__dirname, '../../../client/dist')  // Deep client alternative
   ];
   
+  // Log current directory structure for debugging
+  log('info', 'static.files.search.start', { 
+    __dirname,
+    cwd: process.cwd(),
+    searchedPaths: possiblePaths
+  });
+  
+  // List directory contents for debugging
+  try {
+    const parentDir = dirname(__dirname);
+    const grandparentDir = dirname(parentDir);
+    
+    log('info', 'static.files.debug', {
+      parentDir: parentDir,
+      grandparentDir: grandparentDir,
+      parentContents: fs.existsSync(parentDir) ? fs.readdirSync(parentDir) : 'not found',
+      grandparentContents: fs.existsSync(grandparentDir) ? fs.readdirSync(grandparentDir) : 'not found'
+    });
+  } catch (e: any) {
+    log('warn', 'static.files.debug.failed', { error: e.message });
+  }
+  
   let staticPath = null;
-  for (const path of possiblePaths) {
+  for (const searchPath of possiblePaths) {
     try {
-      const fs = require('fs');
-      if (fs.existsSync(join(path, 'index.html'))) {
-        staticPath = path;
-        log('info', 'static.files.found', { path: staticPath });
+      const indexPath = join(searchPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        staticPath = searchPath;
+        log('info', 'static.files.found', { 
+          path: staticPath,
+          indexPath: indexPath
+        });
         break;
+      } else {
+        log('debug', 'static.files.path_not_found', { 
+          path: searchPath,
+          indexPath: indexPath,
+          exists: fs.existsSync(searchPath)
+        });
       }
     } catch (e) {
-      // Continue to next path
+      log('debug', 'static.files.path_error', { 
+        path: searchPath,
+        error: e.message 
+      });
     }
   }
   
@@ -258,7 +296,9 @@ if (process.env.NODE_ENV === 'production') {
       res.status(404).json({ 
         error: 'Frontend files not found',
         message: 'The application is running but frontend files are not available',
-        searchedPaths: possiblePaths
+        searchedPaths: possiblePaths,
+        __dirname: __dirname,
+        cwd: process.cwd()
       });
     });
   }
