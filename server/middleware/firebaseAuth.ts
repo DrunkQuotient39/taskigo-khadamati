@@ -13,8 +13,21 @@ function initFirebase() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
   const storageBucket = process.env.FIREBASE_STORAGE_BUCKET; // e.g. your-project.appspot.com
 
+  console.log('Firebase initialization check:', {
+    hasProjectId: !!projectId,
+    hasClientEmail: !!clientEmail,
+    hasPrivateKey: !!privateKey,
+    hasStorageBucket: !!storageBucket,
+    projectId: projectId ? projectId.substring(0, 10) + '...' : 'missing',
+    clientEmail: clientEmail ? clientEmail.substring(0, 20) + '...' : 'missing'
+  });
+
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn('Firebase Admin not configured. Skipping Firebase auth.');
+    console.warn('Firebase Admin not configured. Missing environment variables:', {
+      missingProjectId: !projectId,
+      missingClientEmail: !clientEmail,
+      missingPrivateKey: !privateKey
+    });
     return false;
   }
 
@@ -41,9 +54,17 @@ export const firebaseAuthenticate: RequestHandler = async (req, res, next) => {
   const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
   const authHeader = req.headers.authorization;
 
+  console.log('Firebase auth middleware called:', {
+    firebaseInitialized,
+    hasCookieToken: !!cookieToken,
+    hasAuthHeader: !!authHeader,
+    authHeaderPrefix: authHeader?.substring(0, 20) + '...',
+    endpoint: req.path
+  });
+
   // If we have a Firebase Bearer token, validate it first (primary path)
   if (!firebaseInitialized && !cookieToken) {
-    console.error('Firebase auth not configured');
+    console.error('Firebase auth not configured - missing environment variables');
     return res.status(401).json({ message: 'Auth not configured' });
   }
 

@@ -189,6 +189,47 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
   }
 });
 
+// Debug endpoint to check Firebase configuration
+router.get('/debug-firebase', async (req, res) => {
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+  
+  // Test Firebase initialization
+  let firebaseTest = 'not attempted';
+  try {
+    const admin = require('firebase-admin');
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey: privateKey?.replace(/\\n/g, '\n')
+        }),
+        storageBucket
+      });
+    }
+    firebaseTest = 'success';
+  } catch (error) {
+    firebaseTest = `error: ${error.message}`;
+  }
+  
+  res.json({
+    hasProjectId: !!projectId,
+    hasClientEmail: !!clientEmail,
+    hasPrivateKey: !!privateKey,
+    hasStorageBucket: !!storageBucket,
+    projectId: projectId ? projectId.substring(0, 10) + '...' : 'missing',
+    clientEmail: clientEmail ? clientEmail.substring(0, 20) + '...' : 'missing',
+    privateKeyLength: privateKey ? privateKey.length : 0,
+    privateKeyStart: privateKey ? privateKey.substring(0, 50) + '...' : 'missing',
+    privateKeyEnd: privateKey ? '...' + privateKey.substring(privateKey.length - 50) : 'missing',
+    storageBucket: storageBucket || 'missing',
+    firebaseTest
+  });
+});
+
 // Firebase-backed: current user profile
 router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
   try {
