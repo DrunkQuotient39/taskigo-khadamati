@@ -10,7 +10,7 @@ let poolInstance: Pool | null = null;
 let dbInstance: ReturnType<typeof drizzle> | null = null;
 
 if (!process.env.DATABASE_URL) {
-  console.warn("DATABASE_URL not set. Falling back to in-memory storage. Database features will be disabled.");
+  console.log("ℹ️  Using in-memory storage (DATABASE_URL not set)");
 } else {
   poolInstance = new Pool({ connectionString: process.env.DATABASE_URL });
   dbInstance = drizzle({ client: poolInstance as any, schema });
