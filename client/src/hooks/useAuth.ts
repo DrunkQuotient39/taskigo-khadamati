@@ -63,46 +63,29 @@ export function useAuth() {
         
         // Make API request with detailed logging
         if (DEBUG) console.log('Making API request to /api/auth/me-firebase');
-        const { data } = await api.get('/api/auth/me-firebase', {
+        const response = await api.get('/api/auth/me-firebase', {
           headers: {
             'Cache-Control': 'no-cache',
             'X-Is-Admin-Email': isAdminEmail ? 'true' : 'false'
           }
         });
-        // Simulate response for compatibility
-        const res = { ok: true, status: 200, headers: new Headers() };
         
-        if (DEBUG) console.log('API response status:', res.status);
-        const xAction = res.headers.get('X-Action');
-        if (xAction === 'claims-updated' && auth.currentUser) {
+        if (DEBUG) console.log('API response:', response);
+        
+        if (response.actionHeader === 'claims-updated' && auth.currentUser) {
           if (DEBUG) console.log('Claims updated header detected, refreshing ID token');
           try { await auth.currentUser.getIdToken(true); } catch (e) { if (DEBUG) console.error('ID token refresh failed', e); }
         }
         
-        if (!res.ok) {
-          if (res.status === 401) {
-            if (DEBUG) console.log('Unauthorized (401) response from API');
-            // For admin user, log more details
-            if (isAdminEmail) {
-              if (DEBUG) console.error('Admin authentication failed with 401. This may indicate the admin role is not properly set in the backend.');
-            }
-            return null;
-          }
-          throw new Error(`API error: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        if (DEBUG) console.log('API response:', data);
-        
-        if (data && data.user) {
-          if (DEBUG) console.log('User data received:', data.user);
-          return data.user;
-        } else if (data && typeof data === 'object' && 'id' in data) {
+        if (response.data && response.data.user) {
+          if (DEBUG) console.log('User data received:', response.data.user);
+          return response.data.user;
+        } else if (response.data && typeof response.data === 'object' && 'id' in response.data) {
           // Handle case where user data is directly in the response
-          if (DEBUG) console.log('Direct user data received:', data);
-          return data;
+          if (DEBUG) console.log('Direct user data received:', response.data);
+          return response.data;
         } else {
-          if (DEBUG) console.log('No user data in response:', data);
+          if (DEBUG) console.log('No user data in response:', response.data);
           return null;
         }
       } catch (error) {
@@ -165,55 +148,40 @@ export function useAuth() {
         const url = `/api/auth/me-firebase?_t=${timestamp}`;
         if (DEBUG) console.log('Making refresh API request to', url);
         
-        const { data } = await api.get(url, {
+        const response = await api.get(url, {
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'X-Is-Admin-Email': isAdminEmail ? 'true' : 'false'
           }
         });
-        // Simulate response for compatibility
-        const res = { ok: true, status: 200, headers: new Headers() };
         
-        if (DEBUG) console.log('API refresh response status:', res.status);
-        const xAction = res.headers.get('X-Action');
-        if (xAction === 'claims-updated' && auth.currentUser) {
+        if (DEBUG) console.log('API refresh response:', response);
+        
+        if (response.actionHeader === 'claims-updated' && auth.currentUser) {
           if (DEBUG) console.log('Claims updated header detected (refresh), refreshing ID token');
           try { await auth.currentUser.getIdToken(true); } catch (e) { if (DEBUG) console.error('ID token refresh failed (refresh)', e); }
         }
         
-        if (!res.ok) {
-          if (res.status === 401) {
-            if (DEBUG) console.log('Unauthorized (401) response from API during refresh');
-            // For admin user, log more details
-            if (isAdminEmail) {
-              if (DEBUG) console.error('Admin refresh authentication failed with 401. This may indicate the admin role is not properly set.');
-              
-              // For admin users, we'll try to recover by logging the current token claims
-              try {
-                const decodedToken = JSON.parse(atob(idToken.split('.')[1]));
-                if (DEBUG) console.log('Token payload for debugging:', decodedToken);
-              } catch (e) {
-                if (DEBUG) console.error('Could not decode token for debugging:', e);
-              }
-            }
-            return null;
+        // For admin users, log token claims for debugging
+        if (isAdminEmail && !response.data) {
+          try {
+            const decodedToken = JSON.parse(atob(idToken.split('.')[1]));
+            if (DEBUG) console.log('Token payload for debugging:', decodedToken);
+          } catch (e) {
+            if (DEBUG) console.error('Could not decode token for debugging:', e);
           }
-          throw new Error(`API error during refresh: ${res.status}`);
         }
         
-        const data = await res.json();
-        if (DEBUG) console.log('API refresh response data:', data);
-        
-        if (data && data.user) {
-          if (DEBUG) console.log('User data received from refresh:', data.user);
-          return data.user;
-        } else if (data && typeof data === 'object' && 'id' in data) {
+        if (response.data && response.data.user) {
+          if (DEBUG) console.log('User data received from refresh:', response.data.user);
+          return response.data.user;
+        } else if (response.data && typeof response.data === 'object' && 'id' in response.data) {
           // Handle case where user data is directly in the response
-          if (DEBUG) console.log('Direct user data received from refresh:', data);
-          return data;
+          if (DEBUG) console.log('Direct user data received from refresh:', response.data);
+          return response.data;
         } else {
-          if (DEBUG) console.log('No user data in refresh response:', data);
+          if (DEBUG) console.log('No user data in refresh response:', response.data);
           return null;
         }
       } catch (error) {
