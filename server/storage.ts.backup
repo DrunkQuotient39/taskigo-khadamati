@@ -1234,6 +1234,34 @@ export class MemStorage implements IStorage {
   async deleteServiceImage(id: number): Promise<void> {
     this.serviceImages.delete(id);
   }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    return this.bookings.get(id);
+  }
+}
+
+
+
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  // User management - Updated for Replit Auth
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: insertUser.id || crypto.randomUUID(),
+        email: insertUser.email || null,
+        firstName: insertUser.firstName || null,
         lastName: insertUser.lastName || null,
         profileImageUrl: insertUser.profileImageUrl || null,
         role: insertUser.role || 'client',
@@ -1365,7 +1393,10 @@ export class MemStorage implements IStorage {
     return await db.select().from(bookings).orderBy(desc(bookings.createdAt));
   }
 
-
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking || undefined;
+  }
 
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const [booking] = await db
@@ -1476,7 +1507,11 @@ export class MemStorage implements IStorage {
   }
 
   // AI-related methods for DatabaseStorage
-
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return await db.select().from(chatConversations)
+      .where(eq(chatConversations.userId, userId))
+      .orderBy(desc(chatConversations.updatedAt));
+  }
 
   async getChatConversation(id: number): Promise<ChatConversation | undefined> {
     const [conversation] = await db.select().from(chatConversations)
@@ -1809,6 +1844,11 @@ export class MemStorage implements IStorage {
       .where(eq(serviceImages.id, id));
   }
 
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings)
+      .where(eq(bookings.id, id));
+    return booking || undefined;
+  }
 
   async getChatConversations(userId: string): Promise<ChatConversation[]> {
     return await db.select().from(chatConversations)

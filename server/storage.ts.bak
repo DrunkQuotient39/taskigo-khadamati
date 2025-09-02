@@ -1234,6 +1234,14 @@ export class MemStorage implements IStorage {
   async deleteServiceImage(id: number): Promise<void> {
     this.serviceImages.delete(id);
   }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: insertUser.id || crypto.randomUUID(),
+        email: insertUser.email || null,
+        firstName: insertUser.firstName || null,
         lastName: insertUser.lastName || null,
         profileImageUrl: insertUser.profileImageUrl || null,
         role: insertUser.role || 'client',
