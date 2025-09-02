@@ -219,11 +219,49 @@ app.use('/api/ai', aiRouter);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(join(__dirname, '../client/dist')));
+  // Try multiple possible paths for the built frontend
+  const possiblePaths = [
+    join(__dirname, '../client/dist'),
+    join(__dirname, '../dist/public'),
+    join(__dirname, '../../dist/public'),
+    join(__dirname, '../public')
+  ];
   
-  app.get('*', (req, res) => {
-    res.sendFile(join(__dirname, '../client/dist/index.html'));
-  });
+  let staticPath = null;
+  for (const path of possiblePaths) {
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(join(path, 'index.html'))) {
+        staticPath = path;
+        log('info', 'static.files.found', { path: staticPath });
+        break;
+      }
+    } catch (e) {
+      // Continue to next path
+    }
+  }
+  
+  if (staticPath) {
+    app.use(express.static(staticPath));
+    
+    app.get('*', (req, res) => {
+      res.sendFile(join(staticPath, 'index.html'));
+    });
+  } else {
+    log('warn', 'static.files.not_found', { 
+      searchedPaths: possiblePaths,
+      message: 'No frontend files found in any expected location'
+    });
+    
+    // Fallback: serve a simple message if no static files found
+    app.get('*', (req, res) => {
+      res.status(404).json({ 
+        error: 'Frontend files not found',
+        message: 'The application is running but frontend files are not available',
+        searchedPaths: possiblePaths
+      });
+    });
+  }
 }
 
 // Error handling
