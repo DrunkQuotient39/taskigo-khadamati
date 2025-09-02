@@ -199,13 +199,22 @@ router.get('/debug-firebase', async (req, res) => {
   // Test Firebase initialization
   let firebaseTest = 'not attempted';
   try {
-    const admin = require('firebase-admin');
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
+    const admin = await import('firebase-admin');
+    if (!admin.default.apps.length) {
+      // Clean up the private key
+      let cleanPrivateKey = privateKey;
+      if (cleanPrivateKey) {
+        // Remove surrounding quotes if present
+        cleanPrivateKey = cleanPrivateKey.replace(/^"(.*)"$/, '$1');
+        // Convert literal \n to actual newlines
+        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n');
+      }
+      
+      admin.default.initializeApp({
+        credential: admin.default.credential.cert({
           projectId,
           clientEmail,
-          privateKey: privateKey?.replace(/\\n/g, '\n')
+          privateKey: cleanPrivateKey
         }),
         storageBucket
       });

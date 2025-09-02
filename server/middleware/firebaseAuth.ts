@@ -10,7 +10,14 @@ function initFirebase() {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   // Render/Firebase keys often use literal \n sequences; convert them to real newlines
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  // Also handle cases where the private key is wrapped in quotes
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  if (privateKey) {
+    // Remove surrounding quotes if present
+    privateKey = privateKey.replace(/^"(.*)"$/, '$1');
+    // Convert literal \n to actual newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
   const storageBucket = process.env.FIREBASE_STORAGE_BUCKET; // e.g. your-project.appspot.com
 
   console.log('Firebase initialization check:', {
