@@ -6,7 +6,7 @@ import { verifyToken } from './auth';
 // Initialize Firebase Admin once
 let initialized = false;
 function initFirebase() {
-  if (initialized) return;
+  if (initialized) return true;
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   // Render/Firebase keys often use literal \n sequences; convert them to real newlines
@@ -15,28 +15,34 @@ function initFirebase() {
 
   if (!projectId || !clientEmail || !privateKey) {
     console.warn('Firebase Admin not configured. Skipping Firebase auth.');
-    return;
+    return false;
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
-    ...(storageBucket ? { storageBucket } : {}),
-  });
-  initialized = true;
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+      ...(storageBucket ? { storageBucket } : {}),
+    });
+    initialized = true;
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error);
+    return false;
+  }
 }
 
 export const firebaseAuthenticate: RequestHandler = async (req, res, next) => {
-  initFirebase();
+  const firebaseInitialized = initFirebase();
   // Fallback path: accept admin_auth cookie (JWT) when present
   const cookieToken = (req as any)?.cookies?.admin_auth as string | undefined;
   const authHeader = req.headers.authorization;
 
   // If we have a Firebase Bearer token, validate it first (primary path)
-  if (!initialized && !cookieToken) {
+  if (!firebaseInitialized && !cookieToken) {
     console.error('Firebase auth not configured');
     return res.status(401).json({ message: 'Auth not configured' });
   }
@@ -57,6 +63,11 @@ export const firebaseAuthenticate: RequestHandler = async (req, res, next) => {
 
   const idToken = authHeader.split(' ')[1];
   try {
+    if (!firebaseInitialized) {
+      console.error('Firebase not initialized, cannot verify token');
+      return res.status(401).json({ message: 'Firebase not configured' });
+    }
+    
     console.log('Verifying Firebase token...');
     const decoded = await admin.auth().verifyIdToken(idToken);
     console.log('Firebase token verified for user:', decoded.uid);
