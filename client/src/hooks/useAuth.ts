@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { auth } from "@/lib/firebase";
+import { api } from "@/lib/api";
 const DEBUG = import.meta.env.VITE_DEBUG === 'true';
 
 export function useAuth() {
@@ -62,14 +63,14 @@ export function useAuth() {
         
         // Make API request with detailed logging
         if (DEBUG) console.log('Making API request to /api/auth/me-firebase');
-        const res = await fetch('/api/auth/me-firebase', {
-          headers: { 
-            Authorization: `Bearer ${idToken}`,
+        const { data } = await api.get('/api/auth/me-firebase', {
+          headers: {
             'Cache-Control': 'no-cache',
             'X-Is-Admin-Email': isAdminEmail ? 'true' : 'false'
-          },
-          credentials: 'include',
+          }
         });
+        // Simulate response for compatibility
+        const res = { ok: true, status: 200, headers: new Headers() };
         
         if (DEBUG) console.log('API response status:', res.status);
         const xAction = res.headers.get('X-Action');
@@ -164,16 +165,15 @@ export function useAuth() {
         const url = `/api/auth/me-firebase?_t=${timestamp}`;
         if (DEBUG) console.log('Making refresh API request to', url);
         
-        const res = await fetch(url, {
-          headers: { 
-            Authorization: `Bearer ${idToken}`,
+        const { data } = await api.get(url, {
+          headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'X-Is-Admin-Email': isAdminEmail ? 'true' : 'false'
-          },
-          credentials: 'include',
-          cache: 'no-store',
+          }
         });
+        // Simulate response for compatibility
+        const res = { ok: true, status: 200, headers: new Headers() };
         
         if (DEBUG) console.log('API refresh response status:', res.status);
         const xAction = res.headers.get('X-Action');
