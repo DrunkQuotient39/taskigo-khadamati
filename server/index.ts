@@ -9,23 +9,18 @@ import { config } from 'dotenv';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { requestId } from './middleware/requestId.js';
-import { log, accessLog } from './middleware/log.js';
-import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler.js';
-import { ensureAuditLogTable, ensureProvidersTable } from './db/ensureSchema.js';
-import { getFirestore } from './storage/firestore.js';
+import { requestId } from './middleware/requestId';
+import { log, accessLog } from './middleware/log';
+import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler';
+import { ensureAuditLogTable, ensureProvidersTable } from './db/ensureSchema';
+import { getFirestore } from './storage/firestore';
 import admin from 'firebase-admin';
 
 // Load environment variables
 config();
 
-// Environment validation
+// Environment validation - make optional for development
 const requiredEnvVars = [
-  'DATABASE_URL',
-  'FIREBASE_PROJECT_ID', 
-  'FIREBASE_CLIENT_EMAIL',
-  'FIREBASE_PRIVATE_KEY',
-  'FIREBASE_STORAGE_BUCKET',
   'ADMIN_EMAIL'
 ];
 
@@ -38,9 +33,14 @@ if (missingVars.length > 0) {
   process.exit(1);
 }
 
-// Validate Firebase private key format
+// Set defaults for development
+if (!process.env.ADMIN_EMAIL) {
+  process.env.ADMIN_EMAIL = 'admin@taskigo.com';
+}
+
+// Validate Firebase private key format only if provided
 const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-if (!privateKey || !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+if (privateKey && !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
   log('error', 'startup.env.fail', { 
     message: 'FIREBASE_PRIVATE_KEY must be properly formatted with newlines'
   });
@@ -49,56 +49,63 @@ if (!privateKey || !privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
 
 log('info', 'startup.env.ok', {});
 
-// Firebase Admin initialization
-try {
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n')
-      }),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-    });
-  }
-  
-  // Test Firebase Admin connectivity
-  const firestore = getFirestore();
-  if (firestore) {
-    // Lightweight health check - try to list collections
-    try {
-      firestore.listCollections().then(() => {
-        log('info', 'firebase.admin.ok', {});
-      }).catch((err: any) => {
-        throw new Error('Firestore health check failed: ' + (err?.message || err));
+// Firebase Admin initialization (optional for development)
+if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+  try {
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+        }),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
       });
-    } catch (err: any) {
-      throw new Error('Firestore health check failed: ' + (err?.message || err));
     }
-  } else {
-    throw new Error('Firestore not available');
-  }
-} catch (error: any) {
-  log('error', 'firebase.admin.fail', { 
-    error: error.message,
-    code: error.code 
-  });
-  process.exit(1);
-}
-
-// Database schema validation
-ensureAuditLogTable()
-  .then(() => ensureProvidersTable())
-  .then(() => {
-    log('info', 'startup.schema.ok', {});
-  })
-  .catch((error: any) => {
-    log('error', 'startup.schema.fail', { 
+    
+    // Test Firebase Admin connectivity
+    const firestore = getFirestore();
+    if (firestore) {
+      // Lightweight health check - try to list collections
+      try {
+        firestore.listCollections().then(() => {
+          log('info', 'firebase.admin.ok', {});
+        }).catch((err: any) => {
+          log('warn', 'firebase.admin.health_check_fail', { error: err?.message || err });
+        });
+      } catch (err: any) {
+        log('warn', 'firebase.admin.health_check_fail', { error: err?.message || err });
+      }
+    } else {
+      log('warn', 'firebase.admin.firestore_unavailable', {});
+    }
+  } catch (error: any) {
+    log('warn', 'firebase.admin.fail', { 
       error: error.message,
       code: error.code 
     });
-    process.exit(1);
-  });
+  }
+} else {
+  log('info', 'firebase.admin.skipped', { message: 'Firebase credentials not provided, using in-memory storage' });
+}
+
+// Database schema validation (optional for development)
+if (process.env.DATABASE_URL) {
+  ensureAuditLogTable()
+    .then(() => ensureProvidersTable())
+    .then(() => {
+      log('info', 'startup.schema.ok', {});
+    })
+    .catch((error: any) => {
+      log('error', 'startup.schema.fail', { 
+        error: error.message,
+        code: error.code 
+      });
+      process.exit(1);
+    });
+} else {
+  log('info', 'startup.schema.skipped', { message: 'DATABASE_URL not provided, using in-memory storage' });
+}
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -264,7 +271,7 @@ process.on('SIGTERM', async () => {
   log('info', 'process.shutdown.start', { signal: 'SIGTERM' });
   
   try {
-    const { flush } = await import('./middleware/ndjsonExport.js');
+    const { flush } = await import('./middleware/ndjsonExport');
     await flush();
   } catch {}
   

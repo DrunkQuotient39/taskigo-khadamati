@@ -2,6 +2,11 @@ import { pool } from '../db';
 import { log } from '../middleware/log';
 
 export async function ensureProvidersTable() {
+  if (!pool) {
+    log('info', 'db.providers_table.skipped', { message: 'Database pool not available' });
+    return;
+  }
+  
   try {
     // 1) Create if missing with minimal required columns
     await (pool as any).query(`
@@ -31,6 +36,11 @@ export async function ensureProvidersTable() {
 }
 
 export async function ensureAuditLogTable() {
+  if (!pool) {
+    log('info', 'db.audit_log_table.skipped', { message: 'Database pool not available' });
+    return;
+  }
+  
   try {
     await (pool as any).query(`
       CREATE TABLE IF NOT EXISTS audit_log (
