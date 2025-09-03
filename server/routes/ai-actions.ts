@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { processAIAction, AIActionRequest } from '../ai-actions';
 import { storage } from '../storage';
-import { AuthRequest } from '../middleware/auth';
+// Using any for request since AuthRequest type is not exported
 
 const router = Router();
 
@@ -82,7 +82,7 @@ router.use(firebaseAuthenticate as any);
  * Get user's bookings for AI assistant
  * This helps the AI provide information about the user's bookings
  */
-router.get('/bookings', async (req: AuthRequest, res) => {
+router.get('/bookings', async (req: any, res) => {
   try {
     const userId = req.user!.id;
     const bookings = await storage.getClientBookings(userId);

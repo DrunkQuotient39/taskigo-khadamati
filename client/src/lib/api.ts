@@ -10,7 +10,10 @@ class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || '';
+    // Vite exposes import.meta.env at build/runtime; during TS check, allow string fallback
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env: any = (import.meta as any).env || {};
+    this.baseUrl = env.VITE_API_URL || '';
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {

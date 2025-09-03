@@ -34,11 +34,11 @@ function ensureDevLogFile(): string | null {
 }
 
 export function log(level: LogLevel, message: string, extra: Record<string, unknown> = {}) {
-  const line = {
+  const line: Record<string, unknown> = {
     ts: new Date().toISOString(),
     level,
     message,
-    ...redact(extra),
+    ...(typeof extra === 'object' && extra !== null ? redact(extra) as object : {}),
   } as Record<string, unknown>;
 
   const json = JSON.stringify(line);

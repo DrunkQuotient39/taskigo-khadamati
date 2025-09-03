@@ -15,6 +15,7 @@ import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler';
 import { ensureAuditLogTable, ensureProvidersTable } from './db/ensureSchema';
 import { getFirestore } from './storage/firestore';
 import admin from 'firebase-admin';
+import { setupVite } from './vite';
 
 // Load environment variables
 config();
@@ -259,6 +260,17 @@ app.use('/api/providers', providersRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/ai', aiRouter);
+
+// In development, mount Vite middleware to serve the client app
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    await setupVite(app, server);
+    log('info', 'vite.setup.ok', {});
+  } catch (e: any) {
+    log('error', 'vite.setup.fail', { error: e?.message || e });
+    process.exit(1);
+  }
+}
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
