@@ -203,10 +203,13 @@ export class WebSocketService {
         // Create message in database
         const message = await storage.createChatMessage({
           conversationId: data.conversationId,
-          senderId: socket.userId!,
-          message: data.message,
-          messageType: data.type || 'text',
-          isRead: false
+          role: 'user',
+          content: data.message,
+          metadata: { 
+            userId: socket.userId!,
+            messageType: data.type || 'text',
+            isRead: false
+          }
         });
 
         // Broadcast to conversation room
@@ -220,7 +223,6 @@ export class WebSocketService {
 
         // Update conversation last activity
         await storage.updateChatConversation(data.conversationId, {
-          lastMessageAt: new Date(),
           isActive: true
         });
 
@@ -233,7 +235,10 @@ export class WebSocketService {
     socket.on('chat:mark_read', async (data: { conversationId: number }) => {
       try {
         const messages = await storage.getChatMessages(data.conversationId);
-        const unreadMessages = messages.filter(m => !m.isRead && m.senderId !== socket.userId);
+        const unreadMessages = messages.filter(m => {
+          const metadata = m.metadata as any;
+          return !metadata?.isRead && metadata?.userId !== socket.userId;
+        });
         
         // Mark messages as read (would need to add this method to storage)
         // await storage.markChatMessagesRead(data.conversationId, socket.userId!);

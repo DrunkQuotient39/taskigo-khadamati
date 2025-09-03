@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { ensureServiceAnalytics, recordServiceView, getServiceAnalytics, getServiceAnalyticsByDateRange } from '../analytics';
-import { authorize, optionalAuth, AuthRequest } from '../middleware/auth';
+import authorize, { optionalAuth, AuthRequest } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, serviceValidation } from '../middleware/security';
 import { body } from 'express-validator';
@@ -69,7 +69,7 @@ router.post('/create', firebaseAuthenticate as any, authorize('provider'), valid
   serviceValidation.description,
   serviceValidation.price,
   serviceValidation.categoryId
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
     
@@ -122,7 +122,7 @@ router.post('/create', firebaseAuthenticate as any, authorize('provider'), valid
 
     // Update provider service count
     await storage.updateProvider(provider.id, {
-      serviceCount: provider.serviceCount + 1
+      serviceCount: (provider.serviceCount || 0) + 1
     });
 
     // Log service creation
@@ -223,7 +223,7 @@ router.get('/:id/analytics', optionalAuth, async (req: AuthRequest, res) => {
 router.post('/:id/reviews', firebaseAuthenticate as any, validate([
   body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be 1-5'),
   body('comment').trim().isLength({ min: 5, max: 1000 }).withMessage('Comment must be 5-1000 characters')
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
     const serviceId = parseInt(req.params.id);
@@ -251,7 +251,7 @@ router.put('/:id', firebaseAuthenticate as any, authorize('provider'), validate(
   body('title').optional().trim().isLength({ min: 5, max: 100 }),
   body('description').optional().trim().isLength({ min: 20, max: 1000 }),
   body('price').optional().isDecimal({ decimal_digits: '0,2' }),
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
     const serviceId = parseInt(req.params.id);
@@ -334,9 +334,9 @@ router.delete('/:id', firebaseAuthenticate as any, authorize('provider'), async 
 
     // Update provider service count
     const provider = await storage.getProvider(userId);
-    if (provider && provider.serviceCount > 0) {
+    if (provider && (provider.serviceCount || 0) > 0) {
       await storage.updateProvider(provider.id, {
-        serviceCount: provider.serviceCount - 1
+        serviceCount: (provider.serviceCount || 0) - 1
       });
     }
 
@@ -364,7 +364,7 @@ router.post('/:id/images', firebaseAuthenticate as any, authorize('provider'), v
   body('imageUrl').isURL().withMessage('Valid image URL required'),
   body('alt').optional().trim(),
   body('isPrimary').optional().isBoolean()
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
     const serviceId = parseInt(req.params.id);

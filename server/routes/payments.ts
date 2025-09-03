@@ -25,7 +25,7 @@ router.post('/create-stripe-session', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('successUrl').isURL().withMessage('Valid success URL required'),
   body('cancelUrl').isURL().withMessage('Valid cancel URL required'),
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     if (!stripe) {
       return res.status(500).json({ message: 'Stripe not configured. Please add STRIPE_SECRET_KEY.' });
@@ -135,7 +135,7 @@ router.post('/process', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('amount').isString().withMessage('Amount required'),
   body('paymentMethod').isIn(['card', 'apple_pay']).withMessage('Valid payment method required'),
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { bookingId, amount, paymentMethod, cardDetails } = req.body;
     const userId = req.user!.id;
@@ -281,7 +281,7 @@ router.get('/history', async (req: any, res) => {
 router.post('/refund', validate([
   body('paymentId').isInt({ min: 1 }).withMessage('Valid payment ID required'),
   body('reason').trim().isLength({ min: 10, max: 500 }).withMessage('Refund reason must be 10-500 characters'),
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { paymentId, reason } = req.body;
     const userId = req.user!.id;
@@ -321,7 +321,7 @@ router.post('/refund', validate([
     });
 
     // Adjust provider wallet balance
-    const providerAmount = parseFloat(payment.metadata?.providerAmount || '0');
+    const providerAmount = parseFloat((payment.metadata as any)?.providerAmount || '0');
     if (providerAmount > 0) {
       await storage.updateWalletBalance(payment.providerId, -providerAmount);
     }
@@ -390,7 +390,7 @@ router.post('/apple-pay/session', async (req: any, res) => {
 router.post('/apple-pay/process', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('amount').isString().withMessage('Amount required'),
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { bookingId, amount } = req.body;
     const userId = req.user!.id;

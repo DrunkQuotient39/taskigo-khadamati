@@ -3,6 +3,15 @@ import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { storage } from '../storage';
 
+// Define AuthRequest interface
+export interface AuthRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
 
 // JWT token generation

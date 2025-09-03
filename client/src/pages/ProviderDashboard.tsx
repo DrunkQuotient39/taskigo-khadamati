@@ -225,14 +225,14 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentBookings?.map((booking) => (
+                    {recentBookings?.map((booking: any) => (
                       <TableRow key={booking.id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-8 w-8">
                               <AvatarImage src={booking.clientAvatar} alt={booking.clientName} />
                               <AvatarFallback>
-                                {booking.clientName.split(' ').map(n => n[0]).join('')}
+                                {booking.clientName.split(' ').map((n: string) => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                             <span className="font-medium">{booking.clientName}</span>
@@ -271,7 +271,7 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {services?.map((service) => (
+                {services?.map((service: any) => (
                   <Card key={service.id} className="border border-gray-200">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">

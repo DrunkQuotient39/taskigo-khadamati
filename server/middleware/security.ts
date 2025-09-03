@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler, ErrorRequestHandler } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { storage } from '../storage';
 import { log } from './log';
@@ -98,7 +98,7 @@ export const corsOptions = {
       if (typeof allowed === 'string') {
         return origin === allowed;
       }
-      return allowed.test(origin);
+      return allowed && typeof allowed.test === 'function' ? allowed.test(origin) : false;
     });
     
     if (isAllowed) {
@@ -218,7 +218,7 @@ export const logRequest: RequestHandler = async (req, res, next) => {
 };
 
 // Error handling middleware
-export const errorHandler: RequestHandler = async (error: any, req, res, next) => {
+export const errorHandler: ErrorRequestHandler = async (error: any, req: Request, res: Response, next: NextFunction) => {
   // Log error
   await storage.createSystemLog({
     level: 'error',

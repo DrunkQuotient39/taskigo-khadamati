@@ -1,12 +1,22 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { aiService } from '../ai';
-import { optionalAuth } from '../middleware/auth';
+import { optionalAuth, AuthRequest } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, aiLimiter } from '../middleware/security';
 import { body } from 'express-validator';
 
 const router = Router();
+
+// Helper function for calculating daily trends
+function calculateDailyTrends(logs: any[], startDate: Date) {
+  const trends: { [key: string]: number } = {};
+  logs.forEach(log => {
+    const date = new Date(log.timestamp || 0).toISOString().split('T')[0];
+    trends[date] = (trends[date] || 0) + 1;
+  });
+  return trends;
+}
 
 // Apply AI rate limiting to all routes
 router.use(aiLimiter);
@@ -16,7 +26,7 @@ router.post('/chat', optionalAuth, validate([
   body('message').trim().isLength({ min: 1, max: 1000 }).withMessage('Message must be 1-1000 characters'),
   body('language').optional().isIn(['en', 'ar']).withMessage('Language must be en or ar'),
   body('conversationHistory').optional().isArray()
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { message, language = 'en', conversationHistory = [] } = req.body;
     const userId = req.user?.id || 'anonymous';
@@ -71,7 +81,7 @@ router.post('/recommend', optionalAuth, validate([
   body('budget').optional().isDecimal(),
   body('category').optional().trim(),
   body('preferences').optional().isObject()
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { query, location, budget, category, preferences = {} } = req.body;
     const userId = req.user?.id || 'anonymous';
@@ -135,7 +145,7 @@ router.post('/sentiment', firebaseAuthenticate as any, validate([
   body('text').trim().isLength({ min: 5, max: 2000 }).withMessage('Text must be 5-2000 characters'),
   body('referenceType').optional().isIn(['review', 'message', 'feedback']),
   body('referenceId').optional().isInt({ min: 1 })
-]), async (req: any, res) => {
+]), async (req: any, res: any) => {
   try {
     const { text, referenceType, referenceId } = req.body;
     
@@ -180,7 +190,7 @@ router.post('/price-suggest', firebaseAuthenticate as any, validate([
   body('location').trim().notEmpty().withMessage('Location is required'),
   body('duration').isInt({ min: 15, max: 480 }).withMessage('Duration must be 15-480 minutes'),
   body('description').optional().trim().isLength({ max: 500 })
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const { serviceType, location, duration, description } = req.body;
     
@@ -241,7 +251,7 @@ router.post('/action', firebaseAuthenticate as any, validate([
   body('context').optional().isObject(),
   body('confirm').optional().isBoolean(),
   body('bookingId').optional().isInt({ min: 1 })
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res: any) => {
   try {
     const { intent, query, context = {}, confirm = false, bookingId } = req.body;
     const userId = req.user!.id;
@@ -257,7 +267,7 @@ router.post('/action', firebaseAuthenticate as any, validate([
         let chosenServiceId = context.serviceId as number | undefined;
         if (!chosenServiceId && parsed.serviceType) {
           const svc = (await storage.getServices({ category: parsed.serviceType }))
-            .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))[0];
+            .sort((a, b) => parseFloat(b.rating || '0') - parseFloat(a.rating || '0'))[0];
           if (svc) chosenServiceId = svc.id;
         }
 
@@ -432,7 +442,7 @@ router.get('/history', firebaseAuthenticate as any, async (req: AuthRequest, res
     const startIndex = parseInt(offset as string);
     const limitNum = parseInt(limit as string);
     const paginatedLogs = logs
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime())
       .slice(startIndex, startIndex + limitNum);
 
     res.json({
@@ -470,7 +480,7 @@ router.get('/analytics', firebaseAuthenticate as any, async (req: AuthRequest, r
     }
 
     const logs = await storage.getAiLogs();
-    const periodLogs = logs.filter(log => new Date(log.timestamp) >= startDate);
+    const periodLogs = logs.filter(log => new Date(log.timestamp || 0) >= startDate);
 
     // Calculate analytics
     const totalQueries = periodLogs.length;
@@ -503,7 +513,7 @@ router.get('/analytics', firebaseAuthenticate as any, async (req: AuthRequest, r
         intents: intentBreakdown,
         languages: languageBreakdown
       },
-      trends: this.calculateDailyTrends(periodLogs, startDate)
+      trends: calculateDailyTrends(periodLogs, startDate)
     });
   } catch (error) {
     console.error('AI analytics error:', error);
@@ -511,31 +521,6 @@ router.get('/analytics', firebaseAuthenticate as any, async (req: AuthRequest, r
   }
 });
 
-// Helper method for calculating daily trends
-function calculateDailyTrends(logs: any[], startDate: Date) {
-  const dailyStats: Record<string, { queries: number; users: Set<string> }> = {};
-  const days = Math.ceil((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  
-  for (let i = 0; i < days; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().split('T')[0];
-    dailyStats[dateStr] = { queries: 0, users: new Set() };
-  }
-
-  logs.forEach(log => {
-    const date = new Date(log.timestamp).toISOString().split('T')[0];
-    if (dailyStats[date]) {
-      dailyStats[date].queries++;
-      if (log.userId) dailyStats[date].users.add(log.userId);
-    }
-  });
-
-  return Object.entries(dailyStats).map(([date, stats]) => ({
-    date,
-    queries: stats.queries,
-    uniqueUsers: stats.users.size
-  }));
-}
+// Removed duplicate function definition
 
 export default router;

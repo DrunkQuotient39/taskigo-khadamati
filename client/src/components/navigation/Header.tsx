@@ -9,11 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import { useAuth } from '@/hooks/useAuth';
 import { auth } from '@/lib/firebase';
+import { Messages, t } from '@/lib/i18n';
 
 interface HeaderProps {
   currentLanguage: string;
   onLanguageChange: (lang: 'en' | 'ar') => void;
-  messages: any;
+  messages: Messages;
 }
 
 export default function Header({ currentLanguage, onLanguageChange, messages }: HeaderProps) {
@@ -60,10 +61,10 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   });
 
   const navItems = [
-    { href: '/', label: messages.nav?.home || 'Home' },
-    { href: '/services', label: messages.nav?.services || 'Services' },
-    { href: '/about', label: messages.nav?.about || 'About' },
-    { href: '/contact', label: messages.nav?.contact || 'Contact' },
+    { href: '/', label: t('nav.home', messages, 'Home') },
+    { href: '/services', label: t('nav.services', messages, 'Services') },
+    { href: '/about', label: t('nav.about', messages, 'About') },
+    { href: '/contact', label: t('nav.contact', messages, 'Contact') },
   ];
 
   const isActive = (href: string) => {
@@ -127,11 +128,11 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-72" align="end">
                   <div className="flex flex-col p-2">
-                    <div className="font-medium text-sm mb-2 px-2">{messages.notifications?.title || 'Notifications'}</div>
+                    <div className="font-medium text-sm mb-2 px-2">{t('notifications.title', messages, 'Notifications')}</div>
                     
                     {/* Real notifications if available */}
                     {notificationsData?.notifications && notificationsData.notifications.length > 0 ? (
-                      notificationsData.notifications.slice(0, 5).map((notification) => {
+                      notificationsData.notifications.slice(0, 5).map((notification: any) => {
                         // Handle different notification types
                         let href = '/notifications';
                         if (notification.type === 'booking') {
@@ -170,24 +171,24 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                         
                         <Link href="/my-bookings/123" onClick={() => setIsOpen(false)}>
                           <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
-                            <div className="font-medium text-sm">{messages.notifications?.booking_confirmed || 'Booking Confirmed'}</div>
-                            <div className="text-xs text-gray-500">{messages.notifications?.booking_confirmed_desc || 'Your booking for AC Repair has been confirmed'}</div>
+                            <div className="font-medium text-sm">{t('notifications.booking_confirmed', messages, 'Booking Confirmed')}</div>
+                            <div className="text-xs text-gray-500">{t('notifications.booking_confirmed_desc', messages, 'Your booking for AC Repair has been confirmed')}</div>
                             <div className="text-xs text-gray-400 mt-1">2 hours ago</div>
                           </div>
                         </Link>
                         
                         <Link href="/chat?provider=45&booking=124" onClick={() => setIsOpen(false)}>
                           <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
-                            <div className="font-medium text-sm">{messages.notifications?.new_message || 'New Message'}</div>
-                            <div className="text-xs text-gray-500">{messages.notifications?.new_message_desc || 'You received a new message from AC Repair provider'}</div>
+                            <div className="font-medium text-sm">{t('notifications.new_message', messages, 'New Message')}</div>
+                            <div className="text-xs text-gray-500">{t('notifications.new_message_desc', messages, 'You received a new message from AC Repair provider')}</div>
                             <div className="text-xs text-gray-400 mt-1">Yesterday</div>
                           </div>
                         </Link>
                         
                         <Link href="/my-bookings/125" onClick={() => setIsOpen(false)}>
                           <div className="rounded-md hover:bg-gray-100 p-2 cursor-pointer transition-colors">
-                            <div className="font-medium text-sm">{messages.notifications?.service_reminder || 'Service Reminder'}</div>
-                            <div className="text-xs text-gray-500">{messages.notifications?.service_reminder_desc || 'Your cleaning service is scheduled for tomorrow'}</div>
+                            <div className="font-medium text-sm">{t('notifications.service_reminder', messages, 'Service Reminder')}</div>
+                            <div className="text-xs text-gray-500">{t('notifications.service_reminder_desc', messages, 'Your cleaning service is scheduled for tomorrow')}</div>
                             <div className="text-xs text-gray-400 mt-1">2 days ago</div>
                           </div>
                         </Link>
@@ -197,7 +198,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     <div className="mt-2 pt-2 border-t text-center">
                       <Link href="/notifications">
                         <Button variant="link" size="sm" className="text-xs text-blue-600">
-                          {messages.notifications?.view_all || 'View All Notifications'}
+                          {t('notifications.view_all', messages, 'View All Notifications')}
                         </Button>
                       </Link>
                     </div>
@@ -218,7 +219,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                       className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white hidden md:flex"
                     >
                       <Building2 className="h-4 w-4 mr-2" />
-                      {messages.nav?.become_provider || 'Become a Provider'}
+                      {t('nav.become_provider', messages, 'Become a Provider')}
                     </Button>
                   </Link>
                 )}
@@ -258,7 +259,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     {user && user.role !== 'provider' && user.role !== 'admin' && !hasDirectAdminAccess && (
                       <DropdownMenuItem asChild>
                         <Link href="/provider-signup">
-                          {messages.nav?.become_provider || 'Become a Provider'}
+                          {t('nav.become_provider', messages, 'Become a Provider')}
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -288,7 +289,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                           console.error('Logout error:', error);
                         }
                       }}>
-                        {messages.nav?.logout || 'Logout'}
+                        {t('nav.logout', messages, 'Logout')}
                       </button>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -309,13 +310,13 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                   className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white"
                   onClick={() => window.location.href = '/login'}
                 >
-                  {messages.nav?.login || 'Login'}
+                  {t('nav.login', messages, 'Login')}
                 </Button>
                 <Button 
                   className="bg-khadamati-blue hover:bg-blue-700"
                   onClick={() => window.location.href = '/signup'}
                 >
-                  {messages.nav?.signup || 'Sign Up'}
+                  {t('nav.signup', messages, 'Sign Up')}
                 </Button>
               </div>
             )}
@@ -346,12 +347,12 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     <div className="pt-4 border-t space-y-3">
                       <Link href="/login" onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white">
-                          {messages.nav?.login || 'Login'}
+                          {t('nav.login', messages, 'Login')}
                         </Button>
                       </Link>
                       <Link href="/signup" onClick={() => setIsOpen(false)}>
                         <Button className="w-full bg-khadamati-blue hover:bg-blue-700">
-                          {messages.nav?.signup || 'Sign Up'}
+                          {t('nav.signup', messages, 'Sign Up')}
                         </Button>
                       </Link>
                     </div>

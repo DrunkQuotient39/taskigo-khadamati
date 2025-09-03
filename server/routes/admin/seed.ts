@@ -12,7 +12,7 @@ router.use(authorize('admin'));
 // Seed test data
 router.post('/seed', async (req, res) => {
   try {
-    const adminUserId = req.user!.id;
+    const adminUserId = (req as any).user!.id;
     
     // 1. Create service categories if needed
     const existingCategories = await storage.getServiceCategories();
@@ -82,7 +82,6 @@ router.post('/seed', async (req, res) => {
     if (providers.length === 0) {
       // Create a provider user first
       const providerUser = await storage.createUser({
-        id: `test-provider-${Date.now()}`,
         email: 'testprovider@taskigo.net',
         firstName: 'Test',
         lastName: 'Provider',
@@ -96,8 +95,8 @@ router.post('/seed', async (req, res) => {
       const provider = await storage.createProvider({
         userId: providerUser.id,
         businessName: 'Test Provider Services',
-        businessNameAr: 'خدمات اختبار المزود',
-        phone: '+1234567890',
+        // businessNameAr: 'خدمات اختبار المزود', // TODO: Add this field to schema
+        // phone: '+1234567890', // TODO: Add phone field to provider schema
         businessEmail: 'provider@taskigo.net',
         businessType: 'General Services',
         businessDescription: 'Test provider for development and testing',
@@ -264,7 +263,6 @@ router.post('/seed', async (req, res) => {
       
       if (!clientUser) {
         clientUser = await storage.createUser({
-          id: `test-client-${Date.now()}`,
           email: 'testclient@taskigo.net',
           firstName: 'Test',
           lastName: 'Client',
@@ -359,7 +357,6 @@ router.post('/seed', async (req, res) => {
     if (pendingProviders.length === 0) {
       // Create a user for the pending provider
       const pendingUser = await storage.createUser({
-        id: `pending-provider-${Date.now()}`,
         email: 'pendingprovider@taskigo.net',
         firstName: 'Pending',
         lastName: 'Provider',
@@ -373,8 +370,8 @@ router.post('/seed', async (req, res) => {
       await storage.createProvider({
         userId: pendingUser.id,
         businessName: 'Pending Provider Business',
-        businessNameAr: 'اسم الشركة قيد الانتظار',
-        phone: '+9876543210',
+        // businessNameAr: 'اسم الشركة قيد الانتظار', // TODO: Add this field to schema
+        // phone: '+9876543210', // TODO: Add phone field to provider schema
         businessEmail: 'pending@taskigo.net',
         businessType: 'Handyman Services',
         businessDescription: 'This is a pending provider waiting for admin approval.',

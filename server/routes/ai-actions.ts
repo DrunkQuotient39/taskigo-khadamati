@@ -18,7 +18,7 @@ const validateAIAction = [
  * Process an AI action
  * Some actions require authentication, others don't
  */
-router.post('/action', validateAIAction, async (req: any, res) => {
+router.post('/action', validateAIAction, async (req: any, res: any) => {
   // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -82,13 +82,14 @@ router.use(firebaseAuthenticate as any);
  * Get user's bookings for AI assistant
  * This helps the AI provide information about the user's bookings
  */
-router.get('/bookings', async (req: any, res) => {
+router.get('/bookings', async (req: any, res: any) => {
   try {
     const userId = req.user!.id;
-    const bookings = await storage.getClientBookings(userId);
+    const allBookings = await storage.getBookings();
+    const bookings = allBookings.filter(b => b.clientId === userId);
     
     // Map to simplified format
-    const simplifiedBookings = bookings.map(b => ({
+    const simplifiedBookings = bookings.map((b: any) => ({
       id: b.id,
       serviceId: b.serviceId,
       serviceTitle: b.serviceTitle || 'Service',

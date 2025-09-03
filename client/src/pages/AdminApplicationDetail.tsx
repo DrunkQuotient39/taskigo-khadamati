@@ -29,7 +29,8 @@ export default function AdminApplicationDetail() {
   const params = useParams<{ uid: string }>();
   const uid = params?.uid;
   const [, setLocation] = useLocation();
-  const { role } = useAuth();
+  const { user } = useAuth();
+  const role = user?.role;
   const { toast } = useToast();
   
   const [application, setApplication] = useState<ApplicationData | null>(null);

@@ -127,7 +127,7 @@ export class SimpleStorage implements IStorage {
       status: "active",
       isActive: true,
       images: [],
-      tags: ["cleaning", "house", "professional"],
+      // tags: ["cleaning", "house", "professional"], // TODO: Add tags field to schema
       rating: "4.8",
       reviewCount: 45,
       availability: {},
@@ -150,7 +150,7 @@ export class SimpleStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
-      id: insertUser.id || crypto.randomUUID(),
+      id: crypto.randomUUID(),
       email: insertUser.email || null,
       firstName: insertUser.firstName || null,
       lastName: insertUser.lastName || null,
@@ -218,6 +218,7 @@ export class SimpleStorage implements IStorage {
     const newService: Service = {
       id,
       ...service,
+      duration: service.duration || null,
       rating: "0",
       reviewCount: 0,
       isActive: true,
@@ -252,6 +253,8 @@ export class SimpleStorage implements IStorage {
     const newCategory: ServiceCategory = {
       id,
       ...category,
+      description: category.description || null,
+      descriptionAr: category.descriptionAr || null,
       isActive: true,
       createdAt: new Date()
     };
@@ -290,6 +293,7 @@ export class SimpleStorage implements IStorage {
     const newProvider: Provider = {
       id,
       ...provider,
+      businessDocs: provider.businessDocs || {},
       ratings: provider.ratings || "0",
       serviceCount: provider.serviceCount || 0,
       createdAt: new Date(),
@@ -333,6 +337,7 @@ export class SimpleStorage implements IStorage {
     const newBooking: Booking = {
       id,
       ...booking,
+      status: booking.status || 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
       completedAt: null
@@ -369,6 +374,7 @@ export class SimpleStorage implements IStorage {
     const newReview: Review = {
       id,
       ...review,
+      comment: review.comment || null,
       createdAt: new Date()
     };
     
@@ -380,7 +386,7 @@ export class SimpleStorage implements IStorage {
   async getNotifications(userId: string): Promise<Notification[]> {
     return Array.from(this.notifications.values())
       .filter(n => n.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => (b.createdAt || new Date()).getTime() - (a.createdAt || new Date()).getTime());
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {
@@ -412,6 +418,7 @@ export class SimpleStorage implements IStorage {
     const newLog: SystemLog = {
       id,
       ...log,
+      metadata: log.metadata || {},
       createdAt: new Date()
     };
     
