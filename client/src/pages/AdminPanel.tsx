@@ -338,7 +338,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {users.slice(0, 5).map((user) => (
+                      {users.slice(0, 5).map((user: any) => (
                         <div key={user.id} className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-10 w-10">
@@ -375,7 +375,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {pending?.providers?.map((provider) => (
+                    {pending?.providers?.map((provider: any) => (
                       <div key={provider.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg mb-4">
                         <div className="flex items-center space-x-4">
                           <Avatar className="h-12 w-12">
@@ -440,7 +440,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                         </div>
                       </div>
                     ))}
-                    {pending?.services?.map((service) => (
+                    {pending?.services?.map((service: any) => (
                       <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div className="flex items-center space-x-4">
                           <Avatar className="h-12 w-12">
@@ -599,7 +599,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {users?.map((user) => (
+                          {users?.map((user: any) => (
                             <TableRow key={user.id}>
                               <TableCell>
                                 <div className="flex items-center space-x-3">
@@ -666,7 +666,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                 <CardContent>
                   {pending?.providers?.length > 0 ? (
                     <div className="space-y-4">
-                      {pending.providers.map((provider) => (
+                      {pending.providers.map((provider: any) => (
                         <div key={provider.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                           <div className="flex items-center space-x-4">
                             <Avatar className="h-12 w-12">

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, ArrowRight, Shield, Users, Mail, AlertTriangle, Eye, EyeOff, RefreshCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Messages } from '@/lib/i18n';
+import { Messages, t } from '@/lib/i18n';
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, auth, resetPassword } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
@@ -35,10 +35,10 @@ export default function Login({ messages }: LoginProps) {
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">
-                {messages.login?.title || 'Welcome Back'}
+                {t('login.title', messages, 'Welcome Back')}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {messages.login?.subtitle || 'Sign in to access your Taskigo account'}
+                {t('login.subtitle', messages, 'Sign in to access your Taskigo account')}
               </CardDescription>
             </CardHeader>
             
@@ -163,7 +163,7 @@ export default function Login({ messages }: LoginProps) {
                     }}
                     disabled={!disclaimerAccepted}
                   >
-                    {messages.login?.button || 'Continue with Google'}
+                    {t('login.button', messages, 'Continue with Google')}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
 
@@ -446,20 +446,20 @@ export default function Login({ messages }: LoginProps) {
               </div>
               
               <div className="text-center text-sm text-gray-500">
-                {messages.login?.secure || 'Secure authentication'}
+                {t('login.secure', messages, 'Secure authentication')}
               </div>
               
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="text-center">
                   <Shield className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                   <p className="text-xs text-gray-600">
-                    {messages.login?.secure_auth || 'Secure Auth'}
+                    {t('login.secure_auth', messages, 'Secure Auth')}
                   </p>
                 </div>
                 <div className="text-center">
                   <Users className="w-6 h-6 mx-auto mb-2 text-yellow-600" />
                   <p className="text-xs text-gray-600">
-                    {messages.login?.trusted || 'Trusted Platform'}
+                    {t('login.trusted', messages, 'Trusted Platform')}
                   </p>
                 </div>
               </div>

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, ArrowRight, Shield, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Messages } from '@/lib/i18n';
+import { Messages, t } from '@/lib/i18n';
 import { signUpWithEmail, signInWithGoogle } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
@@ -33,10 +33,10 @@ export default function SignUp({ messages }: SignUpProps) {
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">
-                {messages.signup?.title || 'Join Taskigo'}
+                {t('signup.title', messages, 'Join Taskigo')}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {messages.signup?.subtitle || 'Create your account to get started'}
+                {t('signup.subtitle', messages, 'Create your account to get started')}
               </CardDescription>
             </CardHeader>
             
@@ -91,7 +91,7 @@ export default function SignUp({ messages }: SignUpProps) {
                   }}
                   disabled={!disclaimerAccepted}
                 >
-                  {messages.signup?.button || 'Sign Up with Google'}
+                  {t('signup.button', messages, 'Sign Up with Google')}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <div className="grid grid-cols-1 gap-2">
@@ -123,26 +123,26 @@ export default function SignUp({ messages }: SignUpProps) {
               </div>
               
               <div className="text-center text-sm text-gray-500">
-                {messages.signup?.secure || 'Secure registration'}
+                {t('signup.secure', messages, 'Secure registration')}
               </div>
               
               <div className="space-y-3 pt-4">
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-sm text-gray-600">
-                    {messages.signup?.benefit1 || 'Connect with trusted service providers'}
+                    {t('signup.benefit1', messages, 'Connect with trusted service providers')}
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-sm text-gray-600">
-                    {messages.signup?.benefit2 || 'Secure payment processing'}
+                    {t('signup.benefit2', messages, 'Secure payment processing')}
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-sm text-gray-600">
-                    {messages.signup?.benefit3 || 'Real-time booking management'}
+                    {t('signup.benefit3', messages, 'Real-time booking management')}
                   </span>
                 </div>
               </div>
@@ -151,13 +151,13 @@ export default function SignUp({ messages }: SignUpProps) {
                 <div className="text-center">
                   <Shield className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                   <p className="text-xs text-gray-600">
-                    {messages.signup?.secure_auth || 'Secure Auth'}
+                    {t('signup.secure_auth', messages, 'Secure Auth')}
                   </p>
                 </div>
                 <div className="text-center">
                   <Users className="w-6 h-6 mx-auto mb-2 text-yellow-600" />
                   <p className="text-xs text-gray-600">
-                    {messages.signup?.community || 'Join Community'}
+                    {t('signup.community', messages, 'Join Community')}
                   </p>
                 </div>
               </div>

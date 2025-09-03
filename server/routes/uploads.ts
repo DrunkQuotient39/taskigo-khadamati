@@ -12,7 +12,7 @@ router.post('/data-url', firebaseAuthenticate as any, validate([
   body('dataUrl').isString().withMessage('dataUrl required'),
   body('filename').optional().isString(),
   body('contentType').optional().isString(),
-]), async (req, res) => {
+]), async (req: any, res: any) => {
   try {
     const { dataUrl, filename, contentType } = req.body;
     if (isFirebaseStorageConfigured()) {

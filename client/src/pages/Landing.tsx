@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Messages } from '@/lib/i18n';
+import { Messages, t } from '@/lib/i18n';
 import { motion } from 'framer-motion';
 import { Sparkles, Users, Shield, Zap } from 'lucide-react';
 
@@ -25,11 +25,11 @@ export default function Landing({ messages }: LandingProps) {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            {messages.welcome || 'Welcome to Taskego'}
+            {t('welcome', messages, 'Welcome to Taskego')}
           </h1>
           
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            {messages.heroSubtitle || 'Your trusted local service marketplace connecting clients with skilled providers'}
+            {t('heroSubtitle', messages, 'Your trusted local service marketplace connecting clients with skilled providers')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -38,7 +38,7 @@ export default function Landing({ messages }: LandingProps) {
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
               onClick={() => window.location.href = '/api/login'}
             >
-              {messages.getStarted || 'Get Started'}
+              {t('getStarted', messages, 'Get Started')}
             </Button>
             
             <Button
@@ -47,7 +47,7 @@ export default function Landing({ messages }: LandingProps) {
               className="px-8 py-4 text-lg"
               onClick={() => window.location.href = '/provider-signup'}
             >
-              {messages.becomeProvider || 'Become a Provider'}
+              {t('becomeProvider', messages, 'Become a Provider')}
             </Button>
           </div>
         </motion.div>
@@ -64,10 +64,10 @@ export default function Landing({ messages }: LandingProps) {
           >
             <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
-              {messages.trustedProviders || 'Trusted Providers'}
+              {t('trustedProviders', messages, 'Trusted Providers')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {messages.trustedProvidersDesc || 'Connect with verified local service providers'}
+              {t('trustedProvidersDesc', messages, 'Connect with verified local service providers')}
             </p>
           </motion.div>
           
@@ -79,10 +79,10 @@ export default function Landing({ messages }: LandingProps) {
           >
             <Shield className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
-              {messages.secureBooking || 'Secure Booking'}
+              {t('secureBooking', messages, 'Secure Booking')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {messages.secureBookingDesc || 'Safe and secure booking system with payment protection'}
+              {t('secureBookingDesc', messages, 'Safe and secure booking system with payment protection')}
             </p>
           </motion.div>
           
@@ -94,10 +94,10 @@ export default function Landing({ messages }: LandingProps) {
           >
             <Zap className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
-              {messages.quickService || 'Quick Service'}
+              {t('quickService', messages, 'Quick Service')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {messages.quickServiceDesc || 'Fast and reliable service delivery when you need it'}
+              {t('quickServiceDesc', messages, 'Fast and reliable service delivery when you need it')}
             </p>
           </motion.div>
         </div>
