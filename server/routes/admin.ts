@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import authorize from '../middleware/auth';
-import firebaseAuthenticate from '../middleware/firebaseAuth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate } from '../middleware/security';
 import { body } from 'express-validator';
 import admin from 'firebase-admin';
