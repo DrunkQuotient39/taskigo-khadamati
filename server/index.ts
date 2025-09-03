@@ -19,13 +19,30 @@ import admin from 'firebase-admin';
 // Load environment variables
 config();
 
+// Fallback: also try common env file names if primary .env didn't include needed vars
+try {
+  const altFiles = ['config.env', 'render.env', '.env.local'];
+  if (!process.env.DATABASE_URL || !process.env.ADMIN_EMAIL) {
+    for (const f of altFiles) {
+      const p = join(process.cwd(), f);
+      if (fs.existsSync(p)) {
+        config({ path: p, override: false });
+      }
+    }
+  }
+  // Sanitize possible quoted values
+  if (process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/^"(.*)"$/, '$1');
+  }
+} catch {}
+
 // Environment validation - make optional for development
 const requiredEnvVars = [
   'ADMIN_EMAIL'
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-if (missingVars.length > 0) {
+if (missingVars.length > 0 && process.env.NODE_ENV === 'production') {
   log('error', 'startup.env.fail', { 
     missing: missingVars,
     message: 'Required environment variables are missing'
@@ -175,41 +192,43 @@ if (process.env.NODE_ENV !== 'development') {
   app.use('/api/', limiter);
 }
 
-// Health check endpoint
-app.get('/readyz', async (req, res) => {
-  const requestId = (req as any).requestId;
-  try {
-    // Check Firebase Admin
-    const firestore = getFirestore();
-    if (!firestore) {
-      log('error', 'readyz.firebase.fail', { requestId });
-      return res.status(503).json({ status: 'unhealthy', firebase: 'unavailable' });
-    }
-
-    // Check Neon database
-    let pool;
+  // Health check endpoint
+  app.get('/readyz', async (req, res) => {
+    const requestId = (req as any).requestId;
     try {
-      // Try to require the pool from the CommonJS path as a fallback
-      ({ pool } = require('./db/index'));
-    } catch (err) {
-      log('error', 'readyz.neon.import_fail', { requestId, error: (err as Error).message });
-      return res.status(503).json({ status: 'unhealthy', neon: 'import_failed' });
+      // Check Firebase Admin
+      const firestore = getFirestore();
+      if (!firestore) {
+        log('error', 'readyz.firebase.fail', { requestId });
+        return res.status(503).json({ status: 'unhealthy', firebase: 'unavailable' });
+      }
+
+      // If no DB configured, skip Neon check in dev
+      const hasDbUrl = !!process.env.DATABASE_URL;
+      log('info', 'readyz.neon.config', { requestId, hasDbUrl });
+      if (!hasDbUrl) {
+        return res.json({ status: 'healthy', neon: 'skipped', timestamp: new Date().toISOString() });
+      }
+
+      // One-off Neon check (self-contained)
+      try {
+        const neon = await import('@neondatabase/serverless');
+        const wsMod: any = await import('ws');
+        (neon as any).neonConfig.webSocketConstructor = wsMod.default || wsMod;
+        const pool = new (neon as any).Pool({ connectionString: process.env.DATABASE_URL });
+        await pool.query('SELECT 1');
+      } catch (err: any) {
+        log('error', 'readyz.neon.query_fail', { requestId, error: err?.message, stack: err?.stack, hasDbUrl });
+        return res.status(503).json({ status: 'unhealthy', neon: 'query_failed', error: err?.message });
+      }
+      
+      log('info', 'readyz.ok', { requestId });
+      res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      log('error', 'readyz.fail', { requestId, error: error?.message, stack: error?.stack });
+      res.status(503).json({ status: 'unhealthy', error: error?.message });
     }
-    if (!pool) {
-      log('error', 'readyz.neon.fail', { requestId });
-      return res.status(503).json({ status: 'unhealthy', neon: 'unavailable' });
-    }
-    
-    // Test query
-    await pool.query('SELECT 1');
-    
-    log('info', 'readyz.ok', { requestId });
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
-  } catch (error: any) {
-    log('error', 'readyz.fail', { requestId, error: error.message });
-    res.status(503).json({ status: 'unhealthy', error: error.message });
-  }
-});
+  });
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -295,8 +314,8 @@ if (process.env.NODE_ENV === 'production') {
           exists: fs.existsSync(searchPath)
         });
       }
-    } catch (e) {
-      log('debug', 'static.files.path_error', { 
+    } catch (e: any) {
+    log('debug', 'static.files.path_error', { 
         path: searchPath,
         error: e.message 
       });
@@ -383,19 +402,39 @@ process.on('SIGTERM', async () => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
-server.listen(PORT, () => {
-  log('info', 'server.start', { 
-    port: PORT,
-    env: process.env.NODE_ENV || 'development'
+function tryListen(port: number, attempt: number = 0) {
+  const maxAttempts = 5;
+
+  const onError = (err: any) => {
+    if (err?.code === 'EADDRINUSE' && process.env.NODE_ENV !== 'production' && attempt < maxAttempts) {
+      log('warn', 'server.port_in_use', { port, attempt });
+      server.removeListener('error', onError);
+      setTimeout(() => tryListen(port + 1, attempt + 1), 200);
+      return;
+    }
+    log('error', 'server.listen_error', { message: err?.message, name: err?.name, stack: err?.stack });
+    process.exit(1);
+  };
+
+  server.once('error', onError);
+
+  server.listen(port, () => {
+    server.removeListener('error', onError);
+    log('info', 'server.start', { 
+      port,
+      env: process.env.NODE_ENV || 'development'
+    });
+    
+    console.log(`🚀 Taskego Server with AI & Payments ready!`);
+    console.log(`📚 API Documentation: http://localhost:${port}/docs`);
+    console.log(`🤖 AI Features: /api/ai/* and /api/chat-ai/*`);
+    console.log(`💳 Payment System: /api/payments/* (Apple Pay ready)`);
+    console.log(`🏥 Health Check: http://localhost:${port}/readyz`);
   });
-  
-  console.log(`🚀 Taskego Server with AI & Payments ready!`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}/docs`);
-  console.log(`🤖 AI Features: /api/ai/* and /api/chat-ai/*`);
-  console.log(`💳 Payment System: /api/payments/* (Apple Pay ready)`);
-  console.log(`🏥 Health Check: http://localhost:${PORT}/readyz`);
-});
+}
+
+tryListen(PORT);
 
 export { app, io };

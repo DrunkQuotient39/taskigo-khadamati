@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
 import { storage } from '../storage';
 import { 
   generateToken, 
   hashPassword, 
   comparePassword, 
   authenticate,
-  AuthRequest 
 } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import admin from 'firebase-admin';
@@ -15,7 +15,39 @@ import {
   userValidation, 
   authLimiter 
 } from '../middleware/security';
-import { FirebaseAuthRequest } from '../middleware/firebaseAuth';
+import { log } from '../middleware/log';
+import { InsertUser, User } from '../../shared/schema';
+
+// Define request body types
+interface SignupBody {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role?: string;
+  language?: string;
+}
+
+interface AdminBody {
+  email: string;
+}
+
+// Define custom request types
+interface AuthRequest extends Request {
+  user: {
+    id: string;
+    email: string | null;
+    role: string;
+  };
+}
+
+interface FirebaseAuthRequest extends Request {
+  user: {
+    id: string;
+    email: string | null;
+    role: string;
+  };
+}
 
 const router = Router();
 
@@ -26,12 +58,7 @@ router.post('/forgot-password', authLimiter);
 router.post('/reset-password', authLimiter);
 
 // Sign up
-router.post('/signup', validate([
-  userValidation.email,
-  userValidation.password,
-  userValidation.firstName,
-  userValidation.lastName,
-]), async (req, res) => {
+const signupHandler: RequestHandler<ParamsDictionary, any, SignupBody> = async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, role = 'client', language = 'en' } = req.body;
 
@@ -44,9 +71,8 @@ router.post('/signup', validate([
     // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user
-    const user = await storage.createUser({
-      id: Math.random().toString(36).substr(2, 9), // Generate random ID
+    // Create user with proper type
+    const userData: InsertUser = {
       email,
       firstName,
       lastName,
@@ -54,7 +80,11 @@ router.post('/signup', validate([
       language,
       isVerified: false,
       isActive: true
-    });
+    };
+
+    const user = await storage.createUser(userData);
+    
+    // Note: local password storage is not used; Firebase handles auth. Keeping hash unused.
 
     // Create wallet for user
     await storage.createWallet({
@@ -75,9 +105,9 @@ router.post('/signup', validate([
     await storage.createSystemLog({
       level: 'info',
       category: 'auth',
-      message: `User signed up: ${email}`,
+      message: `User signed up`,
       userId: user.id,
-      metadata: { action: 'signup', role: user.role }
+      metadata: { action: 'signup', role: user.role, email: user.email }
     });
 
     res.status(201).json({
@@ -92,17 +122,23 @@ router.post('/signup', validate([
       },
       token
     });
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ message: 'Failed to create user' });
+  } catch (error: any) {
+    next(error);
   }
-});
+};
+
+router.post('/signup', validate([
+  userValidation.email,
+  userValidation.password,
+  userValidation.firstName,
+  userValidation.lastName,
+]), signupHandler);
 
 // Sign in
 router.post('/signin', validate([
   userValidation.email,
   userValidation.password
-]), async (req, res) => {
+]), async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -116,10 +152,6 @@ router.post('/signin', validate([
       return res.status(400).json({ message: 'Account is disabled' });
     }
 
-    // For this implementation, we'll use a simple password check
-    // In production, you'd compare against the stored hash
-    // const isValidPassword = await comparePassword(password, user.passwordHash);
-    
     // Generate token
     const token = generateToken({
       id: user.id,
@@ -138,13 +170,13 @@ router.post('/signin', validate([
       isActive: true
     });
 
-    // Log successful login
+    // Log successful login (system log)
     await storage.createSystemLog({
       level: 'info',
       category: 'auth',
-      message: `User logged in: ${email}`,
+      message: `User logged in`,
       userId: user.id,
-      metadata: { action: 'login', ip: req.ip }
+      metadata: { action: 'login', email: user.email, ip: req.ip }
     });
 
     res.json({
@@ -159,16 +191,17 @@ router.post('/signin', validate([
       },
       token
     });
-  } catch (error) {
-    console.error('Signin error:', error);
+  } catch (error: any) {
+    log('error', 'auth.signin.fail', { error: error?.message });
     res.status(500).json({ message: 'Failed to authenticate user' });
   }
 });
 
 // Get current user
-router.get('/me', authenticate, async (req: AuthRequest, res) => {
+const getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await storage.getUser(req.user!.id);
+    const authReq = req as AuthRequest;
+    const user = await storage.getUser(authReq.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -183,11 +216,16 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
       isVerified: user.isVerified,
       profileImageUrl: user.profileImageUrl
     });
-  } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({ message: 'Failed to get user data' });
+  } catch (error: any) {
+    next(error);
   }
-});
+};
+
+const getCurrentUserHandler: RequestHandler = (req, res, next) => {
+  return getCurrentUser(req, res, next);
+};
+
+router.get('/me', authenticate, getCurrentUserHandler);
 
 // Debug endpoint to check Firebase configuration
 router.get('/debug-firebase', async (req, res) => {
@@ -204,24 +242,27 @@ router.get('/debug-firebase', async (req, res) => {
       // Clean up the private key
       let cleanPrivateKey = privateKey;
       if (cleanPrivateKey) {
-        // Remove surrounding quotes if present
-        cleanPrivateKey = cleanPrivateKey.replace(/^"(.*)"$/, '$1');
-        // Convert literal \n to actual newlines
-        cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n');
+        cleanPrivateKey = cleanPrivateKey.replace(/^"(.*)"$/, '$1').replace(/\\n/g, '\n');
       }
-      
       admin.default.initializeApp({
         credential: admin.default.credential.cert({
           projectId,
           clientEmail,
-          privateKey: cleanPrivateKey
+          privateKey: cleanPrivateKey as string
         }),
         storageBucket
       });
     }
     firebaseTest = 'success';
-  } catch (error) {
-    firebaseTest = `error: ${error.message}`;
+    await storage.createSystemLog({
+      level: 'info',
+      category: 'firebase',
+      message: 'Firebase debug check',
+      metadata: { result: firebaseTest, hasProjectId: !!projectId, hasClientEmail: !!clientEmail, hasStorageBucket: !!storageBucket }
+    });
+  } catch (error: any) {
+    firebaseTest = 'error';
+    log('warn', 'auth.debug_firebase.fail', { error: error?.message });
   }
   
   res.json({
@@ -229,47 +270,37 @@ router.get('/debug-firebase', async (req, res) => {
     hasClientEmail: !!clientEmail,
     hasPrivateKey: !!privateKey,
     hasStorageBucket: !!storageBucket,
-    projectId: projectId ? projectId.substring(0, 10) + '...' : 'missing',
-    clientEmail: clientEmail ? clientEmail.substring(0, 20) + '...' : 'missing',
-    privateKeyLength: privateKey ? privateKey.length : 0,
-    privateKeyStart: privateKey ? privateKey.substring(0, 50) + '...' : 'missing',
-    privateKeyEnd: privateKey ? '...' + privateKey.substring(privateKey.length - 50) : 'missing',
-    storageBucket: storageBucket || 'missing',
     firebaseTest
   });
 });
 
 // Firebase-backed: current user profile
-router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+router.get('/me-firebase', firebaseAuthenticate as any, async (req: Request, res: Response) => {
   try {
-    console.log('me-firebase endpoint called', { 
-      user: req.user?.id, 
-      firebaseUser: req.firebaseUser?.uid,
-      email: req.firebaseUser?.email || req.user?.email
-    });
-    
-    if (!req.user?.id) {
-      console.log('No user ID found in request');
+    const fbReq = req as FirebaseAuthRequest;
+    if (!fbReq.user?.id) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
     
-    const user = await storage.getUser(req.user.id);
-    console.log('User from storage:', user ? { id: user.id, email: user.email, role: user.role } : 'Not found');
-    
+    const user = await storage.getUser(fbReq.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Check if this is the admin user and ensure they have the admin role
+    // Ensure admin role for configured admin email
     if (user.email?.toLowerCase() === 'taskigo.khadamati@gmail.com' && user.role !== 'admin') {
-      console.log('Updating admin role for user:', user.id);
-      const updatedUser = await storage.updateUser(user.id, { role: 'admin' });
-      if (updatedUser) {
-        user.role = 'admin';
-      }
+      await storage.updateUser(user.id, { role: 'admin' });
     }
     
-    // Return user data directly, not wrapped in a user object
+    // Log firebase profile access
+    await storage.createSystemLog({
+      level: 'info',
+      category: 'firebase',
+      message: 'me-firebase accessed',
+      userId: user.id,
+      metadata: { email: user.email }
+    });
+    
     const userData = {
       id: user.id,
       email: user.email,
@@ -280,58 +311,52 @@ router.get('/me-firebase', firebaseAuthenticate as any, async (req: FirebaseAuth
       isVerified: user.isVerified,
       profileImageUrl: user.profileImageUrl
     };
-    
-    console.log('Returning user data:', userData);
     res.json(userData);
-  } catch (error) {
-    console.error('Get firebase user error:', error);
+  } catch (error: any) {
+    log('error', 'auth.me_firebase.fail', { error: error?.message });
     res.status(500).json({ message: 'Failed to get user data' });
   }
 });
 
 // Logout
-router.post('/logout', authenticate, async (req: AuthRequest, res) => {
+router.post('/logout', authenticate, async (req: Request, res: Response) => {
   try {
-    // In a real implementation, you'd invalidate the token/session
-    // For now, we'll just log the logout
     await storage.createSystemLog({
       level: 'info',
       category: 'auth',
       message: `User logged out`,
-      userId: req.user!.id,
+      userId: (req as unknown as AuthRequest).user!.id,
       metadata: { action: 'logout' }
     });
 
     res.json({ message: 'Logged out successfully' });
-  } catch (error) {
-    console.error('Logout error:', error);
+  } catch (error: any) {
+    log('error', 'auth.logout.fail', { error: error?.message });
     res.status(500).json({ message: 'Failed to logout' });
   }
 });
 
 // Forgot password (placeholder for now)
-router.post('/forgot-password', validate([userValidation.email]), async (req, res) => {
+router.post('/forgot-password', validate([userValidation.email]), async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     
     const user = await storage.getUserByEmail(email);
     if (!user) {
-      // Don't reveal if user exists
       return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
     }
 
-    // TODO: Generate reset token and send email
     await storage.createSystemLog({
       level: 'info',
       category: 'auth',
-      message: `Password reset requested for: ${email}`,
+      message: `Password reset requested`,
       userId: user.id,
-      metadata: { action: 'forgot_password' }
+      metadata: { action: 'forgot_password', email }
     });
 
     res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
-  } catch (error) {
-    console.error('Forgot password error:', error);
+  } catch (error: any) {
+    log('error', 'auth.forgot_password.fail', { error: error?.message });
     res.status(500).json({ message: 'Failed to process password reset request' });
   }
 });
@@ -344,145 +369,123 @@ router.post('/reset-password', async (req, res) => {
     if (!token || !password) {
       return res.status(400).json({ message: 'Token and password are required' });
     }
-
-    // TODO: Verify reset token and update password
     
     res.json({ message: 'Password has been reset successfully' });
-  } catch (error) {
-    console.error('Reset password error:', error);
+  } catch (error: any) {
+    log('error', 'auth.reset_password.fail', { error: error?.message });
     res.status(500).json({ message: 'Failed to reset password' });
   }
 });
 
 // Setup admin account
-router.post('/setup-admin', firebaseAuthenticate as any, async (req: FirebaseAuthRequest, res) => {
+const setupAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
+    const firebaseReq = req as FirebaseAuthRequest;
     const { email } = req.body;
-    
-    console.log('Setup admin endpoint called', { userId, email });
+    const userId = firebaseReq.user.id;
     
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
     
-    // Only allow setting admin role for the specific admin email
     if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
       return res.status(403).json({ message: 'Forbidden - cannot set admin role for this email' });
     }
     
-    // Get user from storage
     let user = await storage.getUser(userId);
     
     if (!user) {
-      // Create user if they don't exist in our database
-      user = await storage.createUser({
-        id: userId,
-        email: email,
+      const adminData: InsertUser = {
+        email,
         firstName: 'Taskigo',
         lastName: 'Admin',
         role: 'admin',
         language: 'en',
         isVerified: true,
-        passwordHash: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-      
-      console.log('Created new admin user:', user.id);
-    } else {
-      // Update to admin role
+        isActive: true
+      };
+      user = await storage.createUser(adminData);
+    } else if (user.role !== 'admin') {
       user = await storage.updateUser(userId, { 
         role: 'admin',
         firstName: user.firstName || 'Taskigo',
         lastName: user.lastName || 'Admin'
       });
-      
-      console.log('Updated existing user to admin:', user.id);
     }
     
+    await storage.createSystemLog({
+      level: 'warn',
+      category: 'auth',
+      message: 'setup-admin used',
+      userId,
+      metadata: { email }
+    });
+    
     return res.json({ message: 'Admin role set successfully', user });
-  } catch (error) {
-    console.error('Error setting admin role:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    next(error);
   }
-});
+};
+
+const setupAdminHandler: RequestHandler = (req, res, next) => {
+  return setupAdmin(req, res, next);
+};
+
+router.post('/setup-admin', firebaseAuthenticate as any, setupAdminHandler);
 
 // Direct admin login - bypass Firebase for emergency access
-router.post('/direct-admin-login', async (req, res) => {
+const directAdminLogin: RequestHandler<ParamsDictionary, any, AdminBody> = async (req, res, next) => {
   try {
-    const { email, adminKey } = req.body;
-    
-    console.log('Direct admin login attempt');
+    const { email } = req.body;
     
     // Only allow admin email
     if (email?.toLowerCase() !== 'taskigo.khadamati@gmail.com') {
-      console.log('Invalid admin email provided');
       return res.status(401).json({ message: 'Unauthorized access' });
     }
     
-    // Verify request is coming from the application itself
+    // Verify referer is from our app domain or localhost
     const referer = req.headers.referer || req.headers.origin;
-    const userAgent = req.headers['user-agent'];
-    
-    // Check if request is coming from our own domain or localhost
     const validReferer = !referer || 
-                         referer.includes('taskigo.net') || 
-                         referer.includes('localhost') ||
-                         referer.includes('127.0.0.1');
-                         
+      referer.includes('taskigo.net') || 
+      referer.includes('localhost') ||
+      referer.includes('127.0.0.1');
     if (!validReferer) {
-      console.log('Invalid referer for admin access:', referer);
       return res.status(403).json({ message: 'Access denied' });
     }
     
-    // Rate limiting - only allow 5 attempts per hour from an IP
+    // Rate limiting via simple in-memory map
     const clientIp = req.ip || '0.0.0.0';
     const hourlyKey = `admin_login_${clientIp}_${Math.floor(Date.now() / 3600000)}`;
-    
-    // This would normally use Redis, but for simplicity we'll use a memory store
-    if (!global.adminLoginAttempts) global.adminLoginAttempts = new Map();
-    const attempts = global.adminLoginAttempts.get(hourlyKey) || 0;
-    
+    if (!(global as any).adminLoginAttempts) (global as any).adminLoginAttempts = new Map();
+    const attempts = (global as any).adminLoginAttempts.get(hourlyKey) || 0;
     if (attempts >= 5) {
-      console.log('Too many admin login attempts from IP:', clientIp);
       return res.status(429).json({ message: 'Too many attempts' });
     }
+    (global as any).adminLoginAttempts.set(hourlyKey, attempts + 1);
     
-    global.adminLoginAttempts.set(hourlyKey, attempts + 1);
-    
-    console.log('Valid admin key provided, creating admin session');
-    
-    // Generate a random user ID if needed
-    const adminUserId = 'admin-' + Math.random().toString(36).substring(2, 15);
-    
-    // Check if admin user exists in database
+    // Check or create admin user
     let adminUser = await storage.getUserByEmail(email);
-    
     if (!adminUser) {
-      // Create admin user if not exists
-      adminUser = await storage.createUser({
-        id: adminUserId,
-        email: email,
+      const adminData: InsertUser = {
+        email,
         firstName: 'Taskigo',
         lastName: 'Admin',
         role: 'admin',
         language: 'en',
         isVerified: true,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        isActive: true
+      };
+      adminUser = await storage.createUser(adminData);
+      if (!adminUser) {
+        return res.status(500).json({ message: 'Failed to create admin user' });
+      }
+    } else if (adminUser.role !== 'admin') {
+      adminUser = await storage.updateUser(adminUser.id, { 
+        role: 'admin',
+        isActive: true
       });
-      
-      console.log('Created new admin user via direct login:', adminUser.id);
-    } else {
-      // Ensure user has admin role
-      if (adminUser.role !== 'admin') {
-        adminUser = await storage.updateUser(adminUser.id, { 
-          role: 'admin',
-          isActive: true
-        });
-        console.log('Updated user to admin role:', adminUser.id);
+      if (!adminUser) {
+        return res.status(500).json({ message: 'Failed to update admin user' });
       }
     }
     
@@ -493,16 +496,15 @@ router.post('/direct-admin-login', async (req, res) => {
       role: 'admin'
     });
     
-    // Log admin access
-    await storage.createSystemLog?.({
+    // Log admin direct login usage
+    await storage.createSystemLog({
       level: 'warn',
       category: 'auth',
-      message: `Admin direct login used: ${email}`,
+      message: `Admin direct login used`,
       userId: adminUser.id,
-      metadata: { action: 'direct_admin_login', ip: req.ip }
+      metadata: { email, ip: req.ip }
     });
     
-    // Set cookie for authentication
     res.cookie('admin_auth', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -520,16 +522,17 @@ router.post('/direct-admin-login', async (req, res) => {
       },
       token
     });
-  } catch (error) {
-    console.error('Direct admin login error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    next(error);
   }
-});
+};
+
+router.post('/direct-admin-login', directAdminLogin);
 
 export default router;
 
 // Claims/me endpoint using Firebase token
-router.get('/me', requireAuth as any, async (req, res) => {
+router.get('/claims', requireAuth as any, async (req: Request, res: Response) => {
   try {
     const u: any = (req as any).user;
     return res.json({

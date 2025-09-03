@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { Anthropic } from '@anthropic-ai/sdk';
-import natural from 'natural';
+// Removed: import natural from 'natural';
 import { Service, ServiceCategory, User } from '../shared/schema';
 import { WEBSITE_KNOWLEDGE_EN, WEBSITE_KNOWLEDGE_AR } from './knowledge/websiteContent';
 // @ts-ignore - Import node-fetch without type checking
@@ -17,9 +17,19 @@ const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 }) : null;
 
-// NLP Tokenizer for text analysis
-const tokenizer = new natural.WordTokenizer();
-const stemmer = natural.PorterStemmer;
+// NLP Tokenizer for text analysis (safe fallback without natural)
+// Simple tokenization and stemming if 'natural' is unavailable at runtime
+type SimpleTokenizer = { tokenize: (input: string) => string[] };
+type SimpleStemmer = { stem: (word: string) => string };
+
+const tokenizer: SimpleTokenizer = {
+      tokenize: (text: string) =>
+      (text || '').toLowerCase().split(/[^a-z0-9]+/g).filter(Boolean),
+};
+
+const stemmer: SimpleStemmer = {
+  stem: (word: string) => (word || '').toLowerCase(),
+};
 
 // Ollama local LLM config (free provider) comes from central config with sane defaults
 
@@ -1109,51 +1119,31 @@ You must respond in JSON format with:
     keywords: string[];
   }> {
     try {
-      // Use Natural's built-in sentiment analyzer
-      const analyzer = new natural.SentimentAnalyzer('English', 
-        natural.PorterStemmer, 'negation');
-      
+      // Try to load 'natural' dynamically; if it fails, fall back below
+      const natMod: any = await import('natural').then(m => (m as any).default ?? m);
+      const analyzer = new natMod.SentimentAnalyzer('English', natMod.PorterStemmer, 'negation');
       const tokens = tokenizer.tokenize(text.toLowerCase());
-      const stemmedTokens = tokens?.map(token => stemmer.stem(token)) || [];
-      
+      const stemmedTokens = tokens?.map((token) => natMod.PorterStemmer.stem(token)) || [];
       const score = analyzer.getSentiment(stemmedTokens);
-      
+
       let sentiment: 'positive' | 'negative' | 'neutral';
       if (score > 0.1) sentiment = 'positive';
       else if (score < -0.1) sentiment = 'negative';
       else sentiment = 'neutral';
 
-      return {
-        sentiment,
-        score,
-        keywords: tokens?.slice(0, 5) || []
-      };
+      return { sentiment, score, keywords: tokens?.slice(0, 5) || [] };
     } catch (error) {
-      console.error('Sentiment analysis error:', error);
-      // Fallback to simple analysis
+      // Fallback to simple analysis when 'natural' or its deps are unavailable
       const positiveWords = ['good', 'great', 'excellent', 'amazing', 'love', 'perfect'];
       const negativeWords = ['bad', 'terrible', 'awful', 'hate', 'horrible', 'worst'];
-      
-      const lowerText = text.toLowerCase();
-      const hasPositive = positiveWords.some(word => lowerText.includes(word));
-      const hasNegative = negativeWords.some(word => lowerText.includes(word));
-      
+      const lowerText = (text || '').toLowerCase();
+      const hasPositive = positiveWords.some((w) => lowerText.includes(w));
+      const hasNegative = negativeWords.some((w) => lowerText.includes(w));
+      const score = (hasPositive ? 1 : 0) - (hasNegative ? 1 : 0);
       let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
-      let score = 0;
-      
-      if (hasPositive && !hasNegative) {
-        sentiment = 'positive';
-        score = 0.5;
-      } else if (hasNegative && !hasPositive) {
-        sentiment = 'negative';
-        score = -0.5;
-      }
-      
-      return {
-        sentiment,
-        score,
-        keywords: tokenizer.tokenize(text.toLowerCase())?.slice(0, 5) || []
-      };
+      if (score > 0) sentiment = 'positive';
+      if (score < 0) sentiment = 'negative';
+      return { sentiment, score, keywords: tokenizer.tokenize(lowerText).slice(0, 5) };
     }
   }
 
