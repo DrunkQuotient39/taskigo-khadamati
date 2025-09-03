@@ -1,22 +1,25 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { Request, Response, NextFunction, RequestHandler, ErrorRequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { storage } from '../storage';
-import { log } from './log';
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 10000 : 100,
+  max: process.env.NODE_ENV === 'development' ? 10000 : (Number(process.env.API_RATE_LIMIT_MAX) || 300),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  handler: (req, res /*, next*/) => {
-    // Structured log for throttling
-    try { console.warn(JSON.stringify({ ts: new Date().toISOString(), level: 'warn', message: 'rate_limited', path: req.originalUrl })); } catch {}
-    res.status(429).json({ message: 'Too many requests' });
+  // Use client IP from proxy header when behind a proxy (requires app.set('trust proxy', 1))
+  keyGenerator: (req) => {
+    const xffHeader = req.headers['x-forwarded-for'] as string | undefined;
+    const forwardedIp = xffHeader?.split(',')[0]?.trim();
+    const ip = forwardedIp || req.ip || (req.socket as any)?.remoteAddress || '';
+    return ip || 'unknown';
   },
+  // Do not throttle auth identity checks
+  skip: (req) => req.path === '/api/auth/me-firebase'
 });
 
 export const authLimiter = rateLimit({
@@ -24,11 +27,6 @@ export const authLimiter = rateLimit({
   max: 5, // limit each IP to 5 auth requests per windowMs
   message: 'Too many authentication attempts, please try again later.',
   skipSuccessfulRequests: true,
-  skip: () => process.env.NODE_ENV === 'development',
-  handler: (req, res /*, next*/) => {
-    try { console.warn(JSON.stringify({ ts: new Date().toISOString(), level: 'warn', message: 'auth_rate_limited', path: req.originalUrl })); } catch {}
-    res.status(429).json({ message: 'Too many authentication attempts' });
-  },
 });
 
 export const aiLimiter = rateLimit({
@@ -77,6 +75,7 @@ export const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:5000',
+      'http://localhost:5173',
       'https://localhost:3000',
       'https://localhost:5000',
       /\.replit\.app$/,
@@ -98,13 +97,13 @@ export const corsOptions = {
       if (typeof allowed === 'string') {
         return origin === allowed;
       }
-      return allowed && typeof allowed.test === 'function' ? allowed.test(origin) : false;
+      // Handle RegExp test only if allowed is defined
+      return allowed?.test(origin) ?? false;
     });
     
     if (isAllowed) {
       callback(null, true);
     } else {
-      log('warn', 'cors.denied', { origin, path: 'CORS', reason: 'origin_not_allowed' });
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -114,18 +113,27 @@ export const corsOptions = {
 };
 
 // Input validation middleware
-export const validate = (validations: ValidationChain[]): RequestHandler[] => [
-  ...(validations as RequestHandler[]),
-  ((req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const extractedErrors: any[] = [];
-      errors.array().map(err => extractedErrors.push({ [err.type]: err.msg }));
-      return res.status(422).json({ errors: extractedErrors });
+export const validate = (validations: ValidationChain[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    // Run all validations
+    for (const validation of validations) {
+      const result = await validation.run(req);
+      if (result.array().length) break;
     }
-    next();
-  }) as RequestHandler
-];
+
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+      return next();
+    }
+
+    const extractedErrors: any[] = [];
+    errors.array().map(err => extractedErrors.push({ [err.type]: err.msg }));
+
+    return res.status(422).json({
+      errors: extractedErrors,
+    });
+  };
+};
 
 // Common validation rules
 export const userValidation = {
@@ -157,7 +165,7 @@ export const reviewValidation = {
 };
 
 // Input sanitization
-export const sanitizeInput: RequestHandler = (req, res, next) => {
+export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
   // Recursively sanitize all string inputs
   const sanitize = (obj: any): any => {
     if (typeof obj === 'string') {
@@ -179,7 +187,7 @@ export const sanitizeInput: RequestHandler = (req, res, next) => {
 };
 
 // Request logging middleware
-export const logRequest: RequestHandler = async (req, res, next) => {
+export const logRequest = async (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   
   // Log request
@@ -218,7 +226,7 @@ export const logRequest: RequestHandler = async (req, res, next) => {
 };
 
 // Error handling middleware
-export const errorHandler: ErrorRequestHandler = async (error: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = async (error: any, req: Request, res: Response, next: NextFunction) => {
   // Log error
   await storage.createSystemLog({
     level: 'error',
@@ -247,7 +255,7 @@ export const errorHandler: ErrorRequestHandler = async (error: any, req: Request
 };
 
 // Health check endpoint
-export const healthCheck: RequestHandler = (req, res) => {
+export const healthCheck = (req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
