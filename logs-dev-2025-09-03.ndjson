@@ -97,3 +97,11 @@
 {"ts":"2025-09-03T14:01:42.665Z","level":"info","message":"startup.schema.ok"}
 {"ts":"2025-09-03T14:01:42.782Z","level":"info","message":"server.start","port":5000,"env":"dev***"}
 {"ts":"2025-09-03T14:01:43.165Z","level":"info","message":"firebase.admin.ok"}
+{"ts":"2025-09-03T14:50:45.637Z","level":"info","message":"startup.env.ok"}
+{"ts":"2025-09-03T14:50:45.713Z","level":"info","message":"Dat***"}
+{"ts":"2025-09-03T14:50:45.879Z","level":"info","message":"Dat***"}
+{"ts":"2025-09-03T14:50:45.879Z","level":"info","message":"startup.schema.ok"}
+{"ts":"2025-09-03T14:50:45.902Z","level":"info","message":"server.start","port":5050,"env":"dev***"}
+{"ts":"2025-09-03T14:50:46.355Z","level":"info","message":"firebase.admin.ok"}
+{"ts":"2025-09-03T14:51:58.628Z","level":"info","message":"process.shutdown.start","signal":"SIG***"}
+{"ts":"2025-09-03T14:51:58.630Z","level":"info","message":"process.shutdown.complete"}
