@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { storage } from '../storage';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { firebaseAuthenticate, FirebaseAuthRequest } from '../middleware/firebaseAuth';
+import { authenticate } from '../middleware/auth';
+import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, paymentLimiter } from '../middleware/security';
 import { body } from 'express-validator';
 
@@ -25,7 +25,7 @@ router.post('/create-stripe-session', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('successUrl').isURL().withMessage('Valid success URL required'),
   body('cancelUrl').isURL().withMessage('Valid cancel URL required'),
-]), async (req: FirebaseAuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     if (!stripe) {
       return res.status(500).json({ message: 'Stripe not configured. Please add STRIPE_SECRET_KEY.' });
@@ -135,7 +135,7 @@ router.post('/process', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('amount').isString().withMessage('Amount required'),
   body('paymentMethod').isIn(['card', 'apple_pay']).withMessage('Valid payment method required'),
-]), async (req: FirebaseAuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { bookingId, amount, paymentMethod, cardDetails } = req.body;
     const userId = req.user!.id;
@@ -230,7 +230,7 @@ router.post('/process', validate([
 });
 
 // Get payment history
-router.get('/history', async (req: FirebaseAuthRequest, res) => {
+router.get('/history', async (req: any, res) => {
   try {
     const userId = req.user!.id;
     const { status, limit = 20, offset = 0 } = req.query;
@@ -281,7 +281,7 @@ router.get('/history', async (req: FirebaseAuthRequest, res) => {
 router.post('/refund', validate([
   body('paymentId').isInt({ min: 1 }).withMessage('Valid payment ID required'),
   body('reason').trim().isLength({ min: 10, max: 500 }).withMessage('Refund reason must be 10-500 characters'),
-]), async (req: FirebaseAuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { paymentId, reason } = req.body;
     const userId = req.user!.id;
@@ -309,7 +309,7 @@ router.post('/refund', validate([
       status: 'refunded',
       refundReason: reason,
       metadata: {
-        ...payment.metadata,
+        ...(payment.metadata || {}),
         refundedAt: new Date().toISOString(),
         refundAmount: refundAmount.toString(),
       }
@@ -368,7 +368,7 @@ router.post('/refund', validate([
 });
 
 // Apple Pay session creation (test implementation)
-router.post('/apple-pay/session', async (req: FirebaseAuthRequest, res) => {
+router.post('/apple-pay/session', async (req: any, res) => {
   try {
     // Mock Apple Pay session for development
     res.json({
@@ -390,7 +390,7 @@ router.post('/apple-pay/session', async (req: FirebaseAuthRequest, res) => {
 router.post('/apple-pay/process', validate([
   body('bookingId').isInt({ min: 1 }).withMessage('Valid booking ID required'),
   body('amount').isString().withMessage('Amount required'),
-]), async (req: FirebaseAuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { bookingId, amount } = req.body;
     const userId = req.user!.id;
@@ -475,7 +475,7 @@ router.post('/apple-pay/process', validate([
 });
 
 // Payment methods info
-router.get('/methods/supported', async (req: FirebaseAuthRequest, res) => {
+router.get('/methods/supported', async (req: any, res) => {
   try {
     res.json({
       supportedMethods: {

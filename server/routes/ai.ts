@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { aiService } from '../ai';
-import { optionalAuth, AuthRequest } from '../middleware/auth';
+import { optionalAuth } from '../middleware/auth';
 import { firebaseAuthenticate } from '../middleware/firebaseAuth';
 import { validate, aiLimiter } from '../middleware/security';
 import { body } from 'express-validator';
@@ -16,7 +16,7 @@ router.post('/chat', optionalAuth, validate([
   body('message').trim().isLength({ min: 1, max: 1000 }).withMessage('Message must be 1-1000 characters'),
   body('language').optional().isIn(['en', 'ar']).withMessage('Language must be en or ar'),
   body('conversationHistory').optional().isArray()
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { message, language = 'en', conversationHistory = [] } = req.body;
     const userId = req.user?.id || 'anonymous';
@@ -71,7 +71,7 @@ router.post('/recommend', optionalAuth, validate([
   body('budget').optional().isDecimal(),
   body('category').optional().trim(),
   body('preferences').optional().isObject()
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { query, location, budget, category, preferences = {} } = req.body;
     const userId = req.user?.id || 'anonymous';
@@ -135,7 +135,7 @@ router.post('/sentiment', firebaseAuthenticate as any, validate([
   body('text').trim().isLength({ min: 5, max: 2000 }).withMessage('Text must be 5-2000 characters'),
   body('referenceType').optional().isIn(['review', 'message', 'feedback']),
   body('referenceId').optional().isInt({ min: 1 })
-]), async (req: AuthRequest, res) => {
+]), async (req: any, res) => {
   try {
     const { text, referenceType, referenceId } = req.body;
     

@@ -26,6 +26,7 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   actionProposal?: ActionProposal;
+  suggestions?: string[];
 }
 
 export default function Chat({ messages }: ChatProps) {

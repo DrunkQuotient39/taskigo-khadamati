@@ -161,7 +161,7 @@ export default function FloatingChat({ messages }: FloatingChatProps) {
       const currentLang = document.documentElement.lang || 'en';
       
       // Prepare a basic message object for the API
-      const requestData = {
+      const requestData: Record<string, any> = {
         message: userMessage.text,
         language: currentLang,
         sessionId: sessionId,
