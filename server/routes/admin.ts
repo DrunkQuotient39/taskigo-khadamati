@@ -13,7 +13,7 @@ import { pool } from '../db';
 const router = Router();
 
 // All admin routes require authentication and admin role
-router.use(firebaseAuthenticate);
+router.use(firebaseAuthenticate as any);
 router.use(authorize('admin'));
 
 // Get admin dashboard stats
@@ -564,6 +564,44 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
       message: 'Failed to process application approval', 
       requestId 
     });
+  }
+});
+
+// Approve or reject a service (admin)
+router.post('/services/:id/approve', async (req: Request, res: Response) => {
+  try {
+    const serviceId = parseInt(req.params.id);
+    const approved = typeof req.body?.approved === 'boolean'
+      ? req.body.approved
+      : String(req.body?.approved).toLowerCase() === 'true';
+    const requestId = (req as any).requestId;
+
+    if (isNaN(serviceId)) {
+      return res.status(400).json({ message: 'Invalid service ID' });
+    }
+
+    const service = await storage.getService(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    const newStatus = approved ? 'approved' : 'rejected';
+    await storage.updateService(serviceId, { status: newStatus, updatedAt: new Date() });
+
+    try {
+      await storage.createSystemLog({
+        level: 'info',
+        category: 'service',
+        message: `Service ${newStatus}: ${service.title}`,
+        userId: (req as any).user?.id,
+        metadata: { action: 'admin_approval', serviceId, approved }
+      });
+    } catch {}
+
+    return res.json({ message: `Service ${newStatus} successfully` });
+  } catch (error: any) {
+    console.error('Admin service approval error:', error);
+    return res.status(500).json({ message: 'Failed to update service status' });
   }
 });
 

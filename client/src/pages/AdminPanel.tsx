@@ -104,7 +104,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
     }
   }, [location]);
   
-  const approveProvider = async (providerId: number, approved: boolean) => {
+  const approveProvider = async (providerId: string | number, approved: boolean) => {
     try {
       const fbUser = auth.currentUser;
       if (!fbUser) {
@@ -113,11 +113,13 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
       }
       
       const idToken = await fbUser.getIdToken(true);
-      const response = await fetch('/api/admin/approve-provider', {
+      // Our backend expects UID in the URL: /api/admin/applications/:uid/approve
+      const uid = String(providerId);
+      const response = await fetch(`/api/admin/applications/${uid}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         credentials: 'include',
-        body: JSON.stringify({ providerId, approved })
+        body: JSON.stringify({ approved: !!approved })
       });
       
       const result = await response.json();
@@ -472,11 +474,11 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                                 }
                                 
                                 const idToken = await fbUser.getIdToken(true);
-                                const response = await fetch('/api/admin/approve-service', {
+                                const response = await fetch(`/api/admin/services/${service.id}/approve`, {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
                                   credentials: 'include',
-                                  body: JSON.stringify({ serviceId: service.id, approved: true })
+                                  body: JSON.stringify({ approved: true })
                                 });
                                 
                                 const result = await response.json();
@@ -518,11 +520,11 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                                 }
                                 
                                 const idToken = await fbUser.getIdToken(true);
-                                const response = await fetch('/api/admin/approve-service', {
+                                const response = await fetch(`/api/admin/services/${service.id}/approve`, {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
                                   credentials: 'include',
-                                  body: JSON.stringify({ serviceId: service.id, approved: false })
+                                  body: JSON.stringify({ approved: false })
                                 });
                                 
                                 const result = await response.json();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { api } from '@/lib/api';
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -44,8 +44,16 @@ export default function AdminApplicationDetail() {
     const fetchApplication = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/admin/applications/${uid}`);
-        setApplication(response.data);
+        const idToken = await auth.currentUser?.getIdToken(true);
+        const res = await fetch(`/api/admin/applications/${uid}`, {
+          headers: {
+            Authorization: idToken ? `Bearer ${idToken}` : ''
+          },
+          credentials: 'include'
+        });
+        if (!res.ok) throw new Error(`Failed: ${res.status}`);
+        const data = await res.json();
+        setApplication(data);
       } catch (error: any) {
         toast({
           title: 'Error',
@@ -65,7 +73,17 @@ export default function AdminApplicationDetail() {
     
     try {
       setSubmitting('approve');
-      await api.post(`/admin/applications/${uid}/approve`, { approved: true });
+      const idToken = await auth.currentUser?.getIdToken(true);
+      const res = await fetch(`/api/admin/applications/${uid}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: idToken ? `Bearer ${idToken}` : ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({ approved: true })
+      });
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
       
       toast({
         title: 'Success',
@@ -73,8 +91,11 @@ export default function AdminApplicationDetail() {
       });
       
       // Refresh application data
-      const response = await api.get(`/admin/applications/${uid}`);
-      setApplication(response.data);
+      const refresh = await fetch(`/api/admin/applications/${uid}`, {
+        headers: { Authorization: idToken ? `Bearer ${idToken}` : '' },
+        credentials: 'include'
+      });
+      setApplication(await refresh.json());
       
       // Navigate back to pending approvals
       setLocation('/admin?tab=pending');
@@ -94,7 +115,17 @@ export default function AdminApplicationDetail() {
     
     try {
       setSubmitting('reject');
-      await api.post(`/admin/applications/${uid}/reject`, { reason: rejectReason });
+      const idToken = await auth.currentUser?.getIdToken(true);
+      const res = await fetch(`/api/admin/applications/${uid}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: idToken ? `Bearer ${idToken}` : ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({ reason: rejectReason })
+      });
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
       
       toast({
         title: 'Success',
@@ -102,8 +133,11 @@ export default function AdminApplicationDetail() {
       });
       
       // Refresh application data
-      const response = await api.get(`/admin/applications/${uid}`);
-      setApplication(response.data);
+      const refresh = await fetch(`/api/admin/applications/${uid}`, {
+        headers: { Authorization: idToken ? `Bearer ${idToken}` : '' },
+        credentials: 'include'
+      });
+      setApplication(await refresh.json());
       
       // Navigate back to pending approvals
       setLocation('/admin?tab=pending');
