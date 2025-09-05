@@ -3,12 +3,28 @@ import { log } from './log';
 
 export function notFoundHandler(req: Request, res: Response, _next: NextFunction) {
   const requestId = (req as any).requestId as string | undefined;
+  const safe = (v: any) => {
+    try {
+      const json = JSON.stringify(v);
+      return json.length > 2000 ? json.slice(0, 2000) + '…' : json;
+    } catch {
+      return String(v);
+    }
+  };
   log('warn', 'route_not_found', {
     requestId,
     method: req.method,
     path: req.originalUrl,
+    ip: req.ip,
+    headers: safe(req.headers),
+    query: safe(req.query),
+    body: safe(req.body),
   });
-  res.status(404).json({ error: 'Not found' });
+  const isDev = process.env.NODE_ENV === 'development';
+  res.status(404).json({ 
+    error: 'Not found',
+    ...(isDev && { method: req.method, path: req.originalUrl, requestId })
+  });
 }
 
 export function globalErrorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
@@ -26,7 +42,7 @@ export function globalErrorHandler(err: any, req: Request, res: Response, _next:
 
   res.status(status).json({
     message,
-    ...(isDev && { stack: err?.stack }),
+    ...(isDev && { stack: err?.stack, requestId }),
   });
 }
 

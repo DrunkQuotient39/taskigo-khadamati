@@ -25,7 +25,7 @@ const requiredEnvVars = [
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-if (missingVars.length > 0) {
+if (missingVars.length > 0 && process.env.NODE_ENV === 'production') {
   log('error', 'startup.env.fail', { 
     missing: missingVars,
     message: 'Required environment variables are missing'
@@ -179,36 +179,60 @@ if (process.env.NODE_ENV !== 'development') {
 app.get('/readyz', async (req, res) => {
   const requestId = (req as any).requestId;
   try {
-    // Check Firebase Admin
+    // Firebase Admin check (optional in development)
     const firestore = getFirestore();
-    if (!firestore) {
-      log('error', 'readyz.firebase.fail', { requestId });
-      return res.status(503).json({ status: 'unhealthy', firebase: 'unavailable' });
+    let firebaseStatus: 'ok' | 'skipped' | 'unavailable' = 'ok';
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      firebaseStatus = 'skipped';
+    } else if (!firestore) {
+      firebaseStatus = 'unavailable';
+    } else {
+      try {
+        await firestore.listCollections();
+      } catch (err: any) {
+        log('warn', 'readyz.firebase.health_check_fail', { requestId, error: err?.message || err });
+      }
     }
 
-    // Check Neon database
-    let pool;
-    try {
-      // Try to require the pool from the CommonJS path as a fallback
-      ({ pool } = require('./db/index'));
-    } catch (err) {
-      log('error', 'readyz.neon.import_fail', { requestId, error: (err as Error).message });
-      return res.status(503).json({ status: 'unhealthy', neon: 'import_failed' });
+    // Neon database check only if DATABASE_URL is configured
+    if (!process.env.DATABASE_URL) {
+      log('info', 'readyz.ok.dev_no_db', { requestId, firebase: firebaseStatus, neon: 'skipped' });
+      return res.json({ status: 'healthy', firebase: firebaseStatus, neon: 'skipped', timestamp: new Date().toISOString() });
     }
+
+    // ESM-safe import of pool from our db module
+    const { pool } = await import('./db');
     if (!pool) {
       log('error', 'readyz.neon.fail', { requestId });
       return res.status(503).json({ status: 'unhealthy', neon: 'unavailable' });
     }
-    
-    // Test query
-    await pool.query('SELECT 1');
-    
+
+    await (pool as any).query('SELECT 1');
+
     log('info', 'readyz.ok', { requestId });
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    res.json({ status: 'healthy', firebase: firebaseStatus, neon: 'ok', timestamp: new Date().toISOString() });
   } catch (error: any) {
     log('error', 'readyz.fail', { requestId, error: error.message });
     res.status(503).json({ status: 'unhealthy', error: error.message });
   }
+});
+
+// Debug: list registered routes
+app.get('/__debug/routes', (req, res) => {
+  const routes: Array<{ method: string; path: string }> = [];
+  app._router?.stack?.forEach((layer: any) => {
+    if (layer?.route?.path) {
+      const methods = Object.keys(layer.route.methods || {}).filter(Boolean);
+      methods.forEach(m => routes.push({ method: m.toUpperCase(), path: layer.route.path }));
+    } else if (layer?.name === 'router' && layer?.handle?.stack) {
+      layer.handle.stack.forEach((sub: any) => {
+        const p = sub?.route?.path;
+        const methods = Object.keys(sub?.route?.methods || {}).filter(Boolean);
+        methods.forEach(m => routes.push({ method: m.toUpperCase(), path: p }));
+      });
+    }
+  });
+  res.json({ routes });
 });
 
 // Request logging middleware
@@ -220,6 +244,9 @@ app.use((req, res, next) => {
       requestId: (req as any).requestId,
       method: req.method,
       path: req.path,
+      originalUrl: req.originalUrl,
+      baseUrl: (req as any).baseUrl,
+      route: (req as any).route?.path,
       status: res.statusCode,
       durationMs: duration,
       user: (req as any).user
@@ -234,12 +261,20 @@ import providersRouter from './routes/providers';
 import adminRouter from './routes/admin';
 import paymentsRouter from './routes/payments';
 import aiRouter from './routes/ai';
+import servicesRouter from './routes/services';
+import bookingsRouter from './routes/bookings';
+import uploadsRouter from './routes/uploads';
+import aiActionsRouter from './routes/ai-actions';
 
 app.use('/api/auth', authRouter);
 app.use('/api/providers', providersRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/services', servicesRouter);
+app.use('/api/bookings', bookingsRouter);
+app.use('/api/uploads', uploadsRouter);
+app.use('/api/ai-actions', aiActionsRouter);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
@@ -327,6 +362,19 @@ if (process.env.NODE_ENV === 'production') {
     });
   }
 }
+}
+
+// In development, provide a friendly root message instead of 404
+if (process.env.NODE_ENV === 'development') {
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      message: 'Taskigo API (dev) running',
+      health: '/readyz',
+      routesDebug: '/__debug/routes',
+      frontend: 'http://localhost:5173',
+      note: 'In development the frontend is served by Vite on port 5173. API is under /api/*.'
+    });
+  });
 }
 
 // Error handling

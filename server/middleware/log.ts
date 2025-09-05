@@ -64,15 +64,21 @@ export function accessLog(params: {
   requestId?: string;
   method: string;
   path: string;
+  originalUrl?: string;
+  route?: string;
+  baseUrl?: string;
   status: number;
   durationMs: number;
   user?: { id?: string; email?: string } | null;
 }) {
-  const { requestId, method, path: p, status, durationMs, user } = params;
+  const { requestId, method, path: p, originalUrl, route, baseUrl, status, durationMs, user } = params;
   log('info', 'http.access', {
     requestId,
     method,
     path: p,
+    originalUrl,
+    route,
+    baseUrl,
     status,
     durationMs,
     userId: user?.id,

@@ -136,6 +136,22 @@ export function useAuth() {
     refetchOnReconnect: false,
   });
 
+  // Provide a fast UI fallback from Firebase while the backend user loads
+  const derivedUser = useMemo(() => {
+    if (user) return user as any;
+    const fb = auth.currentUser;
+    if (!fb) return null;
+    return {
+      id: fb.uid,
+      email: fb.email || '',
+      firstName: fb.displayName?.split(' ')[0] || undefined,
+      lastName: fb.displayName?.split(' ').slice(1).join(' ') || undefined,
+      role: 'client',
+      language: 'en',
+      isVerified: fb.emailVerified ?? true,
+    } as any;
+  }, [user]);
+
   // Debounced refetch after ID token changes to avoid bursts
   useEffect(() => {
     let timer: any;
@@ -158,8 +174,8 @@ export function useAuth() {
   }, [refetch]);
 
   return {
-    user,
+    user: derivedUser,
     isLoading: !firebaseReady || isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!derivedUser,
   };
 }

@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult, ValidationChain } from 'express-validator';
@@ -11,13 +11,7 @@ export const generalLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // Use client IP from proxy header when behind a proxy (requires app.set('trust proxy', 1))
-  keyGenerator: (req) => {
-    const xffHeader = req.headers['x-forwarded-for'] as string | undefined;
-    const forwardedIp = xffHeader?.split(',')[0]?.trim();
-    const ip = forwardedIp || req.ip || (req.socket as any)?.remoteAddress || '';
-    return ip || 'unknown';
-  },
+  keyGenerator: (req) => ipKeyGenerator(req.ip || '0.0.0.0'),
   // Do not throttle auth identity checks
   skip: (req) => req.path === '/api/auth/me-firebase'
 });
