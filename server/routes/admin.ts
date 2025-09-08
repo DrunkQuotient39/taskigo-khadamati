@@ -66,14 +66,8 @@ router.get('/stats', async (req: Request, res: Response) => {
     }).length;
 
     res.json({
-      overview: {
-        totalUsers,
-        totalProviders,
-        totalServices,
-        totalBookings,
-        totalRevenue: totalRevenue.toFixed(2),
-        totalPlatformFees: totalPlatformFees.toFixed(2)
-      },
+      totalUsers,
+      activeProviders: approvedProviders,
       providers: {
         total: totalProviders,
         pending: pendingProviders,
@@ -107,6 +101,52 @@ router.get('/stats', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Failed to get admin statistics' });
   }
 });
+// Admin create service that is immediately approved and public
+router.post('/services', async (req: Request, res: Response) => {
+  try {
+    const adminUid = (req as any).user?.id;
+    const { title, description, price, categoryId = 1, location = '', images = [] } = req.body || {};
+    if (!title || !description || !price) {
+      return res.status(400).json({ message: 'title, description, price are required' });
+    }
+    const service = await storage.createService({
+      providerId: adminUid,
+      categoryId,
+      title,
+      description,
+      price: String(price),
+      priceType: 'fixed',
+      duration: 60,
+      location,
+      images,
+      status: 'approved',
+      rating: '5.0',
+      reviewCount: 0,
+      isActive: true,
+    } as any);
+    return res.status(201).json({ message: 'Service created', service });
+  } catch (e: any) {
+    return res.status(500).json({ message: 'Failed to create service', error: e?.message });
+  }
+});
+
+// Revoke provider (admin)
+router.post('/applications/:uid/revoke', async (req: Request, res: Response) => {
+  const { uid } = req.params;
+  const requestId = (req as any).requestId;
+  try {
+    const fs = getFirestore();
+    if (fs) {
+      await fs.doc(`provider_applications/${uid}`).set({ status: 'rejected', reviewedAt: Date.now(), reviewerUid: (req as any).user?.id }, { merge: true });
+    }
+    try { await storage.updateUser(uid, { role: 'client' } as any); } catch {}
+    try { if (pool) await (pool as any).query(`UPDATE providers SET status='rejected', approved_at=NULL WHERE uid=$1`, [uid]); } catch {}
+    return res.json({ message: 'Provider access revoked' });
+  } catch (e: any) {
+    return res.status(500).json({ message: 'Failed to revoke', error: e?.message });
+  }
+});
+
 
 // Get all users with filtering
 router.get('/users', async (req: Request, res: Response) => {
@@ -240,6 +280,7 @@ router.get('/pending-approvals', async (req: Request, res: Response) => {
           city: doc.data()?.city || 'Unknown City',
           businessType: doc.data()?.businessType || 'Unknown Type',
           businessDocs: doc.data()?.extraDocs || [],
+          idCardImageUrl: doc.data()?.idCardImageUrl || null,
           createdAt: doc.data()?.createdAt || Date.now(),
           isApplication: true // Flag to indicate this is from Firestore
         }));
@@ -351,7 +392,7 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
       return res.status(401).json({ message: 'Admin user not found' });
     }
 
-    log('info', 'admin.approve.start', { requestId, uid, approved });
+    log('info', 'admin.approve.start', { requestId, uid, approved, route: req.originalUrl });
 
     // Firestore guard
     const fs = getFirestore();
@@ -370,7 +411,7 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
     const newStatus = approved ? 'approved' : 'rejected';
 
     // 1) Firestore update
-    log('info', 'admin.approve.step', { requestId, uid, step: 'firestore_update' });
+    log('info', 'admin.approve.step', { requestId, uid, step: 'firestore_update', route: req.originalUrl });
     await fs.doc(`provider_applications/${uid}`).set({
       status: newStatus,
       reviewedAt: Date.now(),
@@ -386,20 +427,14 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
         const userRecord = await admin.auth().getUser(uid);
         const existingClaims = userRecord.customClaims || {};
         const newClaims = { ...existingClaims, provider: true };
-        
         await admin.auth().setCustomUserClaims(uid, newClaims);
         log('info', 'admin.approve.step', { requestId, uid, step: 'claims_set', status: 'ok' });
       } catch (e: any) {
+        // Do not fail the entire approval if claims update fails locally
         log('error', 'admin.approve.step', { 
-          requestId, 
-          uid, 
-          step: 'claims_set', 
-          status: 'fail',
-          name: e?.name,
-          code: e?.code,
-          error: e?.message
+          requestId, uid, step: 'claims_set', status: 'fail',
+          name: e?.name, code: e?.code, error: e?.message 
         });
-        throw e;
       }
 
       // 3) Update user role in storage
@@ -441,16 +476,7 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
           });
         }
       } catch (e: any) {
-        log('error', 'admin.approve.step', { 
-          requestId, 
-          uid, 
-          step: 'neon_upsert', 
-          status: 'fail',
-          name: e?.name,
-          code: e?.code,
-          error: e?.message
-        });
-        throw e;
+        log('error', 'admin.approve.step', { requestId, uid, step: 'neon_upsert', status: 'fail', name: e?.name, code: e?.code, error: e?.message });
       }
 
       // Set header to trigger client-side claims refresh
@@ -478,8 +504,9 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
     }
 
     // Step 5: Create notification for the applicant
+    log('info', 'admin.approve.step', { requestId, uid, step: 'notification_create' });
     try {
-      await storage.createNotification({
+      const notification = await storage.createNotification({
         userId: uid,
         title: approved ? 'Provider Application Approved' : 'Provider Application Rejected',
         message: approved ? 
@@ -492,11 +519,21 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
           reason: reason || null
         }
       });
-    } catch (e) {
-      log('warn', 'admin.approve.notification.fail', { 
+      log('info', 'admin.approve.step', { 
         requestId, 
         uid, 
-        error: (e as any)?.message 
+        step: 'notification_create', 
+        status: 'ok',
+        notificationId: notification.id
+      });
+    } catch (e) {
+      log('error', 'admin.approve.step', { 
+        requestId, 
+        uid, 
+        step: 'notification_create',
+        status: 'fail',
+        error: (e as any)?.message,
+        stack: (e as any)?.stack
       });
     }
 
@@ -517,6 +554,7 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
 
     log('info', 'admin.approve.end', { requestId, uid, approved });
 
+    res.setHeader('X-Action', approved ? 'claims-updated' : 'no-action');
     res.json({
       message: `Provider application ${approved ? 'approved' : 'rejected'} successfully`,
       application: {

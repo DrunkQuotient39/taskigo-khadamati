@@ -7,6 +7,7 @@ import { log } from '../middleware/log';
 import { audit } from '../middleware/audit';
 import { getFirestore } from '../storage/firestore';
 import { pool } from '../db';
+import { uploadDataUrlToFirebase, isFirebaseStorageConfigured } from '../lib/uploads';
 import { storage } from '../storage';
 
 const router = Router();
@@ -14,7 +15,7 @@ const router = Router();
 // Apply to become a provider
 router.post('/apply', firebaseAuthenticate, async (req, res) => {
   const requestId = (req as any).requestId;
-  const uid = (req as any).user?.uid;
+  const uid = (req as any).user?.id || (req as any).firebaseUser?.uid;
   
   if (!uid) {
     log('error', 'provider.apply.unauthorized', { requestId });
@@ -24,26 +25,77 @@ router.post('/apply', firebaseAuthenticate, async (req, res) => {
   try {
     log('info', 'provider.apply.start', { requestId, uid });
     
-    const {
-      companyName,
-      nationalId,
-      idCardImageUrl,
-      extraDocs = [],
-      city,
-      businessType,
-      phone,
-      address
-    } = req.body;
+    // Accept both legacy and new payload shapes
+    const body = req.body || {};
+    let companyName = body.companyName || body.businessName;
+    let nationalId = body.nationalId || body.licenseNumber || '';
+    let idCardImageUrl = body.idCardImageUrl as string | undefined;
+    const city = body.city || body.businessAddress;
+    const businessType = body.businessType || body.serviceCategory;
+    const phone = body.phone;
+    const address = body.address || body.businessAddress;
+    const businessDocs = Array.isArray(body.businessDocs) ? body.businessDocs : [];
+    let extraDocs: string[] = Array.isArray(body.extraDocs) ? body.extraDocs : [];
+
+    // If docs come as data URLs, upload to Firebase Storage and collect URLs
+    if (!idCardImageUrl || businessDocs.length > 0) {
+      const storageConfigured = isFirebaseStorageConfigured();
+      log('info', 'provider.apply.docs_detected', { requestId, uid, docsCount: businessDocs.length, storageConfigured });
+      if (storageConfigured) {
+        for (const doc of businessDocs) {
+          if (doc?.dataUrl && typeof doc.dataUrl === 'string' && doc.dataUrl.startsWith('data:')) {
+            try {
+              const url = await uploadDataUrlToFirebase(doc.dataUrl, { folder: `provider_docs/${uid}` });
+              // First id_card becomes primary id image if not set
+              if (!idCardImageUrl && (doc.type === 'id_card' || !doc.type)) {
+                idCardImageUrl = url;
+              } else {
+                extraDocs.push(url);
+              }
+            } catch (e) {
+              log('warn', 'provider.apply.upload_fail', { requestId, error: (e as any)?.message, fallback: true });
+              // Fallback to raw provided data
+              if (!idCardImageUrl && (doc.type === 'id_card' || !doc.type)) {
+                idCardImageUrl = doc.dataUrl || doc.url || idCardImageUrl;
+              } else if (doc?.url) {
+                extraDocs.push(doc.url);
+              }
+            }
+          } else if (doc?.url && typeof doc.url === 'string') {
+            if (!idCardImageUrl && (doc.type === 'id_card' || !doc.type)) {
+              idCardImageUrl = doc.url;
+            } else {
+              extraDocs.push(doc.url);
+            }
+          } else if (doc?.text) {
+            // Text docs are not uploaded; can be stored separately if needed
+          }
+        }
+      } else {
+        // No Firebase Storage: fall back to provided URLs or data URLs
+        for (const doc of businessDocs) {
+          if (!idCardImageUrl && (doc?.type === 'id_card' || !doc?.type)) {
+            idCardImageUrl = doc?.url || doc?.dataUrl || idCardImageUrl;
+          } else if (doc?.url) {
+            extraDocs.push(doc.url);
+          }
+        }
+      }
+      log('info', 'provider.apply.docs_processed', { requestId, uid, hasIdCardUrl: !!idCardImageUrl, extraDocsCount: extraDocs.length });
+    }
 
     // Validate required fields
-    if (!companyName || !nationalId || !idCardImageUrl) {
+    if (!companyName || !idCardImageUrl) {
       log('warn', 'provider.apply.validation_fail', { 
         requestId, 
         uid, 
-        missing: ['companyName', 'nationalId', 'idCardImageUrl'].filter(f => !req.body[f])
+        missing: [
+          !companyName ? 'companyName' : null,
+          !idCardImageUrl ? 'idCardImageUrl' : null,
+        ].filter(Boolean)
       });
       return res.status(400).json({ 
-        error: 'Missing required fields: companyName, nationalId, idCardImageUrl' 
+        error: 'Missing required fields: companyName, idCardImageUrl' 
       });
     }
 
@@ -68,21 +120,22 @@ router.post('/apply', firebaseAuthenticate, async (req, res) => {
       }
     }
 
-    // Create the application document
-    const applicationData = {
+    // Sanitize optional fields and arrays for Firestore (no undefined values)
+    const cleanedExtraDocs = (extraDocs || []).filter((x: any) => typeof x === 'string' && x.length > 0);
+    const applicationData: Record<string, any> = {
       uid,
-      companyName,
-      nationalId,
-      idCardImageUrl,
-      extraDocs,
-      city,
-      businessType,
-      phone,
-      address,
+      companyName: String(companyName),
+      idCardImageUrl: String(idCardImageUrl),
       status: 'pending',
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
+    if (nationalId) applicationData.nationalId = String(nationalId);
+    if (cleanedExtraDocs.length > 0) applicationData.extraDocs = cleanedExtraDocs;
+    if (city) applicationData.city = String(city);
+    if (businessType) applicationData.businessType = String(businessType);
+    if (phone) applicationData.phone = String(phone);
+    if (address) applicationData.address = String(address);
 
     await fs.doc(`provider_applications/${uid}`).set(applicationData);
     

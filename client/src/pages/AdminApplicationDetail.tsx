@@ -44,7 +44,14 @@ export default function AdminApplicationDetail() {
     const fetchApplication = async () => {
       try {
         setLoading(true);
-        const idToken = await auth.currentUser?.getIdToken(true);
+        // Wait for Firebase user to exist to avoid 401 during token churn
+        let fbUser = auth.currentUser;
+        const started = Date.now();
+        while (!fbUser && Date.now() - started < 2500) {
+          await new Promise(r => setTimeout(r, 100));
+          fbUser = auth.currentUser;
+        }
+        const idToken = await fbUser?.getIdToken(true);
         const res = await fetch(`/api/admin/applications/${uid}`, {
           headers: {
             Authorization: idToken ? `Bearer ${idToken}` : ''

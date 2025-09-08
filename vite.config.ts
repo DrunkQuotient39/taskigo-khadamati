@@ -33,5 +33,19 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/socket.io": {
+        target: "http://localhost:3001",
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });

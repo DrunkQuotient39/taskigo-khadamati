@@ -25,6 +25,9 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [previewDocs, setPreviewDocs] = useState<any[] | null>(null);
   const [location] = useLocation();
+  const { user } = useAuth();
+  const hasDirect = typeof window !== 'undefined' && localStorage.getItem('adminDirectAccess') === 'true';
+  const isAdmin = (user?.role === 'admin') || hasDirect || (auth.currentUser?.email === 'taskigo.khadamati@gmail.com');
 
   // Live data from API
   const { data: stats } = useQuery({
@@ -38,7 +41,8 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
         headers: { Authorization: `Bearer ${idToken}` }
       });
       return res.json();
-    }
+    },
+    enabled: isAdmin,
   });
 
   const { data: pending = { providers: [], services: [], counts: {} }, refetch } = useQuery({
@@ -52,7 +56,8 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
         headers: { Authorization: `Bearer ${idToken}` }
       });
       return res.json();
-    }
+    },
+    enabled: isAdmin,
   });
 
   const { data: usersData } = useQuery({
@@ -65,13 +70,58 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
         credentials: 'include',
         headers: { Authorization: `Bearer ${idToken}` }
       });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch users: ${res.status}`);
+      }
       return res.json();
-    }
+    },
+    enabled: isAdmin,
   });
   
-  // Ensure users is always an array
-  const users = Array.isArray(usersData) ? usersData : 
+  // Ensure users is always an array and dedupe by id/email
+  const usersRaw = Array.isArray(usersData) ? usersData : 
     (usersData?.users && Array.isArray(usersData.users) ? usersData.users : []);
+  const seen = new Set<string>();
+  const users = usersRaw.filter((u: any) => {
+    const key = String(u.id || '') + '|' + String(u.email || '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Compute online/offline mock from recent activity if available
+  const isOnline = (u: any) => {
+    const last = u.lastActiveAt ? new Date(u.lastActiveAt).getTime() : 0;
+    return Date.now() - last < 5 * 60 * 1000; // 5 minutes
+  };
+
+  // Simple admin-create service form state
+  const [newService, setNewService] = useState({ title: '', description: '', price: '', categoryId: 1, location: '', imageUrl: '' });
+  const createServiceAsAdmin = async () => {
+    try {
+      const fbUser = auth.currentUser;
+      if (!fbUser) {
+        toast({ title: 'Authentication required', description: 'Please log in as admin' });
+        return;
+      }
+      const idToken = await fbUser.getIdToken(true);
+      const res = await fetch('/api/admin/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...newService,
+          images: newService.imageUrl ? [newService.imageUrl] : []
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || 'Failed to create service');
+      toast({ title: 'Service created', description: 'Service is visible to users.' });
+      setNewService({ title: '', description: '', price: '', categoryId: 1, location: '', imageUrl: '' });
+    } catch (e: any) {
+      toast({ title: 'Error', description: e?.message || 'Failed to create service', variant: 'destructive' });
+    }
+  };
 
   const { toast } = useToast();
   
@@ -176,6 +226,12 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
   return (
     <div className="min-h-screen pt-20 pb-12 bg-khadamati-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {user && !isAdmin && (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold text-khadamati-dark">Admin access required</h2>
+            <p className="text-khadamati-gray mt-2">Please sign in as an admin to view the Admin Panel.</p>
+          </div>
+        )}
         <div className="mb-12">
           <ScrollReveal>
             <h1 className="text-4xl font-bold text-khadamati-dark mb-4">
@@ -398,10 +454,14 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          <a href={`/admin/applications/${provider.userId}`} className="px-3 py-2 rounded border">Review</a>
+                          {provider.isApplication ? (
+                            <a href={`/admin/applications/${provider.userId}`} className="px-3 py-2 rounded border">Review</a>
+                          ) : (
+                            <span className="px-3 py-2 rounded border opacity-60 cursor-not-allowed">Review</span>
+                          )}
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="secondary" onClick={() => setPreviewDocs(provider.businessDocs || [])}>
+                              <Button size="sm" variant="secondary" onClick={() => setPreviewDocs(provider.businessDocs || (provider.idCardImageUrl ? [{ type: 'id_card', url: provider.idCardImageUrl }] : []))}>
                                 View
                               </Button>
                             </DialogTrigger>
@@ -409,18 +469,22 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                               <DialogHeader>
                                 <DialogTitle>Application Documents</DialogTitle>
                               </DialogHeader>
-                              <div className="grid grid-cols-2 gap-4">
-                                {(previewDocs || []).map((doc, idx) => (
-                                  <div key={idx} className="space-y-2">
-                                    <div className="text-sm text-khadamati-gray">{doc.type}</div>
-                                    {doc.url ? (
-                                      <img src={doc.url} alt={doc.type} className="w-full h-40 object-cover rounded-md border" />
-                                    ) : (
-                                      <div className="p-3 rounded-md bg-gray-50 border text-sm break-words">{doc.text || 'No content'}</div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
+                              {(previewDocs && previewDocs.length > 0) ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                  {previewDocs.map((doc, idx) => (
+                                    <div key={idx} className="space-y-2">
+                                      <div className="text-sm text-khadamati-gray">{doc.type || 'document'}</div>
+                                      {doc.url ? (
+                                        <img src={doc.url} alt={doc.type || 'document'} className="w-full h-40 object-cover rounded-md border" />
+                                      ) : (
+                                        <div className="p-3 rounded-md bg-gray-50 border text-sm break-words">{doc.text || 'No content'}</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-khadamati-gray">No documents attached</div>
+                              )}
                             </DialogContent>
                           </Dialog>
                           <Button
@@ -595,6 +659,7 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                           <TableRow>
                             <TableHead>{messages.admin_panel?.table?.user || 'User'}</TableHead>
                             <TableHead>{messages.admin_panel?.table?.type || 'Type'}</TableHead>
+                            <TableHead>Online</TableHead>
                             <TableHead>{messages.admin_panel?.table?.joined || 'Joined'}</TableHead>
                             <TableHead>{messages.admin_panel?.table?.status || 'Status'}</TableHead>
                             <TableHead>{messages.admin_panel?.table?.actions || 'Actions'}</TableHead>
@@ -627,6 +692,11 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                                   {user.role || 'client'}
                                 </Badge>
                               </TableCell>
+                              <TableCell>
+                                <Badge className={isOnline(user) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                  {isOnline(user) ? 'online' : 'offline'}
+                                </Badge>
+                              </TableCell>
                               <TableCell>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <Badge className={getStatusColor(user.isActive ? 'active' : 'inactive')}>
@@ -653,6 +723,52 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
               </ScrollReveal>
             </div>
           </>
+        )}
+
+        {/* Services Tab - Admin quick create */}
+        {activeTab === 'services' && (
+          <div className="mt-6">
+            <ScrollReveal>
+              <Card className="bg-white shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-khadamati-dark">
+                    Create Service (Admin)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-khadamati-gray">Title</label>
+                      <Input value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} placeholder="Service title" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-khadamati-gray">Price</label>
+                      <Input value={newService.price} onChange={(e) => setNewService({ ...newService, price: e.target.value })} placeholder="e.g. 39.00" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-khadamati-gray">Category ID</label>
+                      <Input value={newService.categoryId} onChange={(e) => setNewService({ ...newService, categoryId: Number(e.target.value || 1) })} placeholder="1" />
+                    </div>
+                    <div>
+                      <label className="text-sm text-khadamati-gray">Location</label>
+                      <Input value={newService.location} onChange={(e) => setNewService({ ...newService, location: e.target.value })} placeholder="City / Area" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-sm text-khadamati-gray">Description</label>
+                      <textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full p-2 border rounded" rows={3} placeholder="Describe the service..." />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-sm text-khadamati-gray">Primary Image URL</label>
+                      <Input value={newService.imageUrl} onChange={(e) => setNewService({ ...newService, imageUrl: e.target.value })} placeholder="https://..." />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button onClick={createServiceAsAdmin} className="bg-khadamati-blue">Create Service</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
         )}
 
         {/* Pending Approvals Tab */}

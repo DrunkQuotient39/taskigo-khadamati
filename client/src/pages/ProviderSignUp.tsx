@@ -36,16 +36,20 @@ export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
-  // Redirect to login if not authenticated
+  // Redirects based on auth/role; allow rendering if Firebase user exists even while hook is loading
   useEffect(() => {
-    // Only check auth after Firebase has finished loading
-    if (!authLoading && user === null) {
+    const fbUser = auth.currentUser;
+    if (!authLoading && !user && !fbUser) {
       toast({
         title: 'Login Required',
         description: 'Please sign in to continue with provider registration',
         variant: 'destructive'
       });
       setLocation('/login?redirect=/provider-signup');
+      return;
+    }
+    if ((user?.role === 'provider')) {
+      setLocation('/provider-dashboard');
     }
   }, [user, authLoading, setLocation, toast]);
   
@@ -399,7 +403,7 @@ export default function ProviderSignUp({ messages }: ProviderSignUpProps) {
   };
 
   // Show loading state while authentication is being checked
-  if (authLoading) {
+  if (authLoading && !auth.currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 py-12 px-4 flex items-center justify-center">
         <div className="text-center">

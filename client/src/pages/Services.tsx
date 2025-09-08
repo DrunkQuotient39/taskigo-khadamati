@@ -29,7 +29,11 @@ export default function Services({ messages }: ServicesProps) {
     queryKey: ['/api/service-categories'],
     queryFn: async () => {
       const res = await fetch('/api/service-categories', { credentials: 'include' });
-      return res.json();
+      if (!res.ok) {
+        return [];
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
     }
   });
 
@@ -54,7 +58,7 @@ export default function Services({ messages }: ServicesProps) {
   // Group services by category (with null check to fix "h.reduce is not a function" error)
   const servicesByCategory = servicesList && Array.isArray(servicesList) 
     ? servicesList.reduce((acc: any, service: any) => {
-        const category = categories.find((cat: any) => cat.id === service.categoryId);
+        const category = Array.isArray(categories) ? categories.find((cat: any) => cat.id === service.categoryId) : null;
         if (!category) return acc;
         
         if (!acc[category.name]) {

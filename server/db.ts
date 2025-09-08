@@ -9,9 +9,10 @@ neonConfig.webSocketConstructor = ws;
 let poolInstance: Pool | null = null;
 let dbInstance: ReturnType<typeof drizzle> | null = null;
 
-if (!process.env.DATABASE_URL) {
-  console.log("ℹ️  Using in-memory storage (DATABASE_URL not set)");
-} else {
+// Normalize env loading for local dev
+const hasDbUrl = typeof process.env.DATABASE_URL === 'string' && process.env.DATABASE_URL.trim().length > 0;
+
+if (hasDbUrl) {
   poolInstance = new Pool({ connectionString: process.env.DATABASE_URL });
   dbInstance = drizzle({ client: poolInstance as any, schema });
   try {
@@ -23,6 +24,8 @@ if (!process.env.DATABASE_URL) {
   } catch {
     // ignore if pool doesn't support events
   }
+} else {
+  console.log("ℹ️  Using in-memory storage (DATABASE_URL not set)");
 }
 
 export const pool = poolInstance as unknown as Pool;

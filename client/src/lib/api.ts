@@ -32,10 +32,14 @@ class ApiClient {
   private async makeRequest(endpoint: string, options: ApiOptions = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = await this.getAuthHeaders();
+    // Correlate client <-> server logs
+    const clientRequestId = (globalThis as any).crypto?.randomUUID?.() 
+      ? (globalThis as any).crypto.randomUUID()
+      : `${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
     
     const config: RequestInit = {
       method: options.method || 'GET',
-      headers: { ...headers, ...options.headers },
+      headers: { 'X-Request-Id': clientRequestId, ...headers, ...options.headers },
       credentials: 'include',
     };
 
@@ -43,21 +47,37 @@ class ApiClient {
       config.body = JSON.stringify(options.body);
     }
 
+    const start = performance.now();
+    console.debug('[api] →', options.method || 'GET', endpoint, { clientRequestId });
     const response = await fetch(url, config);
+    const durationMs = Math.round(performance.now() - start);
     
     // Check for claims-updated header
     const actionHeader = response.headers.get('X-Action');
     if (actionHeader === 'claims-updated') {
       // Refresh Firebase ID token to get updated claims
       await auth.currentUser?.getIdToken(true);
+      console.debug('[api] ↺ claims-updated, refreshed ID token', { clientRequestId });
+      
+      // Trigger a custom event to notify useAuth to refetch user data
+      window.dispatchEvent(new CustomEvent('auth-claims-updated'));
     }
 
     // Capture request ID for debugging
-    const requestId = response.headers.get('X-Request-Id');
+    const requestId = response.headers.get('X-Request-Id') || clientRequestId;
+    console.debug('[api] ←', response.status, endpoint, { requestId, durationMs });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      const errorText = await response.text().catch(() => '');
+      let errorMessage = '';
+      try {
+        const json = JSON.parse(errorText);
+        errorMessage = json?.message || json?.error || '';
+      } catch {
+        errorMessage = errorText || '';
+      }
+      console.error('[api] ✖', endpoint, { status: response.status, requestId, error: errorMessage });
+      throw new Error(errorMessage || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     return {

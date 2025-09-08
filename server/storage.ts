@@ -311,7 +311,7 @@ export class MemStorage implements IStorage {
     const mockServices = [
       // House Cleaning Services
       {
-        providerId: 1,
+        providerId: 'provider-1',
         categoryId: 1,
         title: 'Premium House Cleaning',
         description: 'Deep cleaning service for your home with eco-friendly products',
@@ -325,7 +325,7 @@ export class MemStorage implements IStorage {
         images: ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop'],
       },
       {
-        providerId: 2,
+        providerId: 'provider-2',
         categoryId: 1,
         title: 'Express Cleaning Service',
         description: 'Quick and efficient home cleaning for busy professionals',
@@ -339,7 +339,7 @@ export class MemStorage implements IStorage {
         images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop'],
       },
       {
-        providerId: 3,
+        providerId: 'provider-3',
         categoryId: 1,
         title: 'Deep Clean Specialists',
         description: 'Thorough deep cleaning with specialized equipment',
@@ -354,7 +354,7 @@ export class MemStorage implements IStorage {
       },
       // Plumbing Services
       {
-        providerId: 4,
+        providerId: 'provider-4',
         categoryId: 2,
         title: 'Emergency Plumbing',
         description: '24/7 emergency plumbing services for urgent repairs',
@@ -368,7 +368,7 @@ export class MemStorage implements IStorage {
         images: ['https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800&h=400&fit=crop'],
       },
       {
-        providerId: 5,
+        providerId: 'provider-5',
         categoryId: 2,
         title: 'Residential Plumbing Pro',
         description: 'Expert residential plumbing installation and repair',
@@ -383,7 +383,7 @@ export class MemStorage implements IStorage {
       },
       // Electrical Services
       {
-        providerId: 6,
+        providerId: 'provider-6',
         categoryId: 3,
         title: 'Licensed Electrician',
         description: 'Professional electrical installations and safety inspections',
@@ -497,6 +497,120 @@ export class MemStorage implements IStorage {
         reviewCount: 124,
         images: ['https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop'],
       },
+      
+      // Additional Test Services for AI Testing
+      {
+        providerId: 'provider-3',
+        categoryId: 2, // Plumbing
+        title: 'Emergency Plumbing Repair',
+        description: 'Fast response emergency plumbing services available 24/7',
+        price: '75.00',
+        priceType: 'hourly',
+        duration: 60,
+        location: 'All Areas',
+        status: 'approved',
+        rating: '4.8',
+        reviewCount: 156,
+        images: ['https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 'provider-4',
+        categoryId: 3, // Electrical
+        title: 'Home Electrical Wiring',
+        description: 'Professional electrical wiring installation and repairs',
+        price: '85.00',
+        priceType: 'hourly',
+        duration: 120,
+        location: 'Suburban Areas',
+        status: 'approved',
+        rating: '4.9',
+        reviewCount: 203,
+        images: ['https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 'provider-5',
+        categoryId: 4, // Delivery
+        title: 'Same Day Delivery Service',
+        description: 'Fast and reliable same-day delivery for packages and documents',
+        price: '15.00',
+        priceType: 'fixed',
+        duration: 30,
+        location: 'City Wide',
+        status: 'approved',
+        rating: '4.6',
+        reviewCount: 89,
+        images: ['https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 'provider-6',
+        categoryId: 5, // Maintenance
+        title: 'Appliance Repair Service',
+        description: 'Expert repair for washing machines, refrigerators, and other appliances',
+        price: '65.00',
+        priceType: 'hourly',
+        duration: 90,
+        location: 'Metro Area',
+        status: 'approved',
+        rating: '4.7',
+        reviewCount: 134,
+        images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 1,
+        categoryId: 1, // Cleaning
+        title: 'Office Cleaning Service',
+        description: 'Professional office cleaning for small to medium businesses',
+        price: '45.00',
+        priceType: 'hourly',
+        duration: 180,
+        location: 'Business District',
+        status: 'approved',
+        rating: '4.8',
+        reviewCount: 78,
+        images: ['https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 2,
+        categoryId: 6, // Painting
+        title: 'Interior Design & Painting',
+        description: 'Complete interior painting with color consultation included',
+        price: '42.00',
+        priceType: 'hourly',
+        duration: 240,
+        location: 'Residential Areas',
+        status: 'approved',
+        rating: '4.9',
+        reviewCount: 167,
+        images: ['https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 'provider-3',
+        categoryId: 2, // Plumbing
+        title: 'Bathroom Installation',
+        description: 'Complete bathroom renovation and plumbing installation',
+        price: '95.00',
+        priceType: 'hourly',
+        duration: 360,
+        location: 'All Areas',
+        status: 'approved',
+        rating: '4.8',
+        reviewCount: 92,
+        images: ['https://images.unsplash.com/photo-1620626011761-996317b8d101?w=800&h=400&fit=crop'],
+      },
+      {
+        providerId: 'provider-4',
+        categoryId: 3, // Electrical
+        title: 'Smart Home Setup',
+        description: 'Installation of smart home devices and automation systems',
+        price: '120.00',
+        priceType: 'hourly',
+        duration: 180,
+        location: 'Tech Districts',
+        status: 'approved',
+        rating: '4.9',
+        reviewCount: 145,
+        images: ['https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=400&fit=crop'],
+      },
     ];
 
     mockServices.forEach(service => {
@@ -553,7 +667,8 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = (this.currentUserId++).toString();
+    // Use provided ID (Firebase UID) or generate new one as fallback
+    const id = insertUser.id || (this.currentUserId++).toString();
     const user: User = {
       id,
       email: insertUser.email ?? null,
@@ -572,7 +687,22 @@ export class MemStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const existingUser = await this.getUser(userData.id);
+    // First try to find by ID (Firebase UID)
+    let existingUser = await this.getUser(userData.id);
+    
+    // If not found by ID, try to find by email to handle duplicates
+    if (!existingUser && userData.email) {
+      const allUsers = Array.from(this.users.values());
+      existingUser = allUsers.find(u => u.email?.toLowerCase() === userData.email?.toLowerCase());
+      
+      // If found by email but different ID, update the ID to Firebase UID
+      if (existingUser && existingUser.id !== userData.id) {
+        this.users.delete(existingUser.id);
+        existingUser = { ...existingUser, id: userData.id };
+        this.users.set(userData.id, existingUser);
+      }
+    }
+    
     if (existingUser) {
       return await this.updateUser(userData.id, userData) || existingUser;
     } else {

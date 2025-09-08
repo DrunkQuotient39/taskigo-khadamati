@@ -276,6 +276,11 @@ app.use('/api/bookings', bookingsRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/ai-actions', aiActionsRouter);
 
+// API 404 safeguard: ensure unknown /api routes return JSON (before static fallback)
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'Not Found', path: req.originalUrl });
+});
+
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   // Try multiple possible paths for the built frontend
@@ -335,6 +340,7 @@ if (process.env.NODE_ENV === 'production') {
         path: searchPath,
         error: e instanceof Error ? e.message : String(e)
       });
+    }
   if (staticPath) {
     app.use(express.static(staticPath));
 
@@ -362,10 +368,9 @@ if (process.env.NODE_ENV === 'production') {
     });
   }
 }
-}
 
 // In development, provide a friendly root message instead of 404
-if (process.env.NODE_ENV === 'development') {
+if ((process.env.NODE_ENV as string) === 'development') {
   app.get('/', (req, res) => {
     res.status(200).json({
       message: 'Taskigo API (dev) running',

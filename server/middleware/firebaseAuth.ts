@@ -7,10 +7,24 @@ import { verifyToken } from './auth';
 let initialized = false;
 function initFirebase() {
   if (initialized) return;
+
+  // If an app already exists anywhere, mark initialized and reuse it
+  try {
+    if (admin.apps && admin.apps.length > 0) {
+      initialized = true;
+      try {
+        const appProject = (admin.app().options as any)?.projectId;
+        console.log('[Auth] FirebaseAdmin already initialized', { projectId: appProject });
+      } catch {}
+      return;
+    }
+  } catch {}
+
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  // Render/Firebase keys often use literal \n sequences; convert them to real newlines
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  // Normalize private key: strip wrapping quotes and convert literal \n
+  const rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+  const privateKey = rawPrivateKey.replace(/^"([\s\S]*)"$/m, '$1').replace(/\\n/g, '\n');
   const storageBucket = process.env.FIREBASE_STORAGE_BUCKET; // e.g. your-project.appspot.com
 
   if (!projectId || !clientEmail || !privateKey) {
@@ -18,19 +32,30 @@ function initFirebase() {
     return;
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
-    ...(storageBucket ? { storageBucket } : {}),
-  });
-  initialized = true;
   try {
-    const appProject = (admin.app().options as any)?.projectId;
-    console.log('[Auth] FirebaseAdmin initialized', { projectId: appProject });
-  } catch {}
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+      ...(storageBucket ? { storageBucket } : {}),
+    });
+    initialized = true;
+    try {
+      const appProject = (admin.app().options as any)?.projectId;
+      console.log('[Auth] FirebaseAdmin initialized', { projectId: appProject });
+    } catch {}
+  } catch (e: any) {
+    // If another part of the app already initialized, accept and proceed
+    const message: string = e?.message || '';
+    if (message.includes('already exists')) {
+      initialized = true;
+      console.warn('[Auth] FirebaseAdmin duplicate init detected, reusing existing app');
+      return;
+    }
+    console.error('[Auth] FirebaseAdmin init failed', { message });
+  }
 }
 
 export interface FirebaseAuthRequest extends Request {

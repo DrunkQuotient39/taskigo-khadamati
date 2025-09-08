@@ -23,6 +23,8 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
   
   // Get user via Firebase-backed auth hook
   const { user } = useAuth();
+  const fbEmail = auth.currentUser?.email || undefined;
+  const isSignedIn = !!user || !!fbEmail;
   
   // Check for direct admin access
   const [hasDirectAdminAccess, setHasDirectAdminAccess] = useState(false);
@@ -60,12 +62,15 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
     refetchInterval: 60000, // Refetch every minute
   });
 
-  const navItems = [
+  const baseNavItems = [
     { href: '/', label: t('nav.home', messages, 'Home') },
+    { href: '/bookings', label: 'Bookings' },
     { href: '/services', label: t('nav.services', messages, 'Services') },
     { href: '/about', label: t('nav.about', messages, 'About') },
     { href: '/contact', label: t('nav.contact', messages, 'Contact') },
   ];
+  const isAdmin = (user?.role === 'admin') || hasDirectAdminAccess;
+  const navItems = isAdmin ? [...baseNavItems, { href: '/admin', label: 'Admin' }] : baseNavItems;
 
   const isActive = (href: string) => {
     if (href === '/') return location === '/';
@@ -114,7 +119,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
             />
 
             {/* Notifications */}
-            {user && (
+            {isSignedIn && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
@@ -208,10 +213,10 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
             )}
 
             {/* User Menu */}
-            {user || hasDirectAdminAccess ? (
+            {isSignedIn || hasDirectAdminAccess ? (
               <div className="flex items-center space-x-2">
                 {/* Become a Provider button for regular users */}
-                {user && user.role !== 'provider' && user.role !== 'admin' && !hasDirectAdminAccess && (
+                {(isSignedIn && !isAdmin && (!user || (user.role !== 'provider'))) && (
                   <Link href="/provider-signup">
                     <Button 
                       variant="outline" 
@@ -223,13 +228,24 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     </Button>
                   </Link>
                 )}
+                {user && user.role === 'provider' && (
+                  <Link href="/provider-dashboard">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-khadamati-blue text-khadamati-blue hover:bg-khadamati-blue hover:text-white hidden md:flex"
+                    >
+                      Upload a Service
+                    </Button>
+                  </Link>
+                )}
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2">
                       <User className="h-5 w-5" />
                       <span className="hidden sm:inline text-sm text-khadamati-gray max-w-[160px] truncate">
-                        {(user?.role === 'admin' || hasDirectAdminAccess) ? 'Admin' : (user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email || 'Account')}
+                        {(user?.role === 'admin' || hasDirectAdminAccess) ? 'Admin' : (user?.firstName ? `${user.firstName} ${user.lastName || ''}` : (user?.email || fbEmail) || 'Account')}
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -256,7 +272,7 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                     )}
                     
                     {/* Become a Provider menu item for mobile */}
-                    {user && user.role !== 'provider' && user.role !== 'admin' && !hasDirectAdminAccess && (
+                    {(isSignedIn && !hasDirectAdminAccess && (!user || (user.role !== 'provider' && user.role !== 'admin'))) && (
                       <DropdownMenuItem asChild>
                         <Link href="/provider-signup">
                           {t('nav.become_provider', messages, 'Become a Provider')}

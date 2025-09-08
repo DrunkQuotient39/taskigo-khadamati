@@ -7,7 +7,8 @@ import { Messages, t } from '@/lib/i18n';
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, auth, resetPassword } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginProps {
   messages: Messages;
@@ -20,6 +21,18 @@ export default function Login({ messages }: LoginProps) {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
+
+  // If already authenticated, redirect away from login unless ?stay=1
+  useEffect(() => {
+    const params = new URL(window.location.href).searchParams;
+    const stay = params.get('stay');
+    if (stay === '1' || stay === 'true') return;
+    if (isAuthenticated && user) {
+      const isAdmin = user.role === 'admin' || (user.email?.toLowerCase?.() === 'taskigo.khadamati@gmail.com');
+      setLocation(isAdmin ? '/admin' : '/');
+    }
+  }, [isAuthenticated, user, setLocation]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -84,9 +97,7 @@ export default function Login({ messages }: LoginProps) {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={async () => {
                       try {
-                        console.log('Attempting to sign in with Google');
                         await signInWithGoogle();
-                        console.log('Google sign in successful');
                         
                         toast({ 
                           title: 'Welcome back', 
@@ -95,12 +106,9 @@ export default function Login({ messages }: LoginProps) {
                         
                         // Get the current user
                         const currentUser = auth.currentUser;
-                        console.log('Current user after Google sign-in:', currentUser?.email);
                         
                         // Use a more direct approach for redirection
-                        console.log('Sign in successful, getting user token');
                         const idToken = await auth.currentUser?.getIdToken(true);
-                        console.log('Got ID token, length:', idToken?.length);
                         
                         // Make a direct API call to get user data
                         try {
@@ -114,19 +122,15 @@ export default function Login({ messages }: LoginProps) {
                           
                           if (res.ok) {
                             const userData = await res.json();
-                            console.log('User data from API:', userData);
                             
                             // Redirect based on role
                             if (userData?.role === 'admin' || 
                                 auth.currentUser?.email?.toLowerCase() === 'taskigo.khadamati@gmail.com') {
-                              console.log('Redirecting admin to admin panel');
                               window.location.href = '/admin';
                             } else {
-                              console.log('Redirecting user to home page');
                               window.location.href = '/';
                             }
                           } else {
-                            console.log('API response not OK:', res.status);
                             // Fallback to email check
                             if (auth.currentUser?.email?.toLowerCase() === 'taskigo.khadamati@gmail.com') {
                               window.location.href = '/admin';
@@ -135,7 +139,6 @@ export default function Login({ messages }: LoginProps) {
                             }
                           }
                         } catch (apiError) {
-                          console.error('Error fetching user data after login:', apiError);
                           // Fallback redirect
                           window.location.href = '/';
                         }
@@ -285,16 +288,13 @@ export default function Login({ messages }: LoginProps) {
                       }
                       
                       try {
-                        console.log('Attempting to sign in with email:', email);
+                        // Minimal logging
                         
                         // Special handling for admin account
                         if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
                           try {
-                            console.log('Attempting to sign in admin account');
                             await signInWithEmail(email, password);
-                            console.log('Admin sign in successful');
                           } catch (adminError: any) {
-                            console.error('Admin login error:', adminError.code);
                             
                             // For admin account, provide more specific error message
                             if (adminError.code === 'auth/invalid-credential' || 
@@ -306,21 +306,14 @@ export default function Login({ messages }: LoginProps) {
                               });
                               return; // Stop execution here
                             } else if (adminError.code === 'auth/user-not-found') {
-                              console.log('Admin account not found, attempting to create it');
                               try {
                                 // Don't try to create admin account on live server
-                                console.log('Admin account creation skipped - account already exists');
-                                console.log('Admin account created successfully');
-                                
-                                // Don't try to sign in automatically
-                                console.log('Please try signing in with the correct admin password');
                                 
                                 toast({
                                   title: 'Admin Account',
                                   description: 'Use the reset password button below'
                                 });
                               } catch (createError: any) {
-                                console.error('Failed to create admin account:', createError);
                                 if (createError.code === 'auth/email-already-in-use') {
                                   toast({
                                     title: 'Admin Authentication Error',
@@ -338,7 +331,6 @@ export default function Login({ messages }: LoginProps) {
                         } else {
                           // Normal sign in for non-admin users
                           await signInWithEmail(email, password);
-                          console.log('Sign in successful');
                         }
                         
                         toast({ 
@@ -347,9 +339,7 @@ export default function Login({ messages }: LoginProps) {
                         });
                         
                         // Use a more direct approach for redirection
-                        console.log('Email sign in successful, getting user token');
                         const idToken = await auth.currentUser?.getIdToken(true);
-                        console.log('Got ID token, length:', idToken?.length);
                         
                         // Make a direct API call to get user data
                         try {
@@ -363,19 +353,15 @@ export default function Login({ messages }: LoginProps) {
                           
                           if (res.ok) {
                             const userData = await res.json();
-                            console.log('User data from API:', userData);
                             
                             // Redirect based on role
                             if (userData?.role === 'admin' || 
                                 email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
-                              console.log('Redirecting admin to admin panel');
                               window.location.href = '/admin';
                             } else {
-                              console.log('Redirecting user to home page');
                               window.location.href = '/';
                             }
                           } else {
-                            console.log('API response not OK:', res.status);
                             // Fallback to email check
                             if (email.toLowerCase() === 'taskigo.khadamati@gmail.com') {
                               window.location.href = '/admin';
@@ -384,7 +370,6 @@ export default function Login({ messages }: LoginProps) {
                             }
                           }
                         } catch (apiError) {
-                          console.error('Error fetching user data after email login:', apiError);
                           // Fallback redirect
                           window.location.href = '/';
                         }

@@ -2,10 +2,10 @@
   "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
+    "target": "es2017",
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
-    "target": "ES2022",
     "module": "ESNext",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
@@ -21,6 +21,6 @@
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "types": ["vite/client"]
+    "types": []
   }
 }

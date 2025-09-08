@@ -120,7 +120,11 @@ router.get('/client/:clientId', async (req: AuthRequest, res) => {
     const userId = req.user!.id;
     
     // Users can only see their own bookings unless they're admin
-    if (userId !== clientId && req.user!.role !== 'admin') {
+    // Accept both database ID and Firebase UID for clientId parameter
+    const userFirebaseUid = (req as any).firebaseUser?.uid;
+    const isOwnBookings = userId === clientId || userFirebaseUid === clientId;
+    
+    if (!isOwnBookings && req.user!.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
