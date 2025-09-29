@@ -12,7 +12,7 @@ import fs from 'fs';
 import { requestId } from './middleware/requestId';
 import { log, accessLog } from './middleware/log';
 import { notFoundHandler, globalErrorHandler } from './middleware/errorHandler';
-import { ensureAuditLogTable, ensureProvidersTable } from './db/ensureSchema';
+import { ensureAuditLogTable, ensureProvidersTable, ensureCoreTables } from './db/ensureSchema';
 import { getFirestore } from './storage/firestore';
 import admin from 'firebase-admin';
 
@@ -92,6 +92,7 @@ if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && proc
 // Database schema validation (optional for development)
 if (process.env.DATABASE_URL) {
   ensureAuditLogTable()
+    .then(() => ensureCoreTables())
     .then(() => ensureProvidersTable())
     .then(() => {
       log('info', 'startup.schema.ok', {});
@@ -137,7 +138,9 @@ app.use(helmet({
         "wss://*.firebaseio.com",
         "https://*.firebaseio.com"
       ],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrc: process.env.NODE_ENV === 'production'
+        ? ["'self'", "'unsafe-inline'"]
+        : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
       fontSrc: ["'self'", "https:", "data:"],
@@ -207,7 +210,12 @@ app.get('/readyz', async (req, res) => {
       return res.status(503).json({ status: 'unhealthy', neon: 'unavailable' });
     }
 
-    await (pool as any).query('SELECT 1');
+    try {
+      await (pool as any).query('SELECT 1');
+    } catch (e: any) {
+      log('warn', 'readyz.neon.query_fail', { requestId, error: e?.message });
+      return res.json({ status: 'degraded', firebase: firebaseStatus, neon: 'unavailable', timestamp: new Date().toISOString() });
+    }
 
     log('info', 'readyz.ok', { requestId });
     res.json({ status: 'healthy', firebase: firebaseStatus, neon: 'ok', timestamp: new Date().toISOString() });
@@ -265,6 +273,7 @@ import servicesRouter from './routes/services';
 import bookingsRouter from './routes/bookings';
 import uploadsRouter from './routes/uploads';
 import aiActionsRouter from './routes/ai-actions';
+import notificationsRouter from './routes/notifications';
 
 app.use('/api/auth', authRouter);
 app.use('/api/providers', providersRouter);
@@ -275,6 +284,7 @@ app.use('/api/services', servicesRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/ai-actions', aiActionsRouter);
+app.use('/api/notifications', notificationsRouter);
 
 // API 404 safeguard: ensure unknown /api routes return JSON (before static fallback)
 app.use('/api', (req, res) => {

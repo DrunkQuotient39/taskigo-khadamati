@@ -5,6 +5,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { Calendar, DollarSign, Star, Briefcase, TrendingUp, Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { auth } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,6 +22,20 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [newService, setNewService] = useState({
+    title: '',
+    description: '',
+    price: '',
+    priceType: 'hourly',
+    duration: 60,
+    categoryId: 1,
+    location: '',
+    imageUrl: ''
+  });
   
   // Check if user is authenticated and is an approved provider
   useEffect(() => {
@@ -57,6 +74,54 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
       return res.json();
     }
   });
+
+  // Load categories for create form
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/service-categories', { credentials: 'include' });
+        const data = await res.json();
+        if (Array.isArray(data)) setCategories(data);
+      } catch {}
+    })();
+  }, []);
+
+  const submitNewService = async () => {
+    try {
+      setCreating(true);
+      setCreateError(null);
+      const fb = auth.currentUser;
+      if (!fb) throw new Error('Not authenticated');
+      const idToken = await fb.getIdToken(true);
+      const payload: any = {
+        title: newService.title,
+        description: newService.description,
+        price: newService.price,
+        priceType: newService.priceType,
+        duration: Number(newService.duration),
+        categoryId: Number(newService.categoryId),
+        location: newService.location,
+        images: newService.imageUrl ? [newService.imageUrl] : [],
+        availability: {}
+      };
+      const res = await fetch('/api/services/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || 'Failed to create service');
+      setIsCreateOpen(false);
+      setNewService({ title: '', description: '', price: '', priceType: 'hourly', duration: 60, categoryId: 1, location: '', imageUrl: '' });
+      // simple refresh
+      window.location.reload();
+    } catch (e: any) {
+      setCreateError(e?.message || 'Failed to create service');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   
 
@@ -263,10 +328,62 @@ export default function ProviderDashboard({ messages }: ProviderDashboardProps) 
                 <CardTitle className="text-2xl font-bold text-khadamati-dark">
                   {messages.provider_dashboard?.services || 'My Services'}
                 </CardTitle>
-                <Button className="bg-khadamati-blue hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {messages.provider_dashboard?.add_service || 'Add Service'}
-                </Button>
+                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-khadamati-blue hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      {messages.provider_dashboard?.add_service || 'Add Service'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                      <DialogTitle>Submit a New Service (Pending Admin Approval)</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm text-khadamati-gray">Title</label>
+                        <Input value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} placeholder="Service title" />
+                      </div>
+                      <div>
+                        <label className="text-sm text-khadamati-gray">Description</label>
+                        <textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full p-2 border rounded" rows={3} placeholder="Describe the service" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm text-khadamati-gray">Price</label>
+                          <Input value={newService.price} onChange={(e) => setNewService({ ...newService, price: e.target.value })} placeholder="39.00" />
+                        </div>
+                        <div>
+                          <label className="text-sm text-khadamati-gray">Duration (min)</label>
+                          <Input value={newService.duration} onChange={(e) => setNewService({ ...newService, duration: Number(e.target.value || 60) })} placeholder="60" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm text-khadamati-gray">Category</label>
+                          <select className="w-full p-2 border rounded" value={newService.categoryId} onChange={(e) => setNewService({ ...newService, categoryId: Number(e.target.value) })}>
+                            {categories.map((c: any) => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm text-khadamati-gray">Location</label>
+                          <Input value={newService.location} onChange={(e) => setNewService({ ...newService, location: e.target.value })} placeholder="City / Area" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm text-khadamati-gray">Primary Image URL</label>
+                        <Input value={newService.imageUrl} onChange={(e) => setNewService({ ...newService, imageUrl: e.target.value })} placeholder="https://..." />
+                      </div>
+                      {createError && <div className="text-sm text-red-600">{createError}</div>}
+                      <div className="flex justify-end gap-2 pt-2">
+                        <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                        <Button onClick={submitNewService} disabled={creating} className="bg-khadamati-blue">{creating ? 'Submitting...' : 'Submit for Review'}</Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent>

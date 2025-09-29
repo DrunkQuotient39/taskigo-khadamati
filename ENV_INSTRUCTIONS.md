@@ -30,6 +30,7 @@ Create a `.env` file in the project root directory with the following variables:
 |----------|-------------|---------------|---------|
 | `OLLAMA_BASE_URL` | URL for the Ollama API | Your Ollama server address | `https://ollama.taskigo.net` |
 | `OLLAMA_MODEL` | Name of the Ollama model to use | Available on your Ollama server | `qwen2:7b-instruct` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key (primary AI) | Google AI Studio | `AIza...` |
 | `OPENAI_API_KEY` | OpenAI API key (optional backup) | OpenAI dashboard | `sk-...` |
 
 ### Security
@@ -38,6 +39,8 @@ Create a `.env` file in the project root directory with the following variables:
 |----------|-------------|---------------|---------|
 | `JWT_SECRET` | Secret for JWT token signing | Generate a secure random string | `30-50 character random string` |
 | `COOKIE_SECRET` | Secret for cookie signing | Generate a secure random string | `30-50 character random string` |
+| `ALLOW_DIRECT_ADMIN` | Enable direct admin login in production | Set to `true` only if needed | `false` |
+| `ADMIN_DIRECT_KEY` | Secret key for direct admin login | Generate securely | `super-secret-admin-key` |
 
 ### Optional: Email Configuration
 

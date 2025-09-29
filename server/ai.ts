@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { Anthropic } from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 // Removed: import natural from 'natural';
 import { Service, ServiceCategory, User } from '../shared/schema';
 import { WEBSITE_KNOWLEDGE_EN, WEBSITE_KNOWLEDGE_AR } from './knowledge/websiteContent';
@@ -16,6 +17,11 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 }) : null;
+
+// Initialize Google Gemini (primary)
+const genAI = process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY)
+  : null;
 
 // NLP Tokenizer for text analysis (safe fallback without natural)
 // Simple tokenization and stemming if 'natural' is unavailable at runtime
@@ -381,7 +387,23 @@ ${knowledgeToInclude}
         { role: 'user', content: message },
       ];
 
-      // Try OpenAI first, then Ollama, then fallback responses
+      // Try Gemini first, then OpenAI, then Ollama
+      if (genAI) {
+        try {
+          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          const geminiSystem = (messages.find(m => (m as any).role === 'system') as any)?.content || '';
+          const prompt = `${geminiSystem}\n\nUser: ${message}`;
+          const resp: any = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }]}],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 220 },
+          } as any);
+          const text = resp?.response?.candidates?.[0]?.content?.parts?.[0]?.text || resp?.response?.text || '';
+          if (text) return text;
+        } catch (e: any) {
+          console.warn('Gemini failed, falling back to OpenAI/Ollama:', e?.message);
+        }
+      }
+
       if (openai) {
         const response = await openai.chat.completions.create({
           model: 'gpt-4o-mini',
@@ -1159,21 +1181,36 @@ You must respond in JSON format with:
 Knowledge:
 ${WEBSITE_KNOWLEDGE_EN}`;
 
-      if (!openai) {
-        throw new Error('OpenAI not configured');
+      // Prefer Gemini as primary
+      if (genAI) {
+        try {
+          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          const prompt = `${kbEnforcedPrompt}\n\nUser: ${query}`;
+          const resp: any = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }]}],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 260 },
+          } as any);
+          const text = resp?.response?.candidates?.[0]?.content?.parts?.[0]?.text || resp?.response?.text || '';
+          if (text) return text;
+        } catch {}
       }
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: kbEnforcedPrompt },
-          { role: "user", content: query }
-        ],
-        temperature: 0.3,
-        max_tokens: 250,
-      });
+      if (openai) {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: kbEnforcedPrompt },
+            { role: "user", content: query }
+          ],
+          temperature: 0.3,
+          max_tokens: 250,
+        });
 
-      return response.choices[0].message.content || "I'd be happy to help you with that. Could you provide more details?";
+        return response.choices[0].message.content || "I'd be happy to help you with that. Could you provide more details?";
+      }
+
+      // Final fallback when no providers are available
+      return "Thank you for your question. Our team will get back to you soon.";
     } catch (error) {
       console.error('Auto-response error:', error);
       return "Thank you for your question. Our team will get back to you soon.";

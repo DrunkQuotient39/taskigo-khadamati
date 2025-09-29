@@ -124,9 +124,9 @@ export default function Header({ currentLanguage, onLanguageChange, messages }: 
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
                     <Bell className="h-5 w-5" />
-                    {((notificationsData?.unreadCount || 0) > 0 || user?.role === 'admin') && (
+                    {((notificationsData?.unreadCount || 0) > 0) && (
                       <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-khadamati-error text-white">
-                        {user?.role === 'admin' ? '1' : (notificationsData?.unreadCount > 99 ? '99+' : notificationsData?.unreadCount)}
+                        {(notificationsData?.unreadCount > 99 ? '99+' : notificationsData?.unreadCount)}
                       </Badge>
                     )}
                   </Button>

@@ -295,6 +295,13 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
                   </Badge>
                 )}
               </Button>
+              <Button 
+                variant={activeTab === 'applications' ? 'default' : 'ghost'} 
+                onClick={() => setActiveTab('applications')}
+                className={`rounded-none border-b-2 ${activeTab === 'applications' ? 'border-blue-500' : 'border-transparent'}`}
+              >
+                Applications Archive
+              </Button>
             </div>
           </ScrollReveal>
         </div>
@@ -835,7 +842,78 @@ export default function AdminPanel({ messages }: AdminPanelProps) {
             </ScrollReveal>
           </div>
         )}
+
+        {/* Applications Archive */}
+        {activeTab === 'applications' && (
+          <div className="mt-6">
+            <ScrollReveal>
+              <Card className="bg-white shadow-lg border-0">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-khadamati-dark">
+                    Applications Archive
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ArchiveList />
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function ArchiveList() {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const fbUser = auth.currentUser;
+        if (!fbUser) throw new Error('Not authenticated');
+        const idToken = await fbUser.getIdToken(true);
+        const res = await fetch('/api/admin/applications', {
+          headers: { Authorization: `Bearer ${idToken}` },
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || 'Failed to load applications');
+        setItems(data.applications || []);
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load applications');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) return <div className="text-khadamati-gray">Loading...</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
+
+  if (items.length === 0) {
+    return <div className="text-khadamati-gray">No applications found.</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {items.map((app: any) => (
+        <div key={app.id} className="p-4 border rounded-md flex items-center justify-between">
+          <div>
+            <div className="font-semibold">{app.companyName || app.businessName || 'Company'}</div>
+            <div className="text-sm text-khadamati-gray">{app.city || 'Unknown City'} • {app.status || 'pending'}</div>
+            {app.idCardImageUrl && (
+              <div className="mt-2">
+                <img src={app.idCardImageUrl} alt="id" className="h-16 rounded border" />
+              </div>
+            )}
+          </div>
+          <a className="text-blue-600 text-sm" href={`/admin/applications/${app.userId || app.id}`}>View</a>
+        </div>
+      ))}
     </div>
   );
 }

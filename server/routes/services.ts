@@ -63,7 +63,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// Create new service (providers only)
+// Create new service (providers only) — enters 'pending' status for admin review
 router.post('/create', firebaseAuthenticate as any, authorize('provider'), validate([
   serviceValidation.title,
   serviceValidation.description,
@@ -140,7 +140,7 @@ router.post('/create', firebaseAuthenticate as any, authorize('provider'), valid
     });
 
     res.status(201).json({
-      message: 'Service created successfully and is pending approval',
+      message: 'Service submitted and is pending admin approval',
       service: {
         id: service.id,
         title: service.title,

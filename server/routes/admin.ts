@@ -152,40 +152,99 @@ router.post('/applications/:uid/revoke', async (req: Request, res: Response) => 
 router.get('/users', async (req: Request, res: Response) => {
   try {
     const { role, status, search, limit = 50, offset = 0 } = req.query;
-    
-    let users = await storage.getUsers();
-    
+
+    // Fetch all users and dedupe by id|email on server side
+    const raw = await storage.getUsers();
+    const seen = new Set<string>();
+    let users = raw.filter(u => {
+      const key = `${u.id || ''}|${(u.email || '').toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     if (role) {
       users = users.filter(u => u.role === role);
     }
-    
+
     if (status === 'active') {
       users = users.filter(u => u.isActive);
     } else if (status === 'inactive') {
       users = users.filter(u => !u.isActive);
     }
-    
+
     if (search && typeof search === 'string') {
-      const searchLower = search.toLowerCase();
-      users = users.filter(u => 
-        u.email?.toLowerCase().includes(searchLower) ||
-        u.firstName?.toLowerCase().includes(searchLower) ||
-        u.lastName?.toLowerCase().includes(searchLower)
+      const s = search.toLowerCase();
+      users = users.filter(u =>
+        (u.email || '').toLowerCase().includes(s) ||
+        (u.firstName || '').toLowerCase().includes(s) ||
+        (u.lastName || '').toLowerCase().includes(s)
       );
     }
 
+    // Augment presence info using sessions if available
+    const withPresence = await Promise.all(users.map(async (u) => {
+      try {
+        const sessions = await storage.getUserSessions?.(u.id);
+        const recent = Array.isArray(sessions) ? sessions
+          .filter(s => s.isActive)
+          .sort((a, b) => new Date(b.lastActivity || b.createdAt || 0).getTime() - new Date(a.lastActivity || a.createdAt || 0).getTime()) : [];
+        const last = recent[0]?.lastActivity || recent[0]?.createdAt || null;
+        const isOnline = last ? (Date.now() - new Date(last as any).getTime()) < 5 * 60 * 1000 : false;
+        return { ...u, lastActiveAt: last, isOnline };
+      } catch {
+        return { ...u, isOnline: false } as any;
+      }
+    }));
+
     const startIndex = parseInt(offset as string);
     const limitNum = parseInt(limit as string);
-    const paginatedUsers = users.slice(startIndex, startIndex + limitNum);
+    const paginatedUsers = withPresence.slice(startIndex, startIndex + limitNum);
 
     res.json({
       users: paginatedUsers,
-      totalCount: users.length,
-      hasMore: startIndex + limitNum < users.length
+      totalCount: withPresence.length,
+      hasMore: startIndex + limitNum < withPresence.length
     });
   } catch (error) {
     console.error('Get admin users error:', error);
     res.status(500).json({ message: 'Failed to get users' });
+  }
+});
+
+// List all provider applications (archive) with documents if Firestore configured
+router.get('/applications', async (req: Request, res: Response) => {
+  try {
+    const fs = getFirestore();
+    let applications: any[] = [];
+    if (fs) {
+      const snapshot = await fs.collection('provider_applications').get();
+      applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    // Also include legacy providers awaiting or processed from storage as a fallback archive
+    const providers = await storage.getProviders();
+    const legacy = providers.map(p => ({
+      id: String(p.id || p.userId),
+      userId: p.userId,
+      companyName: (p as any).businessName,
+      status: p.approvalStatus || 'pending',
+      createdAt: p.createdAt,
+      source: 'storage'
+    }));
+
+    // Prefer Firestore if present; merge unique by userId/id
+    const merged: Record<string, any> = {};
+    for (const a of [...applications, ...legacy]) {
+      const key = String(a.userId || a.id);
+      if (!merged[key]) merged[key] = a;
+    }
+
+    const list = Object.values(merged);
+    res.json({ applications: list, totalCount: list.length });
+  } catch (e) {
+    console.error('List applications error:', e);
+    res.status(500).json({ message: 'Failed to list applications' });
   }
 });
 
@@ -437,10 +496,23 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
         });
       }
 
-      // 3) Update user role in storage
+      // 3) Ensure user exists in storage and set role
       log('info', 'admin.approve.step', { requestId, uid, step: 'role_update' });
       try {
-        await storage.updateUser(uid, { role: 'provider' });
+        // Try update first
+        const updated = await storage.updateUser(uid, { role: 'provider', isActive: true });
+        if (!updated) {
+          // Upsert minimal user record if not present (common when user hasn't logged in yet)
+          await storage.upsertUser({
+            id: uid,
+            email: (appData?.email as string) || null as any,
+            firstName: (appData?.firstName as string) || 'Provider',
+            lastName: (appData?.lastName as string) || '',
+            role: 'provider',
+            isVerified: true,
+            isActive: true,
+          } as any);
+        }
         log('info', 'admin.approve.step', { requestId, uid, step: 'role_update', status: 'ok' });
       } catch (e: any) {
         log('warn', 'admin.approve.step', { 
@@ -503,9 +575,15 @@ router.post('/applications/:uid/approve', async (req: Request, res: Response) =>
       }
     }
 
-    // Step 5: Create notification for the applicant
+    // Step 5: Create notification for the applicant (ensure user exists first to avoid FK failure)
     log('info', 'admin.approve.step', { requestId, uid, step: 'notification_create' });
     try {
+      try {
+        const user = await storage.getUser(uid);
+        if (!user) {
+          await storage.upsertUser({ id: uid, role: approved ? 'provider' : 'client', isVerified: true, isActive: true } as any);
+        }
+      } catch {}
       const notification = await storage.createNotification({
         userId: uid,
         title: approved ? 'Provider Application Approved' : 'Provider Application Rejected',

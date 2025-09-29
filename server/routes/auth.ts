@@ -622,6 +622,19 @@ router.post('/direct-admin-login', authLimiter, async (req, res) => {
       });
     }
     
+    // Disallow in production unless env explicitly allows
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DIRECT_ADMIN !== 'true') {
+      logAuthEvent('warn', 'direct_admin_login_disabled', 'Direct admin login disabled in production', undefined, { requestId });
+      return res.status(403).json({ message: 'Direct admin access disabled', code: 'DISABLED', requestId });
+    }
+
+    // Require env secret match
+    const expectedKey = process.env.ADMIN_DIRECT_KEY;
+    if (!expectedKey || adminKey !== expectedKey) {
+      logAuthEvent('warn', 'direct_admin_login_bad_key', 'Invalid adminKey', undefined, { requestId });
+      return res.status(401).json({ message: 'Unauthorized access', code: 'INVALID_KEY', requestId });
+    }
+
     // Rate limiting - only allow 5 attempts per hour from an IP
     const clientIp = req.ip || '0.0.0.0';
     const hourlyKey = `admin_login_${clientIp}_${Math.floor(Date.now() / 3600000)}`;

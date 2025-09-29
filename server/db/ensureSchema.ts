@@ -66,4 +66,68 @@ export async function ensureAuditLogTable() {
   }
 }
 
+export async function ensureCoreTables() {
+  if (!pool) {
+    log('info', 'db.core_tables.skipped', { message: 'Database pool not available' });
+    return;
+  }
+
+  try {
+    // Users table (id primary)
+    await (pool as any).query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE,
+        first_name TEXT,
+        last_name TEXT,
+        profile_image_url TEXT,
+        role TEXT NOT NULL DEFAULT 'client',
+        language TEXT NOT NULL DEFAULT 'en',
+        is_verified BOOLEAN DEFAULT FALSE,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // Notifications table
+    await (pool as any).query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id BIGSERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id),
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        type TEXT NOT NULL,
+        is_read BOOLEAN DEFAULT FALSE,
+        metadata JSONB DEFAULT '{}',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // User sessions table
+    await (pool as any).query(`
+      CREATE TABLE IF NOT EXISTS user_sessions (
+        id BIGSERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id),
+        token TEXT NOT NULL,
+        device_info JSONB DEFAULT '{}',
+        ip_address TEXT,
+        user_agent TEXT,
+        is_active BOOLEAN DEFAULT TRUE,
+        expires_at TIMESTAMPTZ NOT NULL,
+        last_activity TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    log('info', 'db.core_tables.ready', {});
+  } catch (error: any) {
+    log('error', 'db.core_tables.fail', {
+      error: error.message,
+      code: error.code
+    });
+    throw error;
+  }
+}
+
 
