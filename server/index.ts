@@ -274,6 +274,7 @@ import bookingsRouter from './routes/bookings';
 import uploadsRouter from './routes/uploads';
 import aiActionsRouter from './routes/ai-actions';
 import notificationsRouter from './routes/notifications';
+import diagnosticsRouter from './routes/diagnostics';
 
 app.use('/api/auth', authRouter);
 app.use('/api/providers', providersRouter);
@@ -285,6 +286,7 @@ app.use('/api/bookings', bookingsRouter);
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/ai-actions', aiActionsRouter);
 app.use('/api/notifications', notificationsRouter);
+app.use('/api/diagnostics', diagnosticsRouter);
 
 // API 404 safeguard: ensure unknown /api routes return JSON (before static fallback)
 app.use('/api', (req, res) => {
