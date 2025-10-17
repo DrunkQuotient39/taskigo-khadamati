@@ -3,16 +3,15 @@ import admin from 'firebase-admin';
 import { getFirestore } from '../storage/firestore';
 import { log } from '../middleware/log';
 import { validateUserInput, containsPromptInjection } from '../guardrails';
+import { storage } from '../storage';
+import { isFirebaseStorageConfigured } from '../lib/uploads';
 import fetch from 'node-fetch';
 
 const router = Router();
 
 function bool(v: any): boolean { return v === true || v === 'true' || v === 1 || v === '1'; }
 
-router.get('/preflight', async (req, res) => {
-  const requestId = (req as any).requestId;
-  const startedAt = Date.now();
-
+export async function getPreflightChecks(): Promise<Record<string, any>> {
   const checks: Record<string, any> = {};
 
   // Firebase Admin
@@ -110,6 +109,45 @@ router.get('/preflight', async (req, res) => {
     } as any;
   } catch {}
 
+  // Env summary (presence only, no secrets)
+  try {
+    checks.env = {
+      DATABASE_URL: !!process.env.DATABASE_URL,
+      FIREBASE_PROJECT_ID: !!process.env.FIREBASE_PROJECT_ID,
+      FIREBASE_CLIENT_EMAIL: !!process.env.FIREBASE_CLIENT_EMAIL,
+      FIREBASE_PRIVATE_KEY: !!process.env.FIREBASE_PRIVATE_KEY,
+      FIREBASE_STORAGE_BUCKET: !!process.env.FIREBASE_STORAGE_BUCKET,
+      GOOGLE_GENERATIVE_AI_API_KEY: !!process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+      OLLAMA_BASE_URL: !!process.env.OLLAMA_BASE_URL,
+      OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
+      ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      SESSION_SECRET: !!process.env.SESSION_SECRET,
+      ADMIN_DIRECT_KEY: !!process.env.ADMIN_DIRECT_KEY
+    } as any;
+  } catch {}
+
+  // Storage/DB quick counts (best-effort)
+  try {
+    const [cats, services, bookings] = await Promise.all([
+      storage.getServiceCategories().catch(() => []),
+      storage.getServices({}).catch(() => []),
+      storage.getBookings().catch(() => [])
+    ]);
+    checks.storage = {
+      categoriesCount: Array.isArray(cats) ? cats.length : 0,
+      servicesCount: Array.isArray(services) ? services.length : 0,
+      bookingsCount: Array.isArray(bookings) ? bookings.length : 0
+    } as any;
+  } catch {}
+
+  // Firebase Storage bucket config
+  try {
+    checks.firebaseStorage = {
+      configured: isFirebaseStorageConfigured()
+    } as any;
+  } catch {}
+
   // CORS / Frontend URL
   try {
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -127,6 +165,15 @@ router.get('/preflight', async (req, res) => {
     JWT_SECRET: !!process.env.JWT_SECRET,
     AUTH_DEV_DECODE_FALLBACK: bool(process.env.AUTH_DEV_DECODE_FALLBACK),
   };
+
+  return checks;
+}
+
+router.get('/preflight', async (req, res) => {
+  const requestId = (req as any).requestId;
+  const startedAt = Date.now();
+
+  const checks = await getPreflightChecks();
 
   const durationMs = Date.now() - startedAt;
   log('info', 'diagnostics.preflight', { requestId, durationMs, checks });

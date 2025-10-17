@@ -16,8 +16,8 @@ import { ensureAuditLogTable, ensureProvidersTable, ensureCoreTables } from './d
 import { getFirestore } from './storage/firestore';
 import admin from 'firebase-admin';
 
-// Load environment variables
-config();
+// Load environment variables early and override any existing
+config({ override: true });
 
 // Environment validation - make optional for development
 const requiredEnvVars = [
@@ -275,6 +275,7 @@ import uploadsRouter from './routes/uploads';
 import aiActionsRouter from './routes/ai-actions';
 import notificationsRouter from './routes/notifications';
 import diagnosticsRouter from './routes/diagnostics';
+import { getPreflightChecks } from './routes/diagnostics';
 
 app.use('/api/auth', authRouter);
 app.use('/api/providers', providersRouter);
@@ -462,6 +463,19 @@ server.listen(PORT, () => {
   console.log(`🤖 AI Features: /api/ai/* and /api/chat-ai/*`);
   console.log(`💳 Payment System: /api/payments/* (Apple Pay ready)`);
   console.log(`🏥 Health Check: http://localhost:${PORT}/readyz`);
+
+  // Startup preflight summary
+  (async () => {
+    try {
+      const checks = await getPreflightChecks();
+      log('info', 'diagnostics.startup', { checks });
+      const ai = checks?.ai || {};
+      const db = checks?.database || {};
+      const fb = checks?.firebaseAdmin || {};
+      const ol = checks?.ollama || {};
+      console.log(`🧪 Preflight → DB: ${db.reachable ? 'ok' : 'not ready'}, Firebase: ${fb.configured ? 'ok' : 'not set'}, Ollama: ${ol.reachable ? 'ok' : 'not ready'}, Gemini: ${ai.geminiConfigured ? 'on' : 'off'}`);
+    } catch {}
+  })();
 });
 
 export { app, io };

@@ -102,6 +102,7 @@ export function isOnTopic(message: string): { isOnTopic: boolean; reason?: strin
  */
 export function containsPromptInjection(message: string): { safe: boolean; reason?: string } {
   const lowerMessage = message.toLowerCase();
+  const probablyArabic = /[\u0600-\u06FF]/.test(message);
   
   // Common prompt injection patterns
   const injectionPatterns = [
@@ -124,7 +125,9 @@ export function containsPromptInjection(message: string): { safe: boolean; reaso
     if (pattern.test(lowerMessage)) {
       return { 
         safe: false, 
-        reason: "I'm the Taskigo assistant and can only help with questions about our services and website."
+        reason: probablyArabic
+          ? "أنا مساعد تاسكيجو ولا يمكنني تنفيذ هذا الطلب. يمكنني فقط المساعدة في الأسئلة المتعلقة بخدماتنا وموقعنا."
+          : "I'm the Taskigo assistant and can only help with questions about our services and website."
       };
     }
   }
@@ -136,13 +139,25 @@ export function containsPromptInjection(message: string): { safe: boolean; reaso
  * Perform full validation of a user message
  */
 export function validateUserInput(message: string): { valid: boolean; response?: string } {
+  const probablyArabic = /[\u0600-\u06FF]/.test(message || '');
+  if (probablyArabic) {
+    // If Arabic and includes core service keywords, accept as on-topic immediately
+    const coreAr = /(خدمة|تنظيف|سعر|تكلفة|حجز|موعد|توصيل|كهرباء|سباكة|دهان|صيانة)/;
+    if (coreAr.test(message)) {
+      return { valid: true };
+    }
+  }
   // Check for empty or too short messages
   if (!message || message.trim().length === 0) {
-    return { valid: false, response: "How can I help you with Taskigo services today?" };
+    return { valid: false, response: probablyArabic
+      ? "كيف يمكنني مساعدتك في خدمات تاسكيجو اليوم؟"
+      : "How can I help you with Taskigo services today?" };
   }
   
   if (message.trim().length < 3) {
-    return { valid: false, response: "Could you please provide more details so I can assist you better?" };
+    return { valid: false, response: probablyArabic
+      ? "من فضلك قدّم مزيدًا من التفاصيل لأتمكن من مساعدتك بشكل أفضل."
+      : "Could you please provide more details so I can assist you better?" };
   }
   
   // Check for prompt injection attempts
@@ -154,7 +169,10 @@ export function validateUserInput(message: string): { valid: boolean; response?:
   // Check if message is on topic
   const topicCheck = isOnTopic(message);
   if (!topicCheck.isOnTopic) {
-    return { valid: false, response: topicCheck.reason };
+    const probablyArabic = /[\u0600-\u06FF]/.test(message);
+    return { valid: false, response: probablyArabic
+      ? "أنا مساعد Taskigo ويمكنني فقط الإجابة على الأسئلة المتعلقة بخدماتنا وموقعنا. كيف يمكنني مساعدتك؟"
+      : topicCheck.reason };
   }
   
   // All checks passed

@@ -205,14 +205,33 @@ export class AIService {
     }
   ): Promise<string> {
     try {
+      // Arabic UX: if user mentions service + price without a number, ask for budget in Arabic
+      const isArabic = context.language === 'ar' || /[\u0600-\u06FF]/.test(message);
+      if (isArabic) {
+        const hasServiceAr = /(خدمة|تنظيف|سباكة|كهرباء|دهان|صيانة|توصيل)/i.test(message);
+        const hasPriceAr = /(سعر|تكلفة|أقل من|اقل من|\$|دولار)/i.test(message);
+        const hasDigits = /[0-9\u0660-\u0669]/.test(message);
+        if (hasServiceAr && hasPriceAr && !hasDigits) {
+          return 'ما هو الحد الأقصى للميزانية (مثلاً ٤٠$)؟';
+        }
+      }
+
       // Import guardrails
-      const { validateUserInput, getOffTopicResponse } = await import('./guardrails');
-      
-      // First apply guardrails to ensure the message is on-topic
-      const validation = validateUserInput(message);
-      if (!validation.valid) {
-        console.log(`[Guardrails] Blocked off-topic message: "${message.substring(0, 50)}..."`);
-        return validation.response || getOffTopicResponse(message, context.language);
+      const { validateUserInput, getOffTopicResponse, containsPromptInjection } = await import('./guardrails');
+
+      // Always protect against prompt injection
+      const inj = containsPromptInjection(message);
+      if (!inj.safe) {
+        return inj.reason || getOffTopicResponse(message, context.language);
+      }
+
+      // For Arabic, be permissive on-topic to improve UX
+      if (context.language !== 'ar') {
+        const validation = validateUserInput(message);
+        if (!validation.valid) {
+          console.log(`[Guardrails] Blocked off-topic message: "${message.substring(0, 50)}..."`);
+          return validation.response || getOffTopicResponse(message, context.language);
+        }
       }
 
       // Before calling AI, try to detect action intents to enable interactive capabilities
@@ -392,7 +411,8 @@ ${knowledgeToInclude}
         try {
           const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
           const geminiSystem = (messages.find(m => (m as any).role === 'system') as any)?.content || '';
-          const prompt = `${geminiSystem}\n\nUser: ${message}`;
+          const langHint = context.language === 'ar' ? 'Always respond in Arabic (العربية) using clear, concise sentences.' : 'Always respond in English with concise sentences.';
+          const prompt = `${geminiSystem}\n\n${langHint}\n\nUser: ${message}`;
           const resp: any = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: prompt }]}],
             generationConfig: { temperature: 0.2, maxOutputTokens: 220 },
